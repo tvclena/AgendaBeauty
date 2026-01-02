@@ -84,7 +84,7 @@ button{
   margin:-8px 0 14px 4px;
 }
 
-/* OVERLAY */
+/* OVERLAY / MODAL */
 #overlay,#modal{
   position:fixed;
   inset:0;
@@ -107,12 +107,8 @@ button{
 
 <body>
 
-<!-- OVERLAY -->
-<div id="overlay">
-  <div>Salvando cadastro…</div>
-</div>
+<div id="overlay"><div>Salvando cadastro…</div></div>
 
-<!-- MODAL -->
 <div id="modal">
   <div class="modal-box">
     <h3>Cadastro realizado!</h3>
@@ -158,9 +154,9 @@ button{
       <input id="uf" placeholder="UF" maxlength="2" required>
 
       <input id="email" type="email" placeholder="E-mail" required>
-      <div id="emailError">Este e-mail já possui cadastro. Faça login.</div>
+      <div id="emailError">Este e-mail já possui cadastro.</div>
 
-      <input id="senha" type="password" placeholder="Senha" minlength="6" required>
+      <input id="senha" type="password" placeholder="Senha (mín. 6)" minlength="6" required>
 
       <button>Criar conta</button>
     </form>
@@ -169,11 +165,12 @@ button{
 </div>
 
 <script>
-/* 🔐 SUPABASE CLIENT – ÚNICO */
-const supabase = window.supabase.createClient(
+/* 🔐 SUPABASE CLIENT – BLINDADO (NUNCA DUPLICA) */
+window.sb = window.sb || window.supabase.createClient(
   "https://ssmsjryjwhnrbjyzklno.supabase.co",
   "sb_publishable_5Xe5sBRsp-6aLLvMwiTsCA_vRcPpNnV"
 );
+const supabase = window.sb;
 
 const overlay = document.getElementById("overlay");
 const modal = document.getElementById("modal");
@@ -215,7 +212,7 @@ async function cadastrar(e){
   const emailValue = email.value.trim().toLowerCase();
   const senhaValue = senha.value.trim();
 
-  /* 1️⃣ SIGN UP */
+  /* 1️⃣ AUTH */
   const { data, error } = await supabase.auth.signUp({
     email: emailValue,
     password: senhaValue
@@ -231,22 +228,18 @@ async function cadastrar(e){
     return;
   }
 
-  /* 🔴 BLINDAGEM CRÍTICA */
+  /* 👉 Se confirmação de email estiver ativa */
   if(!data?.user){
     overlay.style.display = "none";
-    showError(
-      "Conta criada, mas aguardando confirmação de e-mail. Verifique sua caixa de entrada."
-    );
+    showError("Conta criada. Confirme seu e-mail para continuar.");
     return;
   }
 
-  const userId = data.user.id;
-
-  /* 2️⃣ INSERT PROFILE */
+  /* 2️⃣ PROFILE */
   const { error: profileError } = await supabase
     .from("user_profile")
     .insert([{
-      user_id: userId,
+      user_id: data.user.id,
       responsavel: responsavel.value.trim(),
       whatsapp: whatsapp.value.replace(/\D/g,''),
       negocio: negocio.value.trim(),
@@ -258,7 +251,7 @@ async function cadastrar(e){
   overlay.style.display = "none";
 
   if(profileError){
-    showError("Conta criada, mas erro ao salvar perfil.");
+    showError("Usuário criado, mas erro ao salvar perfil.");
     return;
   }
 
