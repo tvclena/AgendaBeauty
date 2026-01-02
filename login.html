@@ -15,7 +15,6 @@
   --radius:18px;
   --danger:#c62828;
 }
-
 *{
   margin:0;
   padding:0;
@@ -23,7 +22,6 @@
   font-family:Inter;
   text-transform:uppercase;
 }
-
 body{
   min-height:100vh;
   display:grid;
@@ -48,12 +46,8 @@ body{
   z-index:2;
   padding:80px;
 }
-.left h1{
-  font-size:40px;
-}
-.left span{
-  color:var(--primary);
-}
+.left h1{font-size:40px}
+.left span{color:var(--primary)}
 
 /* RIGHT */
 .right{
@@ -61,7 +55,6 @@ body{
   align-items:center;
   justify-content:center;
 }
-
 .card{
   width:100%;
   max-width:460px;
@@ -70,7 +63,6 @@ body{
   border-radius:var(--radius);
   background:#fff;
 }
-
 .card small{
   color:var(--primary);
   font-weight:600;
@@ -82,6 +74,7 @@ input{
   margin-bottom:14px;
   border-radius:12px;
   border:1px solid var(--border);
+  text-transform:none;
 }
 
 button{
@@ -166,16 +159,16 @@ button{
 
     <form onsubmit="login(event)">
       <label>E-mail</label>
-      <input id="email" type="email" required style="text-transform:none">
+      <input id="email" type="email" required>
 
       <label>Senha</label>
-      <input id="senha" type="password" required style="text-transform:none">
+      <input id="senha" type="password" required>
 
       <button>Entrar</button>
     </form>
 
     <div class="links">
-      <a href="contato.html">Esqueci minha senha</a>
+      <a href="#" onclick="resetSenha()">Esqueci minha senha</a>
       <a href="cadastro.html">Cadastrar meu negócio</a>
     </div>
 
@@ -183,10 +176,14 @@ button{
 </div>
 
 <script>
-const supabase = window.supabase.createClient(
+/* =======================
+   SUPABASE CLIENT (ÚNICO)
+   ======================= */
+window.sb = window.sb || window.supabase.createClient(
   "https://ssmsjryjwhnrbjyzklno.supabase.co",
   "sb_publishable_5Xe5sBRsp-6aLLvMwiTsCA_vRcPpNnV"
 );
+const supabase = window.sb;
 
 const overlay = document.getElementById("overlay");
 const errorBox = document.getElementById("errorBox");
@@ -201,28 +198,50 @@ async function login(e){
   errorBox.style.display = "none";
   overlay.style.display = "flex";
 
-  const emailVal = email.value.trim();
+  const emailVal = email.value.trim().toLowerCase();
   const senhaVal = senha.value.trim();
 
-  const { data, error } = await supabase
-    .from("negocios")
-    .select("*")
-    .eq("email", emailVal)
-    .eq("senha", senhaVal)
-    .single();
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: emailVal,
+    password: senhaVal
+  });
 
   overlay.style.display = "none";
 
-  if(error || !data){
-    showError("E-mail ou senha inválidos");
+  if(error){
+    if(error.message.toLowerCase().includes("confirm")){
+      showError("Confirme seu e-mail antes de entrar.");
+    }else{
+      showError("E-mail ou senha inválidos.");
+    }
     return;
   }
 
-  // 🔐 SALVA SESSÃO SIMPLES
-  localStorage.setItem("negocioLogado", JSON.stringify(data));
-
-  // 👉 REDIRECIONA
+  /* LOGIN OK */
   window.location.href = "dashboard.html";
+}
+
+/* RESET DE SENHA */
+async function resetSenha(){
+  const emailVal = email.value.trim().toLowerCase();
+  if(!emailVal){
+    showError("Informe seu e-mail para recuperar a senha.");
+    return;
+  }
+
+  overlay.style.display = "flex";
+
+  const { error } = await supabase.auth.resetPasswordForEmail(emailVal, {
+    redirectTo: window.location.origin + "/login.html"
+  });
+
+  overlay.style.display = "none";
+
+  if(error){
+    showError("Erro ao enviar e-mail de recuperação.");
+  }else{
+    showError("Enviamos um link de recuperação para seu e-mail.");
+  }
 }
 </script>
 
