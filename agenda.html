@@ -5,7 +5,7 @@
 <title>Agenda • AgendaBeauty</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -16,7 +16,6 @@
   --border:#e5e7eb;
   --radius:18px;
   --danger:#dc2626;
-  --holiday:#2563eb;
   --soft:#fff7ed;
 }
 
@@ -56,7 +55,7 @@ body{background:var(--bg);padding:32px}
   background:#fff;
   border-radius:14px;
   padding:10px 18px;
-  font-weight:600;
+  font-weight:700;
   cursor:pointer;
 }
 
@@ -73,7 +72,7 @@ body{background:var(--bg);padding:32px}
 
 .day{
   border:1px solid var(--border);
-  min-height:150px;
+  min-height:140px;
   padding:10px;
   border-radius:14px;
   background:#fff;
@@ -93,11 +92,13 @@ body{background:var(--bg);padding:32px}
   font-size:11px;
   padding:4px 8px;
   border-radius:999px;
-  display:inline-block;
   margin-bottom:6px;
+  display:inline-block;
 }
-.badge.holiday{background:#e0e7ff;color:var(--holiday)}
-.badge.closed{background:#fee2e2;color:var(--danger)}
+.badge.closed{
+  background:#fee2e2;
+  color:var(--danger);
+}
 
 .times{
   margin-top:auto;
@@ -109,7 +110,7 @@ body{background:var(--bg);padding:32px}
   background:#fff;
   border:1px solid var(--border);
   border-radius:10px;
-  padding:6px 8px;
+  padding:6px;
   font-size:12px;
   text-align:center;
 }
@@ -173,14 +174,7 @@ body{background:var(--bg);padding:32px}
   padding:12px;
   width:100%;
   cursor:pointer;
-  font-weight:600;
-}
-
-.replica{
-  margin-top:14px;
-  display:flex;
-  gap:8px;
-  font-size:14px;
+  font-weight:700;
 }
 
 .save-btn{
@@ -191,8 +185,7 @@ body{background:var(--bg);padding:32px}
   padding:14px;
   width:100%;
   margin-top:20px;
-  font-size:15px;
-  font-weight:700;
+  font-weight:800;
   cursor:pointer;
 }
 </style>
@@ -234,11 +227,6 @@ body{background:var(--bg);padding:32px}
       <button class="add-btn" onclick="addHorario()">+ Adicionar horário</button>
     </div>
 
-    <div class="replica">
-      <input type="checkbox" id="replicar">
-      <label>Replicar para todas as semanas do mês</label>
-    </div>
-
     <button class="save-btn" onclick="salvarAgenda()">Salvar agenda</button>
   </div>
 </div>
@@ -250,20 +238,33 @@ const supabase = window.supabase.createClient(
   "sb_publishable_5Xe5sBRsp-6aLLvMwiTsCA_vRcPpNnV"
 );
 
-/* loja vem do login */
-const LOJA_ID = localStorage.getItem("loja_id");
+let USER_ID = null;
 
 /* ================= AGENDA ================= */
-let agenda={},currentDate=new Date(),selectedDate="",selectedWeekDay=0;
+let agenda = {};
+let currentDate = new Date();
+let selectedDate = "";
 
-const daysEl=document.getElementById("days");
-const monthYearEl=document.getElementById("monthYear");
-const modal=document.getElementById("modal");
-const modalDate=document.getElementById("modalDate");
-const horariosEl=document.getElementById("horarios");
-const horariosBox=document.getElementById("horariosBox");
-const fechadoEl=document.getElementById("fechado");
-const replicarEl=document.getElementById("replicar");
+const daysEl = document.getElementById("days");
+const monthYearEl = document.getElementById("monthYear");
+const modal = document.getElementById("modal");
+const modalDate = document.getElementById("modalDate");
+const horariosEl = document.getElementById("horarios");
+const horariosBox = document.getElementById("horariosBox");
+const fechadoEl = document.getElementById("fechado");
+
+/* ================= INIT ================= */
+async function init(){
+  const { data:{ user } } = await supabase.auth.getUser();
+  if(!user){
+    location.href = "login.html";
+    return;
+  }
+  USER_ID = user.id;
+  await carregarAgendaMes();
+  renderCalendar();
+}
+init();
 
 /* ================= CALENDAR ================= */
 function renderCalendar(){
@@ -280,7 +281,7 @@ function renderCalendar(){
     const key=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
     const el=document.createElement("div");
     el.className="day";
-    el.onclick=()=>openDay(y,m,d);
+    el.onclick=()=>openDay(key);
     el.innerHTML=`<div class="day-number">${d}</div>`;
 
     if(agenda[key]){
@@ -301,22 +302,19 @@ function renderCalendar(){
 
 function changeMonth(v){
   currentDate.setMonth(currentDate.getMonth()+v);
-  renderCalendar();
+  carregarAgendaMes();
 }
 
 /* ================= MODAL ================= */
-function openDay(y,m,d){
-  selectedDate=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-  selectedWeekDay=new Date(y,m,d).getDay();
-  modalDate.innerText=new Date(y,m,d).toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long"});
-
+function openDay(date){
+  selectedDate=date;
+  modalDate.innerText=new Date(date).toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long"});
   horariosEl.innerHTML="";
   fechadoEl.checked=false;
-  replicarEl.checked=false;
 
-  if(agenda[selectedDate]){
-    fechadoEl.checked=agenda[selectedDate].fechado;
-    agenda[selectedDate].horarios.forEach(h=>addHorario(h.inicio,h.fim));
+  if(agenda[date]){
+    fechadoEl.checked=agenda[date].fechado;
+    agenda[date].horarios.forEach(h=>addHorario(h.inicio,h.fim));
   }else addHorario();
 
   toggleFechado();
@@ -337,7 +335,7 @@ function addHorario(i="",f=""){
   horariosEl.appendChild(div);
 }
 
-/* ================= SALVAR ================= */
+/* ================= SAVE ================= */
 async function salvarAgenda(){
   let slots=[];
   if(!fechadoEl.checked){
@@ -347,21 +345,29 @@ async function salvarAgenda(){
     });
   }
 
-  const base={loja_id:LOJA_ID,data:selectedDate,fechado:fechadoEl.checked,horarios:slots};
-
-  await supabase.from("agenda_loja")
-    .upsert(base,{onConflict:"loja_id,data"});
+  await supabase.from("agenda_loja").upsert({
+    user_id: USER_ID,
+    data: selectedDate,
+    fechado: fechadoEl.checked,
+    horarios: slots
+  },{onConflict:"user_id,data"});
 
   modal.style.display="none";
-  carregarAgenda();
+  await carregarAgendaMes();
 }
 
-/* ================= LOAD ================= */
-async function carregarAgenda(){
+/* ================= LOAD MONTH ================= */
+async function carregarAgendaMes(){
+  const y=currentDate.getFullYear(),m=currentDate.getMonth();
+  const inicio=`${y}-${String(m+1).padStart(2,"0")}-01`;
+  const fim=`${y}-${String(m+1).padStart(2,"0")}-31`;
+
   const {data}=await supabase
     .from("agenda_loja")
     .select("*")
-    .eq("loja_id",LOJA_ID);
+    .eq("user_id",USER_ID)
+    .gte("data",inicio)
+    .lte("data",fim);
 
   agenda={};
   data?.forEach(r=>{
@@ -370,8 +376,6 @@ async function carregarAgenda(){
 
   renderCalendar();
 }
-
-carregarAgenda();
 </script>
 
 </body>
