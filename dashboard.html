@@ -7,7 +7,6 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
@@ -18,7 +17,7 @@
   --sidebar2:#102a43;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-body{background:var(--bg);height:100vh;display:flex}
+body{height:100vh;display:flex;background:var(--bg)}
 
 /* SIDEBAR */
 .sidebar{
@@ -27,10 +26,13 @@ body{background:var(--bg);height:100vh;display:flex}
   color:#fff;
   display:flex;
   flex-direction:column;
-  transition:.3s;
 }
-.sidebar.collapsed{width:78px}
-.logo{padding:22px;font-size:20px;font-weight:800;color:var(--primary)}
+.logo{
+  padding:22px;
+  font-size:20px;
+  font-weight:800;
+  color:var(--primary);
+}
 .menu{flex:1;padding:10px}
 .menu-item{
   display:flex;
@@ -41,62 +43,63 @@ body{background:var(--bg);height:100vh;display:flex}
   cursor:pointer;
   margin-bottom:6px;
 }
-.menu-item:hover{background:rgba(255,255,255,.08)}
+.menu-item:hover{
+  background:rgba(255,255,255,.08);
+}
 .menu-item.active{
   background:linear-gradient(135deg,var(--primary),var(--primary-dark));
 }
-.menu-item i{font-size:20px;min-width:20px}
-.sidebar.collapsed span{display:none}
-
-/* SUBMENU */
+.menu-item i{font-size:20px}
 .submenu{
-  margin-left:36px;
   display:none;
+  margin-left:36px;
 }
-.submenu a{
-  display:block;
-  padding:10px 14px;
+.submenu div{
+  padding:10px;
   font-size:14px;
-  color:#d1d5db;
-  text-decoration:none;
-  border-radius:10px;
   cursor:pointer;
+  color:#d1d5db;
+  border-radius:8px;
 }
-.submenu a:hover{background:rgba(255,255,255,.08)}
-
-/* FOOTER */
-.sidebar-footer{
+.submenu div:hover{
+  background:rgba(255,255,255,.08);
+}
+.footer{
   padding:16px;
   border-top:1px solid rgba(255,255,255,.1);
 }
 .logout{
-  display:flex;
-  align-items:center;
-  gap:14px;
+  cursor:pointer;
   padding:12px;
   border-radius:12px;
-  cursor:pointer;
 }
-.logout:hover{background:rgba(255,255,255,.08)}
+.logout:hover{
+  background:rgba(255,255,255,.08);
+}
 
 /* MAIN */
-.main{flex:1;display:flex;flex-direction:column}
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
 .topbar{
   height:64px;
   background:#fff;
-  border-bottom:1px solid #e5e7eb;
   display:flex;
   align-items:center;
   justify-content:space-between;
   padding:0 24px;
+  border-bottom:1px solid #e5e7eb;
 }
-.toggle{font-size:22px;cursor:pointer}
-.user{font-weight:700}
-.content{flex:1;background:#fff}
+.content{
+  flex:1;
+}
 iframe{
   width:100%;
   height:100%;
   border:none;
+  background:#fff;
 }
 </style>
 </head>
@@ -104,53 +107,50 @@ iframe{
 <body>
 
 <!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
+<div class="sidebar">
   <div class="logo">AgendaBeauty</div>
 
   <div class="menu">
-    <div class="menu-item active" onclick="loadPage('home.html', this)">
-      <i class="ri-home-5-line"></i><span>Home</span>
+    <div class="menu-item active" data-page="home.html">
+      <i class="ri-home-5-line"></i> Home
     </div>
 
-    <div class="menu-item" onclick="toggleSub(this)">
-      <i class="ri-calendar-line"></i><span>Agenda</span>
+    <div class="menu-item has-sub">
+      <i class="ri-calendar-line"></i> Agenda
     </div>
     <div class="submenu">
-      <a onclick="loadPage('agenda.html')">Horários</a>
+      <div data-page="agenda.html">Horários</div>
     </div>
 
-    <div class="menu-item" onclick="toggleSub(this)">
-      <i class="ri-user-3-line"></i><span>Clientes</span>
+    <div class="menu-item has-sub">
+      <i class="ri-user-3-line"></i> Clientes
     </div>
     <div class="submenu">
-      <a onclick="loadPage('clientes.html')">Clientes</a>
+      <div data-page="clientes.html">Clientes</div>
     </div>
 
-    <div class="menu-item" onclick="toggleSub(this)">
-      <i class="ri-currency-line"></i><span>Financeiro</span>
+    <div class="menu-item has-sub">
+      <i class="ri-currency-line"></i> Financeiro
     </div>
     <div class="submenu">
-      <a onclick="loadPage('caixa.html')">Caixa</a>
-      <a onclick="loadPage('despesas.html')">Despesas</a>
+      <div data-page="caixa.html">Caixa</div>
+      <div data-page="despesas.html">Despesas</div>
     </div>
 
-    <div class="menu-item" onclick="loadPage('config.html', this)">
-      <i class="ri-settings-3-line"></i><span>Configurações</span>
+    <div class="menu-item" data-page="config.html">
+      <i class="ri-settings-3-line"></i> Configurações
     </div>
   </div>
 
-  <div class="sidebar-footer">
-    <div class="logout" onclick="logout()">
-      <i class="ri-logout-box-line"></i><span>Sair</span>
-    </div>
+  <div class="footer">
+    <div class="logout" onclick="logout()">Sair</div>
   </div>
-</aside>
+</div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <i class="ri-menu-line toggle" onclick="toggleMenu()"></i>
-    <div class="user" id="nomeNegocio">Carregando...</div>
+    <strong id="nomeNegocio">Meu Negócio</strong>
   </div>
 
   <div class="content">
@@ -159,56 +159,48 @@ iframe{
 </div>
 
 <script>
-/* ================= SUPABASE (UMA VEZ) ================= */
-const supabase = window.supabase.createClient(
-  "https://egxjgmzukjyyxmkukwub.supabase.co",
-  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
-);
+/* ========= MENU FUNCIONAL (SEM BUG) ========= */
 
-/* 🔐 PROTEÇÃO */
-async function init(){
-  const { data: { session } } = await supabase.auth.getSession();
-  if(!session){
-    location.href = "login.html";
-    return;
-  }
+const frame = document.getElementById("frame");
+const menuItems = document.querySelectorAll(".menu-item[data-page]");
+const submenuItems = document.querySelectorAll(".submenu div");
 
-  const { data } = await supabase
-    .from("user_profile")
-    .select("negocio")
-    .eq("user_id", session.user.id)
-    .single();
-
-  document.getElementById("nomeNegocio").innerText =
-    data?.negocio || "Meu Negócio";
-
-  loadPage("home.html");
-}
-init();
-
-/* UI */
-function toggleMenu(){
-  document.getElementById("sidebar").classList.toggle("collapsed");
+/* carregar página */
+function carregar(pagina){
+  frame.src = pagina;
 }
 
-function toggleSub(el){
-  const sub = el.nextElementSibling;
-  if(!sub) return;
-  sub.style.display = sub.style.display === "block" ? "none" : "block";
-}
+/* menu principal */
+menuItems.forEach(item=>{
+  item.addEventListener("click", ()=>{
+    menuItems.forEach(i=>i.classList.remove("active"));
+    item.classList.add("active");
+    carregar(item.dataset.page);
+  });
+});
 
-function loadPage(page, el){
-  if(el){
-    document.querySelectorAll(".menu-item")
-      .forEach(i=>i.classList.remove("active"));
-    el.classList.add("active");
-  }
-  document.getElementById("frame").src = page;
-}
+/* submenu toggle */
+document.querySelectorAll(".has-sub").forEach((item, index)=>{
+  item.addEventListener("click", ()=>{
+    const submenu = document.querySelectorAll(".submenu")[index];
+    submenu.style.display =
+      submenu.style.display === "block" ? "none" : "block";
+  });
+});
 
-/* LOGOUT */
-async function logout(){
-  await supabase.auth.signOut();
+/* submenu clique */
+submenuItems.forEach(item=>{
+  item.addEventListener("click", ()=>{
+    carregar(item.dataset.page);
+  });
+});
+
+/* página inicial */
+carregar("home.html");
+
+/* logout (simples por enquanto) */
+function logout(){
+  localStorage.clear();
   location.href = "login.html";
 }
 </script>
