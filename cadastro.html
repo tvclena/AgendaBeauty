@@ -207,14 +207,18 @@ function showEmailError(show){
 
 async function cadastrar(e){
   e.preventDefault();
+
   errorBox.style.display = "none";
   showEmailError(false);
   overlay.style.display = "flex";
 
-  /* 1️⃣ CRIA USUÁRIO NO AUTH */
+  const emailValue = email.value.trim().toLowerCase();
+  const senhaValue = senha.value.trim();
+
+  /* 1️⃣ SIGN UP */
   const { data, error } = await supabase.auth.signUp({
-    email: email.value.trim().toLowerCase(),
-    password: senha.value.trim()
+    email: emailValue,
+    password: senhaValue
   });
 
   if(error){
@@ -227,9 +231,18 @@ async function cadastrar(e){
     return;
   }
 
+  /* 🔴 BLINDAGEM CRÍTICA */
+  if(!data?.user){
+    overlay.style.display = "none";
+    showError(
+      "Conta criada, mas aguardando confirmação de e-mail. Verifique sua caixa de entrada."
+    );
+    return;
+  }
+
   const userId = data.user.id;
 
-  /* 2️⃣ SALVA PERFIL */
+  /* 2️⃣ INSERT PROFILE */
   const { error: profileError } = await supabase
     .from("user_profile")
     .insert([{
@@ -245,7 +258,7 @@ async function cadastrar(e){
   overlay.style.display = "none";
 
   if(profileError){
-    showError("Conta criada, mas houve erro ao salvar o perfil.");
+    showError("Conta criada, mas erro ao salvar perfil.");
     return;
   }
 
