@@ -107,8 +107,10 @@ button{
 
 <body>
 
+<!-- OVERLAY -->
 <div id="overlay"><div>Salvando cadastro…</div></div>
 
+<!-- MODAL -->
 <div id="modal">
   <div class="modal-box">
     <h3>Cadastro realizado!</h3>
@@ -165,7 +167,9 @@ button{
 </div>
 
 <script>
-/* 🔐 SUPABASE CLIENT – BLINDADO (NUNCA DUPLICA) */
+/* =======================
+   SUPABASE CLIENT (ÚNICO)
+   ======================= */
 window.sb = window.sb || window.supabase.createClient(
   "https://ssmsjryjwhnrbjyzklno.supabase.co",
   "sb_publishable_5Xe5sBRsp-6aLLvMwiTsCA_vRcPpNnV"
@@ -204,7 +208,6 @@ function showEmailError(show){
 
 async function cadastrar(e){
   e.preventDefault();
-
   errorBox.style.display = "none";
   showEmailError(false);
   overlay.style.display = "flex";
@@ -228,7 +231,7 @@ async function cadastrar(e){
     return;
   }
 
-  /* 👉 Se confirmação de email estiver ativa */
+  /* Caso confirmação de e-mail esteja ativa */
   if(!data?.user){
     overlay.style.display = "none";
     showError("Conta criada. Confirme seu e-mail para continuar.");
