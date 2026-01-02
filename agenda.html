@@ -6,33 +6,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
   --primary:#ff6a00;
-  --bg:#f4f6f9;
+  --bg:#f4f6fb;
   --card:#ffffff;
   --border:#e5e7eb;
   --radius:18px;
   --danger:#dc2626;
+  --holiday:#2563eb;
+  --soft:#fff7ed;
 }
 
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
 body{background:var(--bg);padding:32px}
 
 /* HEADER */
-.header{max-width:1200px;margin:0 auto 20px}
-.header h1{font-size:26px}
+.header{
+  max-width:1200px;
+  margin:0 auto 24px;
+}
+.header h1{
+  font-size:28px;
+  font-weight:800;
+}
 .header span{color:var(--primary)}
 
 /* CALENDAR */
 .calendar{
   background:var(--card);
   border-radius:var(--radius);
-  padding:30px;
+  padding:28px;
   max-width:1200px;
   margin:auto;
-  box-shadow:0 10px 30px rgba(0,0,0,.06);
+  box-shadow:0 20px 40px rgba(0,0,0,.06);
 }
 
 .calendar-header{
@@ -45,7 +54,7 @@ body{background:var(--bg);padding:32px}
 .calendar-header button{
   border:1px solid var(--border);
   background:#fff;
-  border-radius:12px;
+  border-radius:14px;
   padding:10px 18px;
   font-weight:600;
   cursor:pointer;
@@ -55,24 +64,30 @@ body{background:var(--bg);padding:32px}
   display:grid;
   grid-template-columns:repeat(7,1fr);
 }
-
 .weekdays div{
   text-align:center;
   font-weight:600;
   color:#6b7280;
-  padding-bottom:12px;
+  padding-bottom:10px;
 }
 
 .day{
   border:1px solid var(--border);
-  min-height:140px;
+  min-height:150px;
   padding:10px;
   border-radius:14px;
   background:#fff;
   cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  transition:.2s;
 }
+.day:hover{background:var(--soft)}
 
-.day-number{font-weight:700;margin-bottom:6px}
+.day-number{
+  font-weight:700;
+  margin-bottom:6px;
+}
 
 .badge{
   font-size:11px;
@@ -81,17 +96,21 @@ body{background:var(--bg);padding:32px}
   display:inline-block;
   margin-bottom:6px;
 }
+.badge.holiday{background:#e0e7ff;color:var(--holiday)}
 .badge.closed{background:#fee2e2;color:var(--danger)}
 
 .times{
-  margin-top:8px;
+  margin-top:auto;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
 }
 .time-pill{
+  background:#fff;
   border:1px solid var(--border);
-  border-radius:8px;
-  padding:4px;
+  border-radius:10px;
+  padding:6px 8px;
   font-size:12px;
-  margin-bottom:4px;
   text-align:center;
 }
 
@@ -103,26 +122,77 @@ body{background:var(--bg);padding:32px}
   display:none;
   align-items:center;
   justify-content:center;
+  z-index:1000;
 }
 
 .modal-box{
   background:#fff;
-  padding:24px;
-  border-radius:16px;
+  padding:30px;
+  border-radius:22px;
   width:100%;
-  max-width:420px;
+  max-width:480px;
+}
+
+.modal-box h3{
+  margin-bottom:18px;
+  font-size:20px;
+}
+
+.toggle{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:16px;
 }
 
 .horario{
   display:flex;
-  gap:8px;
-  margin-bottom:8px;
+  gap:10px;
+  margin-bottom:10px;
 }
-.horario input{flex:1}
+
+.horario input{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+}
+
 .horario button{
   background:#fee2e2;
   border:none;
-  border-radius:8px;
+  border-radius:10px;
+  padding:0 12px;
+  cursor:pointer;
+}
+
+.add-btn{
+  background:#eef2ff;
+  border:none;
+  border-radius:14px;
+  padding:12px;
+  width:100%;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.replica{
+  margin-top:14px;
+  display:flex;
+  gap:8px;
+  font-size:14px;
+}
+
+.save-btn{
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  border-radius:30px;
+  padding:14px;
+  width:100%;
+  margin-top:20px;
+  font-size:15px;
+  font-weight:700;
   cursor:pointer;
 }
 </style>
@@ -149,57 +219,58 @@ body{background:var(--bg);padding:32px}
   <div class="days" id="days"></div>
 </div>
 
+<!-- MODAL -->
 <div id="modal">
   <div class="modal-box">
     <h3 id="modalDate"></h3>
 
-    <label>
-      <input type="checkbox" id="fechado"> Dia fechado
-    </label>
+    <div class="toggle">
+      <input type="checkbox" id="fechado" onchange="toggleFechado()">
+      <label>Dia fechado</label>
+    </div>
 
-    <div id="horarios"></div>
+    <div id="horariosBox">
+      <div id="horarios"></div>
+      <button class="add-btn" onclick="addHorario()">+ Adicionar horário</button>
+    </div>
 
-    <button onclick="addHorario()">+ Horário</button>
-    <br><br>
-    <button onclick="salvarAgenda()">Salvar</button>
+    <div class="replica">
+      <input type="checkbox" id="replicar">
+      <label>Replicar para todas as semanas do mês</label>
+    </div>
+
+    <button class="save-btn" onclick="salvarAgenda()">Salvar agenda</button>
   </div>
 </div>
 
 <script>
-/* ================= SUPABASE DO PARENT ================= */
-const supabase = window.parent.supabase;
+/* ================= SUPABASE ================= */
+const supabase = window.supabase.createClient(
+  "https://ssmsjryjwhnrbjyzklno.supabase.co",
+  "sb_publishable_5Xe5sBRsp-6aLLvMwiTsCA_vRcPpNnV"
+);
 
-/* ================= STATE ================= */
-let userId = null;
-let agenda = {};
-let currentDate = new Date();
-let selectedDate = "";
+/* loja vem do login */
+const LOJA_ID = localStorage.getItem("loja_id");
 
-const daysEl = document.getElementById("days");
-const monthYearEl = document.getElementById("monthYear");
-const modal = document.getElementById("modal");
-const modalDate = document.getElementById("modalDate");
-const horariosEl = document.getElementById("horarios");
-const fechadoEl = document.getElementById("fechado");
+/* ================= AGENDA ================= */
+let agenda={},currentDate=new Date(),selectedDate="",selectedWeekDay=0;
 
-/* ================= INIT ================= */
-async function init(){
-  const { data: { session } } = await supabase.auth.getSession();
-  if(!session) return;
-
-  userId = session.user.id;
-  await carregarAgenda();
-}
-init();
+const daysEl=document.getElementById("days");
+const monthYearEl=document.getElementById("monthYear");
+const modal=document.getElementById("modal");
+const modalDate=document.getElementById("modalDate");
+const horariosEl=document.getElementById("horarios");
+const horariosBox=document.getElementById("horariosBox");
+const fechadoEl=document.getElementById("fechado");
+const replicarEl=document.getElementById("replicar");
 
 /* ================= CALENDAR ================= */
 function renderCalendar(){
   daysEl.innerHTML="";
-  const y=currentDate.getFullYear();
-  const m=currentDate.getMonth();
+  const y=currentDate.getFullYear(),m=currentDate.getMonth();
 
   monthYearEl.innerText=currentDate.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
-
   const firstDay=new Date(y,m,1).getDay();
   const lastDate=new Date(y,m+1,0).getDate();
 
@@ -209,19 +280,21 @@ function renderCalendar(){
     const key=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
     const el=document.createElement("div");
     el.className="day";
-    el.onclick=()=>openDay(key,y,m,d);
+    el.onclick=()=>openDay(y,m,d);
     el.innerHTML=`<div class="day-number">${d}</div>`;
 
     if(agenda[key]){
       if(agenda[key].fechado){
         el.innerHTML+=`<div class="badge closed">Fechado</div>`;
       }else{
+        const t=document.createElement("div");
+        t.className="times";
         agenda[key].horarios.forEach(h=>{
-          el.innerHTML+=`<div class="time-pill">${h.inicio} - ${h.fim}</div>`;
+          t.innerHTML+=`<div class="time-pill">${h.inicio} - ${h.fim}</div>`;
         });
+        el.appendChild(t);
       }
     }
-
     daysEl.appendChild(el);
   }
 }
@@ -232,18 +305,26 @@ function changeMonth(v){
 }
 
 /* ================= MODAL ================= */
-function openDay(key,y,m,d){
-  selectedDate=key;
-  modalDate.innerText=new Date(y,m,d).toLocaleDateString("pt-BR");
+function openDay(y,m,d){
+  selectedDate=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  selectedWeekDay=new Date(y,m,d).getDay();
+  modalDate.innerText=new Date(y,m,d).toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long"});
+
   horariosEl.innerHTML="";
   fechadoEl.checked=false;
+  replicarEl.checked=false;
 
-  if(agenda[key]){
-    fechadoEl.checked=agenda[key].fechado;
-    agenda[key].horarios.forEach(h=>addHorario(h.inicio,h.fim));
+  if(agenda[selectedDate]){
+    fechadoEl.checked=agenda[selectedDate].fechado;
+    agenda[selectedDate].horarios.forEach(h=>addHorario(h.inicio,h.fim));
   }else addHorario();
 
+  toggleFechado();
   modal.style.display="flex";
+}
+
+function toggleFechado(){
+  horariosBox.style.display=fechadoEl.checked?"none":"block";
 }
 
 function addHorario(i="",f=""){
@@ -256,35 +337,31 @@ function addHorario(i="",f=""){
   horariosEl.appendChild(div);
 }
 
-/* ================= SAVE ================= */
+/* ================= SALVAR ================= */
 async function salvarAgenda(){
   let slots=[];
   if(!fechadoEl.checked){
     document.querySelectorAll(".horario").forEach(h=>{
-      const i=h.children[0].value;
-      const f=h.children[1].value;
+      const i=h.children[0].value,f=h.children[1].value;
       if(i&&f) slots.push({inicio:i,fim:f});
     });
   }
 
+  const base={loja_id:LOJA_ID,data:selectedDate,fechado:fechadoEl.checked,horarios:slots};
+
   await supabase.from("agenda_loja")
-    .upsert({
-      user_id:userId,
-      data:selectedDate,
-      fechado:fechadoEl.checked,
-      horarios:slots
-    },{onConflict:"user_id,data"});
+    .upsert(base,{onConflict:"loja_id,data"});
 
   modal.style.display="none";
-  await carregarAgenda();
+  carregarAgenda();
 }
 
 /* ================= LOAD ================= */
 async function carregarAgenda(){
-  const { data } = await supabase
+  const {data}=await supabase
     .from("agenda_loja")
     .select("*")
-    .eq("user_id", userId);
+    .eq("loja_id",LOJA_ID);
 
   agenda={};
   data?.forEach(r=>{
@@ -293,6 +370,8 @@ async function carregarAgenda(){
 
   renderCalendar();
 }
+
+carregarAgenda();
 </script>
 
 </body>
