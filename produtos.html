@@ -11,10 +11,11 @@
 :root{
 --primary:#ff6a00;--bg:#f5f7fb;--card:#fff;--border:#e5e7eb;
 --danger:#dc2626;--success:#16a34a;--warning:#f59e0b;
---muted:#6b7280;--radius:14px;--shadow:0 12px 30px rgba(0,0,0,.1)
+--muted:#6b7280;--shadow:0 14px 34px rgba(0,0,0,.12);
+--radius:16px
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-body{background:var(--bg);padding:18px;height:100vh;overflow:hidden}
+body{background:var(--bg);height:100vh;overflow:hidden;padding:18px}
 
 /* HEADER */
 .header{max-width:1700px;margin:auto}
@@ -23,55 +24,59 @@ body{background:var(--bg);padding:18px;height:100vh;overflow:hidden}
 .header p{font-size:12px;color:var(--muted)}
 
 /* KPIs */
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
-.kpi{background:var(--card);padding:16px;border-radius:14px;box-shadow:var(--shadow)}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:16px 0}
+.kpi{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:var(--shadow)}
 .kpi small{font-size:11px;color:var(--muted)}
 .kpi h2{font-size:22px;font-weight:800}
 
 /* LAYOUT */
-.container{max-width:1700px;margin:auto;display:grid;grid-template-columns:420px 1fr;gap:18px;height:calc(100vh - 180px)}
+.container{max-width:1700px;margin:auto;display:grid;grid-template-columns:460px 1fr;gap:18px;height:calc(100vh - 200px)}
 
 /* CARD */
-.card{background:var(--card);border-radius:14px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
-.card h3{font-size:15px;font-weight:700;margin-bottom:10px}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+.card h3{font-size:15px;font-weight:800;margin-bottom:10px}
 
 /* FORM */
 input,textarea,select{
 width:100%;height:36px;padding:0 10px;border-radius:10px;
 border:1px solid var(--border);font-size:12px;margin-bottom:8px
 }
-textarea{height:auto;padding:8px}
+textarea{padding:8px;height:auto}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .switch{display:flex;align-items:center;gap:6px;font-size:11px;margin:4px 0}
 
 /* BUTTON */
-button{height:42px;border:none;border-radius:22px;
+button{
+height:42px;border:none;border-radius:22px;
 background:linear-gradient(135deg,#ff6a00,#ff9a57);
-color:#fff;font-weight:800;cursor:pointer}
+color:#fff;font-weight:800;font-size:13px;cursor:pointer
+}
 
 /* GRID */
-.grid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;overflow-y:auto}
+.grid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;overflow-y:auto}
 
 /* ITEM */
-.item{background:#fff;border-radius:14px;box-shadow:0 8px 22px rgba(0,0,0,.1);overflow:hidden;display:flex;flex-direction:column}
+.item{background:#fff;border-radius:var(--radius);box-shadow:0 10px 26px rgba(0,0,0,.12);overflow:hidden;display:flex;flex-direction:column}
 .image{height:90px;display:flex;align-items:center;justify-content:center;background:#f1f5f9}
 .image img{width:100%;height:100%;object-fit:cover}
-.image.no{background:linear-gradient(135deg,#ff6a00,#ff9a57);color:#fff;font-size:32px;font-weight:800}
-.item-body{padding:10px;display:flex;flex-direction:column;gap:4px;flex:1}
+.image.no{background:linear-gradient(135deg,#ff6a00,#ff9a57);color:#fff;font-size:30px;font-weight:800}
+.item-body{padding:12px;display:flex;flex-direction:column;gap:4px;flex:1}
+
+/* BADGES */
 .badges{display:flex;gap:4px;flex-wrap:wrap}
-.badge{font-size:9px;padding:2px 7px;border-radius:999px;font-weight:700}
+.badge{font-size:9px;padding:3px 8px;border-radius:999px;font-weight:800}
 .badge.low{background:#fff3cd;color:var(--warning)}
 .badge.promo{background:#fde7f3;color:#be185d}
 .badge.off{background:#fee2e2;color:var(--danger)}
-.actions{margin-top:auto;font-size:11px;font-weight:700;color:var(--primary);display:flex;gap:8px;cursor:pointer}
+.badge.margin{background:#ecfeff;color:#0369a1}
 
-/* OVERLAY */
+/* ACTIONS */
+.actions{margin-top:auto;font-size:11px;font-weight:800;color:var(--primary);display:flex;gap:10px;cursor:pointer}
+
+/* OVERLAY / TOAST */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:999}
-.overlay div{background:#fff;padding:20px;border-radius:14px;font-weight:700}
-
-/* TOAST */
-.toast{position:fixed;bottom:20px;right:20px;background:#111;color:#fff;
-padding:10px 16px;border-radius:12px;font-size:12px;display:none}
+.overlay div{background:#fff;padding:20px;border-radius:14px;font-weight:800}
+.toast{position:fixed;bottom:20px;right:20px;background:#111;color:#fff;padding:10px 16px;border-radius:12px;font-size:12px;display:none}
 </style>
 </head>
 
@@ -79,13 +84,15 @@ padding:10px 16px;border-radius:12px;font-size:12px;display:none}
 
 <div class="header">
 <h1>Produtos & <span>Serviços</span></h1>
-<p>Controle completo de serviços, produtos, estoque e promoções</p>
+<p>Gestão profissional de catálogo, estoque, margem e promoções</p>
 
 <div class="kpis">
 <div class="kpi"><small>Total</small><h2 id="kpiTotal">0</h2></div>
-<div class="kpi"><small>Serviços ativos</small><h2 id="kpiServicos">0</h2></div>
-<div class="kpi"><small>Estoque baixo</small><h2 id="kpiBaixo">0</h2></div>
+<div class="kpi"><small>Serviços</small><h2 id="kpiServicos">0</h2></div>
+<div class="kpi"><small>Produtos</small><h2 id="kpiProdutos">0</h2></div>
 <div class="kpi"><small>Promoções</small><h2 id="kpiPromo">0</h2></div>
+<div class="kpi"><small>Estoque baixo</small><h2 id="kpiBaixo">0</h2></div>
+<div class="kpi"><small>Margem média</small><h2 id="kpiMargem">0%</h2></div>
 </div>
 </div>
 
@@ -93,29 +100,33 @@ padding:10px 16px;border-radius:12px;font-size:12px;display:none}
 
 <!-- FORM -->
 <div class="card">
-<h3>Cadastro</h3>
+<h3>Cadastro / Edição</h3>
+
 <select id="tipo"><option>SERVICO</option><option>PRODUTO</option></select>
 <input id="nome" placeholder="Nome *">
 <textarea id="descricao" placeholder="Descrição"></textarea>
 <input id="categoria" placeholder="Categoria">
+
 <div class="row">
 <input id="preco" placeholder="Preço">
 <input id="custo" placeholder="Custo">
 </div>
+
 <div class="row">
-<input id="precoPromo" placeholder="Preço promo">
+<input id="precoPromo" placeholder="Preço promocional">
 <input id="ordem" placeholder="Ordem">
 </div>
 
 <label class="switch"><input type="checkbox" id="promoAtiva"> Promoção ativa</label>
-<input id="duracao" placeholder="Duração (min)">
+<label class="switch"><input type="checkbox" id="ativo" checked> Ativo</label>
+<label class="switch"><input type="checkbox" id="podeAgendar"> Disponível agenda</label>
+
 <div class="row">
 <input id="estoque" placeholder="Estoque">
 <input id="estoqueMin" placeholder="Estoque mínimo">
 </div>
 <label class="switch"><input type="checkbox" id="controlaEstoque"> Controlar estoque</label>
-<label class="switch"><input type="checkbox" id="ativo" checked> Ativo</label>
-<label class="switch"><input type="checkbox" id="podeAgendar"> Disponível agenda</label>
+
 <textarea id="obs" placeholder="Observações internas"></textarea>
 
 <button onclick="salvar()">Salvar</button>
@@ -139,35 +150,44 @@ const sb=supabase.createClient(
 
 let itens=[],editId=null,userId=null;
 
-const toast=(msg)=>{toastEl.innerText=msg;toastEl.style.display="block";setTimeout(()=>toastEl.style.display="none",3000)}
-const toastEl=document.getElementById("toast");
 const overlay=document.getElementById("overlay");
+const toastEl=document.getElementById("toast");
+const toast=msg=>{
+toastEl.innerText=msg;
+toastEl.style.display="block";
+setTimeout(()=>toastEl.style.display="none",3000);
+};
 
 (async()=>{
-const {data:{session}}=await sb.auth.getSession();
+const{data:{session}}=await sb.auth.getSession();
 if(!session)return;
 userId=session.user.id;
 carregar();
 })();
 
 async function carregar(){
-const {data}=await sb.from("produtos_servicos")
-.select("*").eq("user_id",userId).order("ordem",{ascending:true});
+const{data}=await sb.from("produtos_servicos")
+.select("*").eq("user_id",userId).order("ordem");
 itens=data||[];
-atualizarKPIs();
+kpis();
 render();
 }
 
-function atualizarKPIs(){
+function kpis(){
 kpiTotal.innerText=itens.length;
-kpiServicos.innerText=itens.filter(i=>i.tipo==="SERVICO"&&i.ativo).length;
+kpiServicos.innerText=itens.filter(i=>i.tipo==="SERVICO").length;
+kpiProdutos.innerText=itens.filter(i=>i.tipo==="PRODUTO").length;
 kpiPromo.innerText=itens.filter(i=>i.promo_ativa).length;
 kpiBaixo.innerText=itens.filter(i=>i.controla_estoque && i.estoque<=i.estoque_min).length;
+
+let margens=itens.filter(i=>i.preco>0).map(i=>((i.preco-i.custo)/i.preco)*100);
+kpiMargem.innerText=margens.length?Math.round(margens.reduce((a,b)=>a+b,0)/margens.length)+"%":"0%";
 }
 
 function render(){
 lista.innerHTML="";
 itens.forEach(i=>{
+const margem=i.preco?Math.round(((i.preco-i.custo)/i.preco)*100):0;
 lista.innerHTML+=`
 <div class="item">
 <div class="image ${i.imagem_url?'':'no'}">${i.imagem_url?`<img src="${i.imagem_url}">`:i.nome[0]}</div>
@@ -176,6 +196,7 @@ lista.innerHTML+=`
 ${i.promo_ativa?'<span class="badge promo">Promo</span>':''}
 ${!i.ativo?'<span class="badge off">Inativo</span>':''}
 ${i.controla_estoque && i.estoque<=i.estoque_min?'<span class="badge low">Estoque baixo</span>':''}
+<span class="badge margin">${margem}%</span>
 </div>
 <strong>${i.nome}</strong>
 <span>R$ ${i.preco}</span>
@@ -202,7 +223,7 @@ podeAgendar.checked=i.pode_agendar;
 }
 
 async function duplicar(id){
-const i=itens.find(x=>x.id===id);
+const i={...itens.find(x=>x.id===id)};
 delete i.id;
 i.nome+=" (Cópia)";
 await sb.from("produtos_servicos").insert(i);
@@ -213,7 +234,7 @@ carregar();
 async function excluir(id){
 if(!confirm("Deseja excluir este item?"))return;
 await sb.from("produtos_servicos").delete().eq("id",id);
-toast("Item removido");
+toast("Item excluído");
 carregar();
 }
 
@@ -222,10 +243,10 @@ if(!nome.value)return toast("Nome obrigatório");
 overlay.style.display="flex";
 
 const dados={
-user_id:userId,
-tipo:tipo.value,nome:nome.value,descricao:descricao.value,categoria:categoria.value,
-preco:+preco.value||0,custo:+custo.value||0,preco_promo:+precoPromo.value||0,
-promo_ativa:promoAtiva.checked,duracao:+duracao.value||0,
+user_id:userId,tipo:tipo.value,nome:nome.value,
+descricao:descricao.value,categoria:categoria.value,
+preco:+preco.value||0,custo:+custo.value||0,
+preco_promo:+precoPromo.value||0,promo_ativa:promoAtiva.checked,
 estoque:+estoque.value||0,estoque_min:+estoqueMin.value||0,
 controla_estoque:controlaEstoque.checked,ativo:ativo.checked,
 pode_agendar:podeAgendar.checked,obs:obs.value,ordem:+ordem.value||0
