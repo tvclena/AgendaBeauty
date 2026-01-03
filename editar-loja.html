@@ -3,227 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <title>Editar Loja • Agenda Fácil</title>
-
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ff6a00">
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-:root{
-  --primary:#ff6a00;
-  --bg:#f4f6fb;
-  --card:#ffffff;
-  --border:#e5e7eb;
-  --text:#111827;
-  --muted:#6b7280;
-}
-
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-body{background:var(--bg);padding:20px}
-
-.card{
-  background:var(--card);
-  border-radius:20px;
-  padding:22px;
-  margin-bottom:20px;
-  box-shadow:0 12px 30px rgba(0,0,0,.08);
-}
-
-h2{
-  font-size:18px;
-  font-weight:800;
-  margin-bottom:14px;
-}
-
-.field{
-  margin-bottom:12px;
-}
-.field label{
-  font-size:13px;
-  color:var(--muted);
-}
-.field input, .field textarea{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  font-size:14px;
-}
-
-.row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-
-.toggle{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-weight:600;
-}
-
-.toggle input{transform:scale(1.2)}
-
-button{
-  width:100%;
-  height:48px;
-  border:none;
-  border-radius:999px;
-  background:var(--primary);
-  color:#fff;
-  font-weight:800;
-  font-size:15px;
-  cursor:pointer;
-}
+body{font-family:Inter;background:#f4f6fb;padding:20px}
+.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px}
+label{font-weight:700;font-size:13px}
+input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;margin-top:6px}
+button{margin-top:14px;padding:14px;border:none;border-radius:999px;background:#ff6a00;color:#fff;font-weight:800}
+.toggle{display:flex;align-items:center;gap:8px}
 </style>
 </head>
 
 <body>
 
+<h2>Visual da Loja</h2>
+
 <div class="card">
-  <h2>Identidade visual</h2>
+  <label>Cor primária</label>
+  <input type="color" id="corPrimaria">
 
-  <div class="field">
-    <label>Nome público da loja</label>
-    <input id="nome">
-  </div>
-
-  <div class="row">
-    <div class="field">
-      <label>Cor primária</label>
-      <input type="color" id="corPrimaria">
-    </div>
-    <div class="field">
-      <label>Cor secundária</label>
-      <input type="color" id="corSecundaria">
-    </div>
-  </div>
-
-  <div class="field">
-    <label>Logo (URL)</label>
-    <input id="logo">
-  </div>
+  <label>Cor do botão</label>
+  <input type="color" id="corBotao">
 </div>
 
 <div class="card">
-  <h2>Banner</h2>
-
   <div class="toggle">
     <input type="checkbox" id="bannerAtivo">
-    <label>Ativar banner</label>
+    <label>Banner ativo</label>
   </div>
 
-  <div class="field">
-    <label>Imagem do banner (URL)</label>
-    <input id="banner">
-  </div>
+  <label>Imagem do banner</label>
+  <input id="bannerImagem">
+
+  <label>Texto do banner</label>
+  <input id="bannerTexto">
 </div>
 
 <div class="card">
-  <h2>Pop-up promocional</h2>
-
   <div class="toggle">
     <input type="checkbox" id="popupAtivo">
-    <label>Ativar pop-up</label>
+    <label>Popup promocional</label>
   </div>
 
-  <div class="field">
-    <label>Título</label>
-    <input id="popupTitulo">
-  </div>
+  <label>Título</label>
+  <input id="popupTitulo">
 
-  <div class="field">
-    <label>Texto</label>
-    <textarea id="popupTexto"></textarea>
-  </div>
-
-  <div class="field">
-    <label>Imagem (URL)</label>
-    <input id="popupImagem">
-  </div>
+  <label>Texto</label>
+  <textarea id="popupTexto"></textarea>
 </div>
 
-<div class="card">
-  <h2>Funcionalidades</h2>
-
-  <div class="toggle"><input type="checkbox" id="mostrarServicos"> Mostrar serviços</div>
-  <div class="toggle"><input type="checkbox" id="mostrarProdutos"> Mostrar produtos</div>
-  <div class="toggle"><input type="checkbox" id="permitirAgendamento"> Permitir agendamento</div>
-  <div class="toggle"><input type="checkbox" id="permitirPedidos"> Permitir pedidos</div>
-</div>
-
-<button onclick="salvar()">Salvar configurações</button>
+<button onclick="salvar()">Salvar alterações</button>
 
 <script>
 const sb = supabase.createClient(
-  "https://egxjgmzukjyyxmkukwub.supabase.co",
-  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+ "https://egxjgmzukjyyxmkukwub.supabase.co",
+ "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-let userId = null;
+let user;
 
 async function init(){
-  const { data:{session} } = await sb.auth.getSession();
-  if(!session){ location.href="login.html"; return; }
+  const {data:{session}} = await sb.auth.getSession();
+  if(!session) location.href="login.html";
+  user = session.user;
 
-  userId = session.user.id;
-
-  const { data } = await sb
+  const {data} = await sb
     .from("config_loja")
     .select("*")
-    .eq("user_id", userId)
+    .eq("user_id", user.id)
     .single();
 
-  if(!data) return;
-
-  nome.value = data.nome || "";
-  corPrimaria.value = data.cor_primaria || "#ff6a00";
-  corSecundaria.value = data.cor_secundaria || "#111827";
-  logo.value = data.logo_url || "";
-
-  bannerAtivo.checked = data.banner_ativo;
-  banner.value = data.banner_url || "";
-
-  popupAtivo.checked = data.popup_ativo;
-  popupTitulo.value = data.popup_titulo || "";
-  popupTexto.value = data.popup_texto || "";
-  popupImagem.value = data.popup_imagem || "";
-
-  mostrarServicos.checked = data.mostrar_servicos;
-  mostrarProdutos.checked = data.mostrar_produtos;
-  permitirAgendamento.checked = data.permitir_agendamento;
-  permitirPedidos.checked = data.permitir_pedidos;
+  if(data){
+    corPrimaria.value = data.cor_primaria;
+    corBotao.value = data.cor_botao;
+    bannerAtivo.checked = data.banner_ativo;
+    bannerImagem.value = data.banner_imagem || "";
+    bannerTexto.value = data.banner_texto || "";
+    popupAtivo.checked = data.popup_ativo;
+    popupTitulo.value = data.popup_titulo || "";
+    popupTexto.value = data.popup_texto || "";
+  }
 }
+init();
 
 async function salvar(){
   await sb.from("config_loja").upsert({
-    user_id: userId,
-    nome: nome.value,
+    user_id: user.id,
     cor_primaria: corPrimaria.value,
-    cor_secundaria: corSecundaria.value,
-    logo_url: logo.value,
-
+    cor_botao: corBotao.value,
     banner_ativo: bannerAtivo.checked,
-    banner_url: banner.value,
-
+    banner_imagem: bannerImagem.value,
+    banner_texto: bannerTexto.value,
     popup_ativo: popupAtivo.checked,
     popup_titulo: popupTitulo.value,
-    popup_texto: popupTexto.value,
-    popup_imagem: popupImagem.value,
-
-    mostrar_servicos: mostrarServicos.checked,
-    mostrar_produtos: mostrarProdutos.checked,
-    permitir_agendamento: permitirAgendamento.checked,
-    permitir_pedidos: permitirPedidos.checked
+    popup_texto: popupTexto.value
   });
-
-  alert("Configurações salvas ✅");
+  alert("Configurações salvas!");
 }
-
-init();
 </script>
 
 </body>
