@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Chat de Agendamento</title>
+<title>Agendamento</title>
 
 <meta name="viewport"
   content="width=device-width,
@@ -11,33 +11,23 @@
   user-scalable=no,
   viewport-fit=cover">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
   --primary:#ff6a00;
   --bg:#f4f6fb;
-  --card:#ffffff;
+  --card:#fff;
   --border:#e5e7eb;
   --text:#111827;
 }
 
 /* RESET */
-*{
-  box-sizing:border-box;
-  font-family:Inter,system-ui;
-  -webkit-tap-highlight-color:transparent;
-}
+*{box-sizing:border-box;font-family:Inter}
+html,body{margin:0;height:100%;background:var(--bg);overflow:hidden}
 
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  background:var(--bg);
-  overflow:hidden;
-}
-
-/* TOPO */
+/* HEADER */
 .header{
   height:56px;
   background:#fff;
@@ -46,10 +36,8 @@ html,body{
   align-items:center;
   justify-content:center;
   font-weight:800;
-  font-size:16px;
   position:fixed;
   top:0;left:0;right:0;
-  z-index:10;
 }
 
 /* CHAT */
@@ -58,80 +46,44 @@ html,body{
   top:56px;
   bottom:92px;
   left:0;right:0;
-  overflow:hidden;
 }
 
 .chat{
   height:100%;
   overflow-y:auto;
-  padding:18px 14px;
+  padding:16px;
   display:flex;
   flex-direction:column;
-  gap:14px;
+  gap:12px;
 }
 
-/* MENSAGENS */
-.row{
-  display:flex;
-}
-
-.row.user{
-  justify-content:flex-end;
-}
+/* BALÕES */
+.row{display:flex}
+.row.user{justify-content:flex-end}
 
 .bubble{
   max-width:78%;
   padding:14px 16px;
-  font-size:14px;
-  line-height:1.45;
-  position:relative;
   border-radius:18px;
+  font-size:14px;
 }
 
-/* BOT */
 .bot{
   background:#fff;
-  color:var(--text);
   border:1px solid var(--border);
   border-bottom-left-radius:6px;
 }
 
-.bot::before{
-  content:"";
-  position:absolute;
-  left:-8px;
-  bottom:0;
-  width:12px;
-  height:12px;
-  background:#fff;
-  border-left:1px solid var(--border);
-  border-bottom:1px solid var(--border);
-  transform:rotate(45deg);
-}
-
-/* USER */
 .user{
   background:var(--primary);
   color:#fff;
   border-bottom-right-radius:6px;
 }
 
-.user::before{
-  content:"";
-  position:absolute;
-  right:-8px;
-  bottom:0;
-  width:12px;
-  height:12px;
-  background:var(--primary);
-  transform:rotate(45deg);
-}
-
 /* INPUT */
 .input-bar{
   position:fixed;
-  bottom:0;
-  left:0;right:0;
+  bottom:0;left:0;right:0;
   height:92px;
   background:#fff;
   border-top:1px solid var(--border);
@@ -142,11 +94,9 @@ html,body{
 
 .input-bar input{
   flex:1;
-  padding:16px 20px;
+  padding:16px;
   border-radius:999px;
   border:1px solid var(--border);
-  font-size:15px;
-  outline:none;
 }
 
 .input-bar button{
@@ -156,6 +106,49 @@ html,body{
   background:var(--primary);
   color:#fff;
   font-size:18px;
+}
+
+/* CARROSSEL */
+.carousel{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+}
+.carousel::-webkit-scrollbar{display:none}
+
+.card{
+  min-width:260px;
+  background:#fff;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 12px 30px rgba(0,0,0,.15);
+  cursor:pointer;
+}
+
+.card img{
+  width:100%;
+  height:160px;
+  object-fit:cover;
+}
+
+.card .info{
+  padding:14px;
+  font-weight:800;
+}
+
+.days,.times{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+
+.day,.time{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px 0;
+  text-align:center;
+  font-weight:800;
   cursor:pointer;
 }
 </style>
@@ -175,84 +168,141 @@ html,body{
 </div>
 
 <script>
+/* SUPABASE */
+const sb = supabase.createClient(
+ "https://egxjgmzukjyyxmkukwub.supabase.co",
+ "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+);
+
+const lojaId = new URLSearchParams(location.search).get("l");
 const chat = document.getElementById("chat");
 const input = document.getElementById("input");
 
-/* ESTADO DO CHAT */
-let etapa = "inicio";
-let dados = {};
+/* ESTADO */
+let etapa="nome";
+let dados={};
+let duracao=0;
 
-/* UTIL */
-function scroll(){
-  chat.scrollTop = chat.scrollHeight;
-}
+/* UTILS */
+const scroll=()=>chat.scrollTop=chat.scrollHeight;
+const bot=t=>{chat.innerHTML+=`<div class="row"><div class="bubble bot">${t}</div></div>`;scroll()}
+const user=t=>{chat.innerHTML+=`<div class="row user"><div class="bubble user">${t}</div></div>`;scroll()}
+const toMin=h=>{const[a,b]=h.split(":").map(Number);return a*60+b}
+const toHour=m=>String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")
 
-function bot(text){
-  chat.innerHTML += `
-    <div class="row">
-      <div class="bubble bot">${text}</div>
-    </div>`;
-  scroll();
-}
-
-function user(text){
-  chat.innerHTML += `
-    <div class="row user">
-      <div class="bubble user">${text}</div>
-    </div>`;
-  scroll();
-}
-
-/* INÍCIO */
+/* START */
 bot("Olá 😊 Vamos agendar?");
 bot("Qual é o seu nome completo?");
-etapa = "nome";
 
-/* ENVIO */
+/* SEND */
 function send(){
-  const value = input.value.trim();
-  if(!value) return;
+  const v=input.value.trim();
+  if(!v)return;
 
-  user(value);
-  input.value = "";
+  user(v);
+  input.value="";
 
-  if(etapa === "nome"){
-    dados.nome = value;
-    etapa = "whats";
-
-    input.type = "tel";
-    input.inputMode = "numeric";
-    input.oninput = maskWhats;
-
-    bot(`Prazer, <b>${dados.nome}</b>! Qual seu WhatsApp?`);
-    return;
-  }
-
-  if(etapa === "whats"){
-    dados.whats = value.replace(/\D/g,'');
-    etapa = "final";
-
-    bot(`
-      <strong>Perfeito!</strong><br><br>
-      👤 ${dados.nome}<br>
-      📱 ${formatWhats(dados.whats)}<br><br>
-      Agora vamos escolher o serviço 😉
-    `);
-    return;
+  if(etapa==="nome"){
+    dados.nome=v;
+    etapa="servico";
+    listarServicos();
   }
 }
 
-/* MÁSCARA */
-function maskWhats(){
-  input.value = input.value
-    .replace(/\D/g,'')
-    .slice(0,11)
-    .replace(/^(\d{2})(\d)/,"($1) $2")
-    .replace(/(\d{5})(\d)/,"$1-$2");
+/* SERVIÇOS */
+async function listarServicos(){
+  const {data}=await sb.from("produtos_servicos")
+    .select("id,nome,preco,imagem_url,duracao_minutos")
+    .eq("user_id",lojaId).eq("ativo",true);
+
+  bot("Escolha um serviço:");
+
+  const wrap=document.createElement("div");
+  wrap.className="carousel";
+
+  wrap.innerHTML=data.map(s=>`
+    <div class="card" onclick="selectServico('${s.id}',${s.duracao_minutos})">
+      <img src="${s.imagem_url||'https://via.placeholder.com/400'}">
+      <div class="info">${s.nome}<br>R$ ${s.preco}</div>
+    </div>`).join("");
+
+  chat.appendChild(wrap);scroll();
 }
 
-function formatWhats(v){
-  return v.replace(/^(\d{2})(\d{5})(\d{4})/,"($1) $2-$3");
+/* SERVIÇO → DIAS */
+async function selectServico(id,d){
+  if(dados.servico)return;
+  dados.servico=id;duracao=d;
+
+  const hoje=new Date().toISOString().split("T")[0];
+  const {data}=await sb.from("agenda_loja")
+    .select("*").eq("user_id",lojaId).gte("data",hoje).eq("fechado",false);
+
+  let diasValidos=[];
+
+  for(const dia of data){
+    const blocos=JSON.parse(dia.horarios||"[]");
+    if(blocos.length) diasValidos.push(dia);
+  }
+
+  bot("Escolha o dia:");
+
+  chat.innerHTML+=`
+    <div class="days">
+      ${diasValidos.map(d=>`
+        <div class="day" onclick="selectDia('${d.data}','${d.horarios.replace(/'/g,"")}')">
+          ${new Date(d.data).getDate()}
+        </div>`).join("")}
+    </div>`;
+  scroll();
+}
+
+/* DIA → HORÁRIOS */
+async function selectDia(data,horariosStr){
+  dados.data=data;
+  const blocos=JSON.parse(horariosStr);
+
+  const {data:ag}=await sb.from("agendamentos")
+    .select("hora_inicio,hora_fim")
+    .eq("user_id",lojaId).eq("data",data);
+
+  let ocupados=ag.map(a=>[toMin(a.hora_inicio),toMin(a.hora_fim)]);
+  let slots=[];
+
+  blocos.forEach(b=>{
+    let s=toMin(b.inicio),e=toMin(b.fim);
+    while(s+duracao<=e){
+      if(!ocupados.some(o=>!(s+duracao<=o[0]||s>=o[1])))
+        slots.push(toHour(s));
+      s+=duracao;
+    }
+  });
+
+  if(!slots.length){bot("⚠️ Sem horários disponíveis.");return;}
+
+  bot("Horários disponíveis:");
+
+  chat.innerHTML+=`
+    <div class="times">
+      ${slots.map(h=>`<div class="time" onclick="confirmar('${h}')">${h}</div>`).join("")}
+    </div>`;
+  scroll();
+}
+
+/* CONFIRMA */
+async function confirmar(h){
+  const fim=toHour(toMin(h)+duracao);
+
+  await sb.from("agendamentos").insert({
+    user_id:lojaId,
+    servico_id:dados.servico,
+    data:dados.data,
+    hora_inicio:h,
+    hora_fim:fim,
+    cliente_nome:dados.nome
+  });
+
+  bot(`🎉 Agendado com sucesso!<br>${dados.data} às ${h}`);
 }
 </script>
 
