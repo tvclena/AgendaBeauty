@@ -441,25 +441,7 @@ async function salvarPerfil(){
     overlay.style.display = "none";
   }
 }
-  if(updErr){
-    alert("Erro ao salvar no banco (user_profile).");
-    return;
-  }
-
-  // Atualiza imagens com signedUrl novo
-  if(avatarPath){
-    const url = await getSigned(avatarPath);
-    if(url){
-      profileImg.style.backgroundImage = `url(${url})`;
-      avatar.style.backgroundImage = `url(${url})`;
-      avatar.textContent = "";
-    }
-  }
-
-  fotoBlob = null;
-  closeProfile();
-}
-
+ 
 /* ================= LOGOUT ================= */
 async function sair(){
   overlayText.innerText = "Saindo…";
