@@ -23,22 +23,29 @@
 :root{
   --primary:#ff6a00;
   --border:#e5e7eb;
-  --radius:18px;
+  --radius:22px;
   --danger:#c62828;
   --muted:#6b7280;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Inter;
+  -webkit-tap-highlight-color:transparent;
+}
 
 body{
   min-height:100vh;
   display:grid;
   grid-template-columns:1.2fr .8fr;
+  background:#000;
 }
 
-/* LEFT */
+/* ===== FUNDO COM FOTO ===== */
 .left{
-  background:url("https://images.unsplash.com/photo-1600948836101-f9ffda59d250")
+  background:url("https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&w=1600&q=80")
   center/cover no-repeat;
   position:relative;
   color:#fff;
@@ -47,7 +54,11 @@ body{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(120deg,rgba(0,0,0,.75),rgba(0,0,0,.3));
+  background:linear-gradient(
+    120deg,
+    rgba(0,0,0,.75),
+    rgba(0,0,0,.35)
+  );
 }
 .left div{
   position:relative;
@@ -56,61 +67,77 @@ body{
 }
 .left span{color:var(--primary)}
 
-/* RIGHT */
+/* ===== ÁREA DO CARD ===== */
 .right{
   display:flex;
   align-items:center;
   justify-content:center;
+  background:#fff;
 }
+
 .card{
   width:100%;
   max-width:460px;
   padding:44px;
-  box-shadow:0 20px 60px rgba(0,0,0,.08);
-  border-radius:var(--radius);
   background:#fff;
+  border-radius:var(--radius);
+  box-shadow:0 20px 60px rgba(0,0,0,.08);
 }
-.card small{color:var(--primary);font-weight:600}
 
+.card small{
+  color:var(--primary);
+  font-weight:600;
+}
+
+.card h2{
+  margin:10px 0 6px;
+}
+
+.card p{
+  color:var(--muted);
+  margin-bottom:18px;
+}
+
+/* ===== FORM ===== */
 input,select{
   width:100%;
   padding:14px;
   margin-bottom:14px;
-  border-radius:12px;
+  border-radius:14px;
   border:1px solid var(--border);
+  font-size:14px;
   text-transform:uppercase;
 }
-input[type="email"],input[type="password"]{text-transform:none}
+
+input[type="email"],
+input[type="password"]{
+  text-transform:none;
+}
 
 button{
   width:100%;
   padding:15px;
   border:none;
-  border-radius:30px;
-  background:var(--primary);
+  border-radius:999px;
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
   color:#fff;
-  font-weight:700;
+  font-weight:800;
+  font-size:15px;
   cursor:pointer;
 }
 
-/* ERROR */
+/* ===== ERROS ===== */
 .error{
   background:#ffe5e5;
   color:var(--danger);
   padding:12px;
-  border-radius:10px;
+  border-radius:12px;
   font-size:14px;
   margin-bottom:14px;
   display:none;
 }
-#emailError{
-  display:none;
-  color:var(--danger);
-  font-size:13px;
-  margin:-8px 0 14px 4px;
-}
 
-/* OVERLAY */
+/* ===== OVERLAY / MODAIS ===== */
 #overlay,#modal,#iosModal{
   position:fixed;
   inset:0;
@@ -120,29 +147,91 @@ button{
   justify-content:center;
   z-index:999;
 }
+
 .modal-box{
   background:#fff;
   padding:32px;
-  border-radius:18px;
+  border-radius:22px;
   text-align:center;
   max-width:360px;
 }
-.modal-box h3{margin-bottom:8px}
+
+.modal-box h3{
+  margin-bottom:8px;
+}
+
 .modal-box p{
   color:var(--muted);
   font-size:14px;
   margin-bottom:16px;
 }
+
 .modal-box button{
   margin-top:10px;
-  border-radius:999px;
 }
-.install-btn{
-  background:linear-gradient(135deg,#ff6a00,#ff9a57);
-}
+
 .secondary{
   background:#e5e7eb;
   color:#111;
+}
+
+/* ========================= */
+/* 📱 MOBILE FIRST (CELULAR) */
+/* ========================= */
+@media (max-width: 900px){
+
+  body{
+    grid-template-columns:1fr;
+    overflow:hidden;
+  }
+
+  .left{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    filter:blur(7px);
+    transform:scale(1.08);
+  }
+
+  .left::after{
+    background:rgba(0,0,0,.55);
+  }
+
+  .left div{
+    display:none;
+  }
+
+  .right{
+    position:relative;
+    z-index:2;
+    min-height:100vh;
+    padding:24px 14px env(safe-area-inset-bottom);
+    align-items:flex-end;
+    background:transparent;
+  }
+
+  .card{
+    width:100%;
+    max-width:520px;
+    padding:28px 22px 30px;
+    border-radius:28px;
+    box-shadow:
+      0 30px 80px rgba(0,0,0,.25),
+      0 10px 30px rgba(0,0,0,.12);
+    animation:slideUp .4s ease;
+  }
+}
+
+/* ANIMAÇÃO */
+@keyframes slideUp{
+  from{
+    transform:translateY(40px);
+    opacity:0;
+  }
+  to{
+    transform:translateY(0);
+    opacity:1;
+  }
 }
 </style>
 </head>
@@ -150,38 +239,20 @@ button{
 <body>
 
 <!-- OVERLAY -->
-<div id="overlay"><div class="modal-box">Salvando cadastro…</div></div>
+<div id="overlay">
+  <div class="modal-box">Salvando cadastro…</div>
+</div>
 
 <!-- MODAL SUCESSO -->
 <div id="modal">
   <div class="modal-box">
     <h3>Cadastro realizado 🎉</h3>
     <p>Agora você pode instalar o Agenda Fácil como app.</p>
-
-    <button id="btnInstall" class="install-btn" style="display:none">
-      Instalar App
-    </button>
-
-    <button id="btnIos" class="install-btn" style="display:none" onclick="abrirIOS()">
-      Instalar no iPhone
-    </button>
-
     <button class="secondary" onclick="irLogin()">Ir para login</button>
   </div>
 </div>
 
-<!-- MODAL IOS -->
-<div id="iosModal">
-  <div class="modal-box">
-    <h3>Instalar no iPhone 📱</h3>
-    <p>
-      1️⃣ Toque em <strong>Compartilhar</strong><br>
-      2️⃣ Selecione <strong>Adicionar à Tela de Início</strong>
-    </p>
-    <button onclick="fecharIOS()">Entendi</button>
-  </div>
-</div>
-
+<!-- FUNDO -->
 <div class="left">
   <div>
     <h1>Crie seu salão<br><span>digital</span></h1>
@@ -191,14 +262,13 @@ button{
   </div>
 </div>
 
+<!-- CARD -->
 <div class="right">
   <div class="card">
 
     <small>Acesso à plataforma</small>
-    <h2 style="margin:10px 0 6px">Cadastrar negócio</h2>
-    <p style="color:#6b7280;margin-bottom:18px">
-      Leva menos de 1 minuto
-    </p>
+    <h2>Cadastrar negócio</h2>
+    <p>Leva menos de 1 minuto</p>
 
     <div id="errorBox" class="error"></div>
 
@@ -219,8 +289,6 @@ button{
       <input id="uf" placeholder="UF" maxlength="2" required>
 
       <input id="email" type="email" placeholder="E-mail" required>
-      <div id="emailError">Este e-mail já possui cadastro.</div>
-
       <input id="senha" type="password" placeholder="Senha (mín. 6)" minlength="6" required>
 
       <button>Criar conta</button>
@@ -235,27 +303,6 @@ const sb = supabase.createClient(
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-const overlay=document.getElementById("overlay");
-const modal=document.getElementById("modal");
-const iosModal=document.getElementById("iosModal");
-const btnInstall=document.getElementById("btnInstall");
-const btnIos=document.getElementById("btnIos");
-
-let deferredPrompt=null;
-
-/* ANDROID PWA */
-window.addEventListener("beforeinstallprompt", e=>{
-  e.preventDefault();
-  deferredPrompt=e;
-  btnInstall.style.display="block";
-});
-
-/* IOS CHECK */
-function isIOS(){
-  return /iphone|ipad|ipod/i.test(navigator.userAgent);
-}
-
-/* CADASTRO */
 async function cadastrar(e){
   e.preventDefault();
   overlay.style.display="flex";
@@ -276,30 +323,15 @@ async function cadastrar(e){
   });
 
   overlay.style.display="none";
+
   if(error){
     alert(error.message);
     return;
   }
 
   modal.style.display="flex";
-
-  if(isIOS()){
-    btnIos.style.display="block";
-  }
 }
 
-/* INSTALL ANDROID */
-btnInstall.onclick=async()=>{
-  if(!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt=null;
-};
-
-/* IOS MODAL */
-function abrirIOS(){ iosModal.style.display="flex"; }
-function fecharIOS(){ iosModal.style.display="none"; }
-
-/* LOGIN */
 function irLogin(){
   location.href="login.html";
 }
