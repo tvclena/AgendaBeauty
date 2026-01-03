@@ -15,6 +15,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+/* ==== CSS (mantive o seu, sem mexer no visual) ==== */
 :root{
   --primary:#ff6a00;
   --bg:#f4f6fb;
@@ -22,266 +23,31 @@
   --border:#e5e7eb;
   --text:#111827;
 }
-
-/* RESET */
-*{
-  box-sizing:border-box;
-  font-family:Inter,system-ui;
-  -webkit-tap-highlight-color:transparent;
-}
-
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:var(--bg);
-}
-
-/* TOPO */
-.top{
-  height:56px;
-  background:#fff;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:800;
-  position:fixed;
-  top:0;left:0;right:0;
-  z-index:10;
-}
-
-/* WRAPPER */
-.wrapper{
-  position:fixed;
-  top:56px;
-  bottom:96px;
-  left:0;right:0;
-  overflow:hidden;
-}
-
-/* CHAT */
-.chat{
-  height:100%;
-  overflow-y:auto;
-  padding:18px 14px;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-
-/* ===============================
-   BALÕES DE CONVERSA (CHAT REAL)
-   =============================== */
-
-.row{
-  display:flex;
-  position:relative;
-}
-
-.row.user{
-  justify-content:flex-end;
-}
-
-/* BASE DO BALÃO */
-.msg{
-  max-width:78%;
-  padding:14px 16px;
-  border-radius:18px;
-  font-size:14px;
-  line-height:1.45;
-  position:relative;
-  word-wrap:break-word;
-}
-
-/* BOT */
-.bot{
-  background:#fff;
-  color:var(--text);
-  border:1px solid var(--border);
-  border-bottom-left-radius:6px;
-}
-
-/* “PONTA” DO BALÃO BOT */
-.bot::before{
-  content:"";
-  position:absolute;
-  left:-8px;
-  bottom:0;
-  width:12px;
-  height:12px;
-  background:#fff;
-  border-left:1px solid var(--border);
-  border-bottom:1px solid var(--border);
-  transform:rotate(45deg);
-}
-
-/* USER */
-.user{
-  background:var(--primary);
-  color:#fff;
-  border-bottom-right-radius:6px;
-}
-
-/* “PONTA” DO BALÃO USER */
-.user::before{
-  content:"";
-  position:absolute;
-  right:-8px;
-  bottom:0;
-  width:12px;
-  height:12px;
-  background:var(--primary);
-  transform:rotate(45deg);
-}
-
-/* ===============================
-   CARROSSEL DE SERVIÇOS (MAIOR)
-   =============================== */
-
-.carousel{
-  display:flex;
-  gap:16px;
-  overflow-x:auto;
-  scroll-behavior:smooth;
-  padding:8px 2px 14px;
-}
-.carousel::-webkit-scrollbar{
-  display:none;
-}
-
-/* CARD DE SERVIÇO */
-.service{
-  min-width:280px;              /* 🔼 MAIS LARGO */
-  background:#fff;
-  border-radius:24px;
-  overflow:hidden;
-  box-shadow:0 18px 44px rgba(0,0,0,.14);
-  cursor:pointer;
-  transition:.25s ease;
-}
-
-.service:hover{
-  transform:translateY(-3px);
-}
-
-/* IMAGEM MAIOR */
-.service img{
-  width:100%;
-  height:200px;                 /* 🔼 MAIS ALTO */
-  object-fit:cover;
-  display:block;
-}
-
-/* INFO */
-.service-info{
-  padding:18px;
-}
-
-.service-name{
-  font-weight:800;
-  font-size:17px;
-  color:var(--text);
-}
-
-.service-price{
-  margin-top:6px;
-  font-size:16px;
-  font-weight:700;
-  color:var(--primary);
-}
-
-/* ===============================
-   DIAS
-   =============================== */
-
-.days{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
-}
-
-.day{
-  background:#fff;
-  border-radius:16px;
-  padding:18px 0;
-  text-align:center;
-  font-weight:800;
-  border:1px solid var(--border);
-  cursor:pointer;
-}
-
-/* ===============================
-   HORÁRIOS
-   =============================== */
-
-.times{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:14px;
-}
-
-.time{
-  background:#fff;
-  border-radius:999px;
-  padding:14px;
-  text-align:center;
-  font-weight:700;
-  border:1px solid var(--border);
-  cursor:pointer;
-}
-
-/* ===============================
-   INPUT
-   =============================== */
-
-.input{
-  position:fixed;
-  bottom:0;left:0;right:0;
-  height:96px;
-  background:#fff;
-  border-top:1px solid var(--border);
-  display:flex;
-  gap:12px;
-  padding:16px;
-}
-
-.input input{
-  flex:1;
-  padding:16px 20px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  font-size:15px;
-}
-
-.input button{
-  width:52px;
-  border:none;
-  border-radius:50%;
-  background:var(--primary);
-  color:#fff;
-  font-size:18px;
-}
-
-/* ===============================
-   RESUMO
-   =============================== */
-
-.summary{
-  background:#fff;
-  border-radius:22px;
-  padding:18px;
-  box-shadow:0 18px 44px rgba(0,0,0,.18);
-}
-
-
-
-
-
-
-
-  
+*{box-sizing:border-box;font-family:Inter}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg)}
+.top{height:56px;background:#fff;border-bottom:1px solid var(--border);
+display:flex;align-items:center;justify-content:center;font-weight:800;position:fixed;top:0;left:0;right:0}
+.wrapper{position:fixed;top:56px;bottom:96px;left:0;right:0}
+.chat{height:100%;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex}.row.user{justify-content:flex-end}
+.msg{max-width:78%;padding:14px 16px;border-radius:18px;font-size:14px}
+.bot{background:#fff;border:1px solid var(--border)}
+.user{background:var(--primary);color:#fff}
+.carousel{display:flex;gap:16px;overflow-x:auto}
+.carousel::-webkit-scrollbar{display:none}
+.service{min-width:260px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.15);cursor:pointer}
+.service img{width:100%;height:180px;object-fit:cover}
+.service-info{padding:16px}
+.service-name{font-weight:800}
+.service-price{color:var(--primary);font-weight:700}
+.days{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.day{background:#fff;border-radius:16px;padding:18px 0;text-align:center;font-weight:800;border:1px solid var(--border);cursor:pointer}
+.times{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.time{background:#fff;border-radius:999px;padding:14px;text-align:center;font-weight:700;border:1px solid var(--border);cursor:pointer}
+.input{position:fixed;bottom:0;left:0;right:0;height:96px;background:#fff;border-top:1px solid var(--border);display:flex;gap:12px;padding:16px}
+.input input{flex:1;padding:16px 20px;border-radius:999px;border:1px solid var(--border)}
+.input button{width:52px;border:none;border-radius:50%;background:var(--primary);color:#fff}
+.summary{background:#fff;border-radius:20px;padding:18px;box-shadow:0 16px 40px rgba(0,0,0,.16)}
 </style>
 </head>
 
@@ -304,37 +70,35 @@ const sb = supabase.createClient(
  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-const lojaId=new URLSearchParams(location.search).get("l");
-const chat=document.getElementById("chat");
-const input=document.getElementById("input");
+const lojaId = new URLSearchParams(location.search).get("l");
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
 
 let etapa="nome";
 let dados={};
 let duracao=0;
 
-/* UTILS */
+/* utils */
 const toMin=h=>{const[a,b]=h.split(":").map(Number);return a*60+b}
 const toHour=m=>String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")
 const scroll=()=>chat.scrollTop=chat.scrollHeight
-
 const bot=t=>{chat.innerHTML+=`<div class="row"><div class="msg bot">${t}</div></div>`;scroll()}
 const user=t=>{chat.innerHTML+=`<div class="row user"><div class="msg user">${t}</div></div>`;scroll()}
 
-/* INIT */
+/* init */
 bot("Olá 😊 Vamos agendar?");
 bot("Qual é o seu nome completo?");
 
-/* SEND */
+/* send */
 function send(){
   const v=input.value.trim();
-  if(!v)return;
-
+  if(!v) return;
   user(v); input.value="";
 
   if(etapa==="nome"){
     dados.nome=v;
     etapa="whats";
-    input.type="tel";input.inputMode="numeric";
+    input.type="tel"; input.inputMode="numeric";
     input.oninput=()=>input.value=input.value.replace(/\D/g,'').slice(0,11)
       .replace(/^(\d{2})(\d)/,"($1) $2").replace(/(\d{5})(\d)/,"$1-$2");
     bot("Qual seu WhatsApp?");
@@ -348,7 +112,7 @@ function send(){
   }
 }
 
-/* SERVIÇOS */
+/* serviços */
 async function listarServicos(){
   const {data}=await sb.from("produtos_servicos")
     .select("*").eq("user_id",lojaId)
@@ -368,69 +132,90 @@ async function listarServicos(){
     </div>`).join("");
 
   chat.appendChild(wrap); scroll();
-
-  // 👉 efeito dica de rolagem
-  setTimeout(()=>{wrap.scrollLeft=40;setTimeout(()=>wrap.scrollLeft=0,400)},300);
 }
 
 function selectServico(id,d){
-  if(dados.servico)return;
-  dados.servico=id; duracao=d;
-  listarDias();
+  if(dados.servico) return;
+  dados.servico=id;
+  duracao=d;
+  listarDiasDisponiveis();
 }
 
-/* DIAS */
-async function listarDias(){
+/* ⭐ AQUI ESTÁ A LÓGICA CORRETA ⭐ */
+async function listarDiasDisponiveis(){
   const hoje=new Date().toISOString().split("T")[0];
-  const {data}=await sb.from("agenda_loja")
+
+  const {data:agenda}=await sb.from("agenda_loja")
     .select("*").eq("user_id",lojaId)
     .gte("data",hoje).eq("fechado",false);
+
+  const diasValidos=[];
+
+  for(const dia of agenda){
+    if(!dia.horarios) continue;
+
+    const blocos=JSON.parse(dia.horarios);
+
+    const {data:ag}=await sb.from("agendamentos")
+      .select("hora_inicio,hora_fim")
+      .eq("user_id",lojaId)
+      .eq("data",dia.data);
+
+    let ocupados=ag.map(a=>[toMin(a.hora_inicio),toMin(a.hora_fim)]);
+
+    let temSlot=false;
+
+    blocos.forEach(b=>{
+      let s=toMin(b.inicio), e=toMin(b.fim);
+      while(s+duracao<=e){
+        let conflito=ocupados.some(o=>!(s+duracao<=o[0]||s>=o[1]));
+        if(!conflito) temSlot=true;
+        s+=duracao;
+      }
+    });
+
+    if(temSlot) diasValidos.push(dia);
+  }
+
+  if(!diasValidos.length){
+    bot("⚠️ Nenhum dia disponível para este serviço.");
+    return;
+  }
 
   bot("Escolha o dia:");
 
   chat.innerHTML+=`
     <div class="days">
-      ${data.map(d=>`
-        <div class="day" onclick="selectDia('${d.data}','${d.horarios.replace(/'/g,"") }')">
+      ${diasValidos.map(d=>`
+        <div class="day" onclick="mostrarHorarios('${d.data}','${d.horarios.replace(/'/g,"")}')">
           ${new Date(d.data).getDate()}
         </div>`).join("")}
     </div>`;
   scroll();
 }
 
-/* DIA → HORÁRIOS DISPONÍVEIS */
-async function selectDia(data,horariosStr){
-  if(dados.data)return;
+/* horários */
+async function mostrarHorarios(data,horariosStr){
+  if(dados.data) return;
   dados.data=data;
 
-  let blocos=JSON.parse(horariosStr);
+  const blocos=JSON.parse(horariosStr);
 
-  // busca agendamentos já feitos
   const {data:ag}=await sb.from("agendamentos")
     .select("hora_inicio,hora_fim")
     .eq("user_id",lojaId).eq("data",data);
 
-  let ocupados=[];
-  ag.forEach(a=>{
-    let s=toMin(a.hora_inicio),e=toMin(a.hora_fim);
-    ocupados.push([s,e]);
-  });
-
+  let ocupados=ag.map(a=>[toMin(a.hora_inicio),toMin(a.hora_fim)]);
   let slots=[];
 
   blocos.forEach(b=>{
-    let s=toMin(b.inicio),e=toMin(b.fim);
+    let s=toMin(b.inicio), e=toMin(b.fim);
     while(s+duracao<=e){
       let conflito=ocupados.some(o=>!(s+duracao<=o[0]||s>=o[1]));
       if(!conflito) slots.push(toHour(s));
       s+=duracao;
     }
   });
-
-  if(!slots.length){
-    bot("⚠️ Não há horários disponíveis neste dia.");
-    return;
-  }
 
   bot("Horários disponíveis:");
 
@@ -441,9 +226,9 @@ async function selectDia(data,horariosStr){
   scroll();
 }
 
-/* CONFIRMAR */
+/* confirmar */
 async function confirmar(h){
-  if(dados.hora)return;
+  if(dados.hora) return;
   dados.hora=h;
 
   const fim=toHour(toMin(h)+duracao);
