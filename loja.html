@@ -2,15 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Agendamento</title>
+<title>Agendamento Online</title>
 
-<meta name="viewport"
-  content="width=device-width,
-  initial-scale=1,
-  maximum-scale=1,
-  user-scalable=no">
-
-<meta name="theme-color" id="themeColor">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#ff6a00">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -18,79 +13,93 @@
 <style>
 :root{
   --primary:#ff6a00;
+  --primary-dark:#e85f00;
   --bg:#f4f6fb;
-  --card:#fff;
+  --card:#ffffff;
   --text:#111827;
   --muted:#6b7280;
+  --border:#e5e7eb;
 }
 
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-body{
-  background:var(--bg);
-  color:var(--text);
-  overflow-x:hidden;
-}
+body{background:var(--bg);color:var(--text);overflow-x:hidden}
 
-/* ===== HEADER ===== */
+/* ================= HEADER ================= */
 .header{
   background:linear-gradient(135deg,#ff6a00,#ff9a57);
-  padding:34px 16px 70px;
+  padding:36px 16px 90px;
   text-align:center;
   position:relative;
 }
 .header img{
-  width:90px;height:90px;
+  width:96px;height:96px;
   border-radius:50%;
   background:#fff;
   object-fit:cover;
-  box-shadow:0 12px 30px rgba(0,0,0,.25);
+  box-shadow:0 14px 36px rgba(0,0,0,.3);
 }
 .header h1{
-  margin-top:12px;
+  margin-top:14px;
   color:#fff;
   font-size:22px;
   font-weight:800;
 }
 .header p{
   color:#fff;
-  opacity:.9;
   font-size:14px;
+  opacity:.95;
+  margin-top:4px;
+}
+.quick-info{
+  margin-top:16px;
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+.quick-info span{
+  background:rgba(255,255,255,.2);
+  color:#fff;
+  font-size:12px;
+  padding:6px 12px;
+  border-radius:999px;
 }
 
-/* ===== CONTAINER ===== */
+/* ================= CONTAINER ================= */
 .container{
-  margin-top:-40px;
+  margin-top:-60px;
   padding:16px;
 }
 
-/* ===== CARD ===== */
+/* ================= CARD ================= */
 .card{
-  background:#fff;
+  background:var(--card);
   border-radius:22px;
   padding:16px;
-  box-shadow:0 18px 50px rgba(0,0,0,.08);
+  box-shadow:0 18px 48px rgba(0,0,0,.1);
 }
 
-/* ===== TOPO TABS ===== */
+/* ================= TABS ================= */
 .tabs{
   display:flex;
   gap:10px;
-  margin-bottom:12px;
+  margin-bottom:14px;
 }
 .tabs button{
   flex:1;
   padding:12px;
   border-radius:999px;
   border:none;
-  font-weight:800;
   background:#f3f4f6;
+  font-weight:800;
+  cursor:pointer;
 }
 .tabs button.active{
   background:var(--primary);
   color:#fff;
 }
 
-/* ===== SEARCH ===== */
+/* ================= SEARCH ================= */
 .search{
   margin-bottom:14px;
 }
@@ -98,10 +107,10 @@ body{
   width:100%;
   padding:14px;
   border-radius:14px;
-  border:1px solid #e5e7eb;
+  border:1px solid var(--border);
 }
 
-/* ===== GRID ===== */
+/* ================= GRID ================= */
 .grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -110,19 +119,29 @@ body{
 .item{
   background:#fff;
   border-radius:18px;
-  padding:10px;
-  box-shadow:0 10px 28px rgba(0,0,0,.08);
+  overflow:hidden;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
 }
 .item img{
   width:100%;
   height:120px;
   object-fit:cover;
-  border-radius:14px;
 }
-.item strong{display:block;margin-top:6px}
-.item small{color:var(--muted)}
+.item-body{
+  padding:12px;
+}
+.item strong{
+  display:block;
+  font-size:14px;
+}
+.meta{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:var(--muted);
+  margin:6px 0 10px;
+}
 .item button{
-  margin-top:8px;
   width:100%;
   padding:10px;
   border:none;
@@ -130,9 +149,27 @@ body{
   background:var(--primary);
   color:#fff;
   font-weight:800;
+  cursor:pointer;
+}
+.item button:hover{background:var(--primary-dark)}
+
+/* ================= FIXED CTA ================= */
+.fixed-cta{
+  position:fixed;
+  bottom:14px;
+  left:14px;
+  right:14px;
+  background:var(--primary);
+  color:#fff;
+  padding:14px;
+  text-align:center;
+  border-radius:16px;
+  font-weight:800;
+  box-shadow:0 20px 40px rgba(0,0,0,.25);
+  z-index:3000;
 }
 
-/* ===== CHAT OVERLAY ===== */
+/* ================= CHAT ================= */
 #chatOverlay{
   position:fixed;
   inset:0;
@@ -159,28 +196,27 @@ body{
   padding:12px 16px;
   border-radius:18px;
   margin-bottom:10px;
+  font-size:14px;
 }
 .bot{
-  background:linear-gradient(135deg,#a11b1b,#ff6a00);
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
   color:#fff;
 }
 .user{
   background:#e5e7eb;
   margin-left:auto;
 }
-
-/* ===== INPUT ===== */
 .chat-input{
   display:flex;
   gap:10px;
   padding:14px;
-  border-top:1px solid #ddd;
+  border-top:1px solid var(--border);
 }
 .chat-input input{
   flex:1;
   padding:14px;
   border-radius:999px;
-  border:1px solid #ddd;
+  border:1px solid var(--border);
 }
 .chat-input button{
   width:56px;
@@ -190,6 +226,13 @@ body{
   color:#fff;
   font-weight:800;
 }
+
+/* ================= LOADING ================= */
+.loading{
+  text-align:center;
+  padding:30px;
+  color:var(--muted);
+}
 </style>
 </head>
 
@@ -198,15 +241,20 @@ body{
 <div class="header">
   <img id="logo">
   <h1 id="nomeLoja">Carregando…</h1>
-  <p>Agende seu horário</p>
+  <p>Agende seu horário online em segundos</p>
+  <div class="quick-info">
+    <span>⏱ Atendimento rápido</span>
+    <span>📱 Confirmação WhatsApp</span>
+    <span>💳 Pagamento facilitado</span>
+  </div>
 </div>
 
 <div class="container">
   <div class="card">
 
     <div class="tabs">
-      <button class="active" onclick="mostrar('servicos')">Serviços</button>
-      <button onclick="mostrar('produtos')">Produtos</button>
+      <button class="active" onclick="mostrar('servicos',this)">Serviços</button>
+      <button onclick="mostrar('produtos',this)">Produtos</button>
     </div>
 
     <div class="search">
@@ -219,21 +267,17 @@ body{
   </div>
 </div>
 
+<div class="fixed-cta" onclick="scrollToServicos()">Agendar agora</div>
+
 <!-- CHAT -->
 <div id="chatOverlay">
   <div class="chat-header">
     <strong>Agendamento</strong>
-    <span onclick="fecharChat()">✕</span>
+    <span style="cursor:pointer" onclick="fecharChat()">✕</span>
   </div>
-
   <div class="chat-body" id="chat"></div>
-
   <div class="chat-input">
-    <input id="input"
-      placeholder="Digite aqui…"
-      autocomplete="off"
-      autocorrect="off"
-      autocapitalize="off">
+    <input id="input" placeholder="Digite aqui…">
     <button onclick="enviar()">➤</button>
   </div>
 </div>
@@ -247,6 +291,10 @@ const sb = supabase.createClient(
 const lojaId = new URLSearchParams(location.search).get("l");
 let etapa="nome", cliente={}, servico=null;
 
+function scrollToServicos(){
+  document.querySelector(".card").scrollIntoView({behavior:"smooth"});
+}
+
 /* ===== CHAT ===== */
 function abrirChat(s){
   servico=s;
@@ -254,8 +302,8 @@ function abrirChat(s){
   document.body.style.overflow="hidden";
   chat.innerHTML="";
   etapa="nome";
-  bot("Olá! Vamos agendar seu horário 😊");
-  bot("Qual é o seu nome?");
+  bot(`Você escolheu <b>${s.nome}</b> 😊`);
+  bot("Para começar, qual é o seu nome?");
 }
 
 function fecharChat(){
@@ -267,37 +315,27 @@ function bot(t){
   setTimeout(()=>{
     chat.innerHTML+=`<div class="msg bot">${t}</div>`;
     chat.scrollTop=chat.scrollHeight;
-  },1000);
+  },600);
 }
-function user(t){
+function userMsg(t){
   chat.innerHTML+=`<div class="msg user">${t}</div>`;
-}
-
-function maskCel(v){
-  v=v.replace(/\D/g,'').slice(0,11);
-  return v.length>6
-    ? v.replace(/^(\d{2})(\d{5})(\d{4})$/,"($1) $2-$3")
-    : v;
 }
 
 function enviar(){
   let v=input.value.trim();
   if(!v) return;
-
-  user(v);
+  userMsg(v);
   input.value="";
 
   if(etapa==="nome"){
     cliente.nome=v;
     etapa="whats";
-    bot("Agora seu WhatsApp 📱");
-    input.type="tel";
-    input.inputMode="numeric";
+    bot("Agora me informe seu WhatsApp 📱");
   }
   else if(etapa==="whats"){
     cliente.whats=v.replace(/\D/g,'');
-    bot(`Perfeito! Serviço escolhido:<br><b>${servico.nome}</b>`);
-    bot("Em breve vamos confirmar seu horário 😉");
+    bot("Perfeito! Seu pedido foi registrado ✅");
+    bot("Em breve entraremos em contato para confirmar o horário.");
     etapa="fim";
   }
 }
@@ -321,28 +359,37 @@ async function carregar(){
 
   servicos.innerHTML=s.map(i=>`
     <div class="item">
-      <img src="${i.imagem_url||''}">
-      <strong>${i.nome}</strong>
-      <small>R$ ${i.preco}</small>
-      <button onclick='abrirChat(${JSON.stringify(i)})'>Agendar</button>
+      <img src="${i.imagem_url || 'https://placehold.co/300x200'}">
+      <div class="item-body">
+        <strong>${i.nome}</strong>
+        <div class="meta">
+          <span>⏱ ${i.duracao||60} min</span>
+          <span>💰 R$ ${i.preco}</span>
+        </div>
+        <button onclick='abrirChat(${JSON.stringify(i)})'>Agendar</button>
+      </div>
     </div>
   `).join("");
 
   produtos.innerHTML=pr.map(i=>`
     <div class="item">
-      <img src="${i.imagem_url||''}">
-      <strong>${i.nome}</strong>
-      <small>R$ ${i.preco}</small>
-      <button>Comprar</button>
+      <img src="${i.imagem_url || 'https://placehold.co/300x200'}">
+      <div class="item-body">
+        <strong>${i.nome}</strong>
+        <div class="meta">
+          <span>💰 R$ ${i.preco}</span>
+        </div>
+        <button>Comprar</button>
+      </div>
     </div>
   `).join("");
 }
 
-function mostrar(t){
+function mostrar(t,el){
   servicos.style.display=t==="servicos"?"grid":"none";
   produtos.style.display=t==="produtos"?"grid":"none";
   document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
-  event.target.classList.add("active");
+  el.classList.add("active");
 }
 
 if(lojaId) carregar();
