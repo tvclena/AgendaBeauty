@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Configurações • Agenda Fácil</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ff6a00">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --primary:#ff6a00;
+  --bg:#f4f6fb;
+  --card:#ffffff;
+  --border:#e5e7eb;
+  --text:#111827;
+  --muted:#6b7280;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Inter;
+}
+
+body{
+  background:var(--bg);
+  min-height:100vh;
+  padding:20px;
+}
+
+/* CARD */
+.card{
+  background:var(--card);
+  border-radius:20px;
+  padding:22px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+}
+
+h1{
+  font-size:20px;
+  font-weight:800;
+  margin-bottom:6px;
+}
+
+p{
+  font-size:14px;
+  color:var(--muted);
+  margin-bottom:18px;
+}
+
+/* LINK BOX */
+.link-box{
+  border:1px dashed var(--border);
+  border-radius:14px;
+  padding:14px;
+  font-size:13px;
+  word-break:break-all;
+  background:#fafafa;
+  margin-bottom:14px;
+}
+
+/* BUTTONS */
+.actions{
+  display:flex;
+  gap:10px;
+}
+
+button{
+  flex:1;
+  height:44px;
+  border:none;
+  border-radius:999px;
+  font-weight:800;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.btn-copy{
+  background:#111827;
+  color:#fff;
+}
+
+.btn-share{
+  background:var(--primary);
+  color:#fff;
+}
+
+/* FEEDBACK */
+#msg{
+  margin-top:12px;
+  font-size:13px;
+  color:green;
+  display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>Link de agendamento</h1>
+  <p>Compartilhe este link com seus clientes para receber agendamentos online.</p>
+
+  <div class="link-box" id="linkLoja">Carregando…</div>
+
+  <div class="actions">
+    <button class="btn-copy" onclick="copiar()">Copiar</button>
+    <button class="btn-share" onclick="compartilhar()">Encaminhar</button>
+  </div>
+
+  <div id="msg">Link copiado com sucesso ✅</div>
+</div>
+
+<script>
+/* SUPABASE */
+const sb = supabase.createClient(
+  "https://egxjgmzukjyyxmkukwub.supabase.co",
+  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+);
+
+let linkFinal = "";
+
+/* CARREGAR LINK */
+async function carregarLink(){
+  const {data:{session}} = await sb.auth.getSession();
+  if(!session){
+    location.href="login.html";
+    return;
+  }
+
+  const lojaId = session.user.id;
+
+  // 🔴 ajuste para seu domínio real
+  linkFinal = `${location.origin}/loja.html?l=${lojaId}`;
+
+  document.getElementById("linkLoja").innerText = linkFinal;
+}
+
+carregarLink();
+
+/* COPIAR */
+function copiar(){
+  navigator.clipboard.writeText(linkFinal);
+  const msg = document.getElementById("msg");
+  msg.style.display="block";
+  setTimeout(()=> msg.style.display="none", 2500);
+}
+
+/* COMPARTILHAR */
+function compartilhar(){
+  const texto =
+    `Agende seu horário online 👇\n\n${linkFinal}`;
+
+  const url =
+    `https://wa.me/?text=${encodeURIComponent(texto)}`;
+
+  window.open(url, "_blank");
+}
+</script>
+
+</body>
+</html>
