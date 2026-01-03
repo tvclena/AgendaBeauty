@@ -2,8 +2,15 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Home • AgendaBeauty</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home • Agenda Fácil</title>
+
+<!-- ❌ BLOQUEIA ZOOM -->
+<meta name="viewport"
+  content="width=device-width,
+  initial-scale=1,
+  maximum-scale=1,
+  user-scalable=no,
+  viewport-fit=cover">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
@@ -15,93 +22,117 @@
   --bg:#f6f7fb;
   --card:#ffffff;
   --muted:#6b7280;
+  --border:#e5e7eb;
   --radius:16px;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-body{
-  background:var(--bg);
-  padding:32px;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Inter;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* HEADER */
+html,body{
+  width:100%;
+  height:100%;
+  overscroll-behavior: none;
+}
+
+body{
+  background:var(--bg);
+  padding:16px;
+}
+
+/* ================= HEADER ================= */
 .header{
-  margin-bottom:24px;
+  margin-bottom:16px;
 }
 .header h1{
-  font-size:26px;
+  font-size:20px;
   font-weight:800;
 }
 .header span{
   color:var(--primary);
 }
 
-/* GRID */
+/* ================= KPIs ================= */
 .grid{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:20px;
-  margin-bottom:28px;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin-bottom:20px;
 }
 
-/* CARD KPI */
 .card{
   background:var(--card);
   border-radius:var(--radius);
-  padding:22px;
-  box-shadow:0 10px 30px rgba(0,0,0,.05);
+  padding:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);
+  position:relative;
 }
+
 .card small{
+  font-size:12px;
   color:var(--muted);
   font-weight:600;
 }
+
 .card h2{
-  font-size:28px;
-  margin-top:6px;
+  font-size:20px;
+  margin-top:4px;
+  font-weight:800;
 }
+
 .card i{
-  font-size:26px;
+  position:absolute;
+  bottom:12px;
+  right:12px;
+  font-size:22px;
   color:var(--primary);
+  opacity:.85;
 }
 
-/* ROW */
-.row{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:20px;
-}
-
-/* LIST */
+/* ================= LISTAS ================= */
 .list{
   background:var(--card);
   border-radius:var(--radius);
-  padding:22px;
-  box-shadow:0 10px 30px rgba(0,0,0,.05);
-}
-.list h3{
+  padding:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);
   margin-bottom:16px;
 }
+
+.list h3{
+  font-size:14px;
+  margin-bottom:12px;
+}
+
 .item{
-  padding:12px;
+  padding:10px;
   border-radius:12px;
   background:#f9fafb;
   margin-bottom:10px;
   display:flex;
   justify-content:space-between;
   align-items:center;
+  font-size:13px;
 }
+
 .badge{
   background:#fff7ed;
   color:var(--primary);
   padding:4px 10px;
   border-radius:999px;
-  font-size:12px;
+  font-size:11px;
   font-weight:700;
 }
+
 .empty{
   color:var(--muted);
   text-align:center;
-  padding:20px;
+  padding:16px;
+  font-size:13px;
 }
 </style>
 </head>
@@ -109,7 +140,7 @@ body{
 <body>
 
 <div class="header">
-  <h1>Bem-vindo ao <span>AgendaBeauty</span></h1>
+  <h1>Bem-vindo ao <span>Agenda Fácil</span></h1>
 </div>
 
 <!-- KPIs -->
@@ -121,13 +152,13 @@ body{
   </div>
 
   <div class="card">
-    <small>Clientes cadastrados</small>
+    <small>Clientes</small>
     <h2 id="kpiClientes">0</h2>
     <i class="ri-user-3-line"></i>
   </div>
 
   <div class="card">
-    <small>Faturamento do mês</small>
+    <small>Faturamento mês</small>
     <h2 id="kpiFaturamento">R$ 0</h2>
     <i class="ri-currency-line"></i>
   </div>
@@ -139,38 +170,31 @@ body{
   </div>
 </div>
 
-<!-- CONTEÚDO -->
-<div class="row">
+<!-- AGENDA -->
+<div class="list">
+  <h3>Agenda de hoje</h3>
+  <div id="agendaHoje">
+    <div class="empty">Nenhum horário agendado hoje</div>
+  </div>
+</div>
 
-  <!-- AGENDA HOJE -->
-  <div class="list">
-    <h3>Agenda de hoje</h3>
-    <div id="agendaHoje">
-      <div class="empty">Nenhum horário agendado hoje</div>
-    </div>
+<!-- AVISOS -->
+<div class="list">
+  <h3>Avisos</h3>
+
+  <div class="item">
+    <span>Complete seu cadastro</span>
+    <span class="badge">Importante</span>
   </div>
 
-  <!-- AVISOS -->
-  <div class="list">
-    <h3>Avisos</h3>
-
-    <div class="item">
-      <span>Complete seu cadastro</span>
-      <span class="badge">Importante</span>
-    </div>
-
-    <div class="item">
-      <span>Configure seus horários</span>
-      <span class="badge">Agenda</span>
-    </div>
+  <div class="item">
+    <span>Configure seus horários</span>
+    <span class="badge">Agenda</span>
   </div>
-
 </div>
 
 <script>
-/* =======================
-   SUPABASE (SEM CONFLITO)
-   ======================= */
+/* ================= SUPABASE ================= */
 const sbHome = window.supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
@@ -178,10 +202,10 @@ const sbHome = window.supabase.createClient(
 
 /* FUTURO: carregar dados */
 async function carregarDados(){
-  const { data: { session } } = await sbHome.auth.getSession();
+  const { data:{session} } = await sbHome.auth.getSession();
   if(!session) return;
 
-  // selects futuros aqui
+  // consultas futuras
 }
 // carregarDados();
 </script>
