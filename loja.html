@@ -10,8 +10,6 @@
   maximum-scale=1,
   user-scalable=no">
 
-<meta name="theme-color" id="themeColor">
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -19,231 +17,92 @@
 :root{
   --primary:#ff6a00;
   --bg:#f4f6fb;
-  --card:#ffffff;
+  --card:#fff;
   --text:#111827;
   --muted:#6b7280;
-  --success:#16a34a;
   --danger:#dc2626;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-body{background:var(--bg);color:var(--text);padding-bottom:90px}
+body{background:var(--bg);padding-bottom:90px}
 
 /* LOGIN */
-#login{
-  position:fixed;inset:0;
-  background:var(--bg);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:1000;
-}
+#login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
 .login-box{
-  background:#fff;
-  padding:26px;
-  border-radius:22px;
-  width:90%;
-  max-width:340px;
-  box-shadow:0 20px 50px rgba(0,0,0,.15);
+  background:#fff;padding:26px;border-radius:22px;
+  width:90%;max-width:340px;
 }
-.login-box h2{text-align:center;margin-bottom:16px}
-.login-box input{
-  width:100%;padding:14px;border-radius:14px;
-  border:1px solid #ddd;margin-bottom:10px;font-size:14px;
+.login-box input,button{
+  width:100%;padding:14px;border-radius:14px;border:1px solid #ddd;
+  margin-bottom:10px;
 }
-.login-box button{
-  width:100%;padding:14px;border:none;border-radius:999px;
-  background:var(--primary);color:#fff;font-weight:800;
-}
+button{background:var(--primary);color:#fff;font-weight:800;border:none}
 
 /* APP */
 #app{display:none}
 
 /* TOPO */
-.top{
-  background:var(--primary);
-  color:#fff;
-  padding:16px;
-  font-weight:800;
-  text-align:center;
-}
-
-/* PERFIL */
-.profile{
-  background:#fff;
-  margin:14px;
-  padding:14px;
-  border-radius:18px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.profile-left{display:flex;align-items:center;gap:12px}
-.avatar{
-  width:44px;height:44px;border-radius:50%;
-  background:var(--primary);color:#fff;font-weight:800;
-  display:flex;align-items:center;justify-content:center;
-}
-.profile small{color:var(--muted)}
-.logout{font-size:12px;color:var(--danger);font-weight:800}
-
-/* BANNER */
-#banner{
-  display:none;
-  margin:14px;
-  border-radius:18px;
-  overflow:hidden;
-  position:relative;
-}
-#banner img{width:100%;height:160px;object-fit:cover}
-#banner span{
-  position:absolute;
-  bottom:0;left:0;right:0;
-  padding:10px;
-  background:rgba(0,0,0,.55);
-  color:#fff;
-  font-weight:800;
-}
-
-/* TABS */
-.tabs{
-  display:flex;
-  margin:0 14px 14px;
-  background:#fff;
-  border-radius:999px;
-  overflow:hidden;
-}
-.tabs button{
-  flex:1;
-  padding:12px;
-  border:none;
-  background:none;
-  font-weight:800;
-  color:var(--muted);
-}
-.tabs button.active{
-  background:var(--primary);
-  color:#fff;
-}
+.top{background:var(--primary);color:#fff;padding:16px;text-align:center;font-weight:800}
 
 /* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-  padding:0 14px;
-}
-
-/* ITEM */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:14px}
 .item{
-  background:#fff;
-  border-radius:18px;
-  padding:10px;
+  background:#fff;border-radius:18px;padding:10px;
   box-shadow:0 10px 28px rgba(0,0,0,.08);
 }
-.item img{
-  width:100%;
-  height:120px;
-  object-fit:cover;
-  border-radius:14px;
-}
-.item strong{display:block;margin-top:6px}
-.item small{color:var(--muted)}
-.item button{
-  width:100%;
-  margin-top:8px;
-  padding:10px;
-  border:none;
-  border-radius:999px;
-  background:var(--primary);
-  color:#fff;
-  font-weight:800;
-}
+.item img{width:100%;height:120px;object-fit:cover;border-radius:14px}
+.item button{margin-top:8px}
 
-/* MODAL AGENDA */
-#modalAgenda{
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.5);
-  display:none;
-  align-items:flex-end;
-  z-index:2000;
+/* MODAL */
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  display:none;align-items:flex-end;z-index:1000;
 }
-.modal-box{
-  background:#fff;
-  width:100%;
-  max-height:85vh;
-  border-radius:24px 24px 0 0;
-  padding:16px;
+.sheet{
+  background:#fff;width:100%;border-radius:24px 24px 0 0;
+  padding:16px;max-height:90vh;overflow:auto;
 }
-.modal-box h3{margin-bottom:6px}
-.modal-box p{color:var(--muted);margin-bottom:10px}
-.horarios{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
+.calendar{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:10px;
 }
+.day{
+  background:#f3f4f6;border-radius:10px;padding:8px;text-align:center;
+  font-size:12px;cursor:pointer;
+}
+.day.active{background:var(--primary);color:#fff}
+.day.disabled{opacity:.3;pointer-events:none}
+
+.horarios{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .horarios button{
-  padding:10px;
-  border-radius:12px;
-  border:1px solid #ddd;
-  background:#fff;
-  font-weight:700;
+  padding:10px;border-radius:12px;border:1px solid #ddd;
+  background:#fff;font-weight:700;
 }
-.horarios button.active{
-  background:var(--primary);
-  color:#fff;
-}
+.horarios button.active{background:var(--primary);color:#fff}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="login">
   <div class="login-box">
-    <h2>Entrar</h2>
-    <input id="loginNome" placeholder="Seu nome completo">
-    <input id="loginWhats" placeholder="WhatsApp">
+    <input id="nome" placeholder="Seu nome">
+    <input id="whats" placeholder="WhatsApp">
     <button onclick="entrar()">Entrar</button>
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
-
-<div class="top" id="nomeLoja">Agendamento</div>
-
-<div class="profile">
-  <div class="profile-left">
-    <div class="avatar" id="avatar">👤</div>
-    <div>
-      <strong id="clienteNome"></strong><br>
-      <small id="clienteWhats"></small>
-    </div>
-  </div>
-  <div class="logout" onclick="sair()">Sair</div>
+  <div class="top">Agendamento</div>
+  <div class="grid" id="servicos"></div>
 </div>
 
-<div id="banner">
-  <img id="bannerImg">
-  <span id="bannerTxt"></span>
-</div>
-
-<div class="tabs">
-  <button id="tabServicos" class="active" onclick="mostrar('servicos')">Serviços</button>
-  <button id="tabProdutos" onclick="mostrar('produtos')">Produtos</button>
-</div>
-
-<div id="servicos" class="grid"></div>
-<div id="produtos" class="grid" style="display:none"></div>
-
-</div>
-
-<!-- MODAL AGENDA -->
-<div id="modalAgenda">
-  <div class="modal-box">
+<div class="modal" id="modal">
+  <div class="sheet">
     <h3 id="servicoNome"></h3>
-    <p>Escolha um horário disponível</p>
+    <p>Escolha a data</p>
+    <div class="calendar" id="calendario"></div>
+    <p>Horários disponíveis</p>
     <div class="horarios" id="listaHorarios"></div>
+    <button onclick="confirmar()">Confirmar agendamento</button>
   </div>
 </div>
 
@@ -254,67 +113,22 @@ const sb = supabase.createClient(
 );
 
 const lojaId = new URLSearchParams(location.search).get("l");
+let servicoAtual=null, dataSelecionada=null, horarioSelecionado=null;
 
 /* LOGIN */
 function entrar(){
-  if(!loginNome.value || !loginWhats.value){
-    alert("Informe nome e WhatsApp");
-    return;
-  }
-  localStorage.setItem("cliente_nome",loginNome.value);
-  localStorage.setItem("cliente_whats",loginWhats.value);
+  localStorage.setItem("cliente_nome",nome.value);
+  localStorage.setItem("cliente_whats",whats.value);
   iniciar();
 }
-function sair(){
-  localStorage.clear();
-  location.reload();
-}
 
-/* INIT */
 function iniciar(){
-  const nome = localStorage.getItem("cliente_nome");
-  if(!nome){
-    login.style.display="flex";
-    return;
+  if(!localStorage.getItem("cliente_nome")){
+    login.style.display="flex"; return;
   }
   login.style.display="none";
   app.style.display="block";
-
-  clienteNome.innerText = nome;
-  clienteWhats.innerText = localStorage.getItem("cliente_whats");
-  avatar.innerText = nome[0].toUpperCase();
-
-  carregarLoja();
   carregarServicos();
-  carregarProdutos();
-}
-
-/* LOJA */
-async function carregarLoja(){
-  const {data:p} = await sb
-    .from("user_profile")
-    .select("negocio")
-    .eq("user_id",lojaId)
-    .single();
-
-  nomeLoja.innerText = p?.negocio || "Agendamento";
-
-  const {data:cfg} = await sb
-    .from("config_loja")
-    .select("*")
-    .eq("user_id",lojaId)
-    .single();
-
-  if(cfg?.cor_primaria){
-    document.documentElement.style.setProperty("--primary",cfg.cor_primaria);
-    themeColor.content = cfg.cor_primaria;
-  }
-
-  if(cfg?.banner_ativo){
-    banner.style.display="block";
-    bannerImg.src = cfg.banner_url;
-    bannerTxt.innerText = cfg.banner_texto || "";
-  }
 }
 
 /* SERVIÇOS */
@@ -326,107 +140,114 @@ async function carregarServicos(){
     .eq("tipo","SERVICO")
     .eq("ativo",true);
 
-  servicos.innerHTML = (data||[]).map(s=>`
+  servicos.innerHTML = data.map(s=>`
     <div class="item">
       <img src="${s.imagem_url||''}">
       <strong>${s.nome}</strong>
-      <small>${s.duracao_minutos} min • R$ ${Number(s.preco).toFixed(2)}</small>
+      <small>${s.duracao_minutos} min</small>
       <button onclick='abrirAgenda(${JSON.stringify(s)})'>Agendar</button>
     </div>
   `).join("");
 }
 
-/* PRODUTOS */
-async function carregarProdutos(){
-  const {data} = await sb
-    .from("produtos_servicos")
-    .select("*")
-    .eq("user_id",lojaId)
-    .eq("tipo","PRODUTO")
-    .eq("ativo",true);
+/* MODAL */
+async function abrirAgenda(s){
+  servicoAtual=s;
+  servicoNome.innerText=s.nome;
+  modal.style.display="flex";
+  gerarCalendario();
+}
 
-  produtos.innerHTML = (data||[]).map(p=>`
-    <div class="item">
-      <img src="${p.imagem_url||''}">
-      <strong>${p.nome}</strong>
-      <small>R$ ${Number(p.preco).toFixed(2)}</small>
-      <button>Comprar</button>
-    </div>
+function gerarCalendario(){
+  calendario.innerHTML="";
+  const hoje=new Date();
+  for(let i=0;i<14;i++){
+    const d=new Date();
+    d.setDate(hoje.getDate()+i);
+    const key=d.toISOString().slice(0,10);
+    const el=document.createElement("div");
+    el.className="day";
+    el.innerText=d.getDate()+"/"+(d.getMonth()+1);
+    el.onclick=()=>selecionarData(key,el);
+    calendario.appendChild(el);
+  }
+}
+
+async function selecionarData(data,el){
+  document.querySelectorAll(".day").forEach(d=>d.classList.remove("active"));
+  el.classList.add("active");
+  dataSelecionada=data;
+  carregarHorarios();
+}
+
+async function carregarHorarios(){
+  listaHorarios.innerHTML="Carregando...";
+  const {data} = await sb
+    .from("agenda_loja")
+    .select("horarios,fechado")
+    .eq("user_id",lojaId)
+    .eq("data",dataSelecionada)
+    .single();
+
+  if(!data||data.fechado){
+    listaHorarios.innerHTML="Dia fechado";
+    return;
+  }
+
+  const intervalos=JSON.parse(data.horarios);
+  const slots=gerarSlots(intervalos,servicoAtual.duracao_minutos);
+
+  // remove horários ocupados
+  const {data:ocupados}=await sb
+    .from("agendamentos")
+    .select("hora_inicio,hora_fim")
+    .eq("user_id",lojaId)
+    .eq("data",dataSelecionada);
+
+  const livres=slots.filter(h=>{
+    return !ocupados.some(o=>h>=o.hora_inicio && h<o.hora_fim);
+  });
+
+  listaHorarios.innerHTML=livres.map(h=>`
+    <button onclick="horarioSelecionado='${h}';this.classList.add('active')">${h}</button>
   `).join("");
 }
 
-/* TABS */
-function mostrar(sec){
-  servicos.style.display = sec==="servicos"?"grid":"none";
-  produtos.style.display = sec==="produtos"?"grid":"none";
-  tabServicos.classList.toggle("active",sec==="servicos");
-  tabProdutos.classList.toggle("active",sec==="produtos");
-}
-
-/* AGENDA */
-async function abrirAgenda(servico){
-  servicoNome.innerText = servico.nome;
-  listaHorarios.innerHTML = "Carregando...";
-
-  const hoje = new Date().toISOString().slice(0,10);
-
-  const {data, error} = await sb
-    .from("agenda_loja")
-    .select("fechado, horarios")
-    .eq("user_id",lojaId)
-    .eq("data",hoje)
-    .single();
-
-  if(error || !data){
-    listaHorarios.innerHTML = "<small>Agenda não configurada</small>";
-    modalAgenda.style.display="flex";
-    return;
-  }
-
-  if(data.fechado){
-    listaHorarios.innerHTML = "<small>Loja fechada hoje</small>";
-    modalAgenda.style.display="flex";
-    return;
-  }
-
-  let intervalos = [];
-  try{
-    intervalos = typeof data.horarios==="string"
-      ? JSON.parse(data.horarios)
-      : data.horarios;
-  }catch(e){}
-
-  const horarios = gerarHorarios(intervalos, servico.duracao_minutos);
-
-  listaHorarios.innerHTML = horarios.length
-    ? horarios.map(h=>`<button>${h}</button>`).join("")
-    : "<small>Sem horários disponíveis</small>";
-
-  modalAgenda.style.display="flex";
-}
-
-function gerarHorarios(intervalos, duracao){
-  const slots=[];
+function gerarSlots(intervalos,dur){
+  const r=[];
   intervalos.forEach(i=>{
-    if(!i.inicio||!i.fim) return;
     let [hi,mi]=i.inicio.split(":").map(Number);
     let [hf,mf]=i.fim.split(":").map(Number);
-    let ini=hi*60+mi, fim=hf*60+mf;
-    if(fim<=ini) return;
-    while(ini+duracao<=fim){
-      slots.push(
-        String(Math.floor(ini/60)).padStart(2,"0") + ":" +
-        String(ini%60).padStart(2,"0")
-      );
-      ini+=duracao;
+    let ini=hi*60+mi,fim=hf*60+mf;
+    while(ini+dur<=fim){
+      r.push(String(Math.floor(ini/60)).padStart(2,"0")+":"+String(ini%60).padStart(2,"0"));
+      ini+=dur;
     }
   });
-  return slots;
+  return r;
 }
 
-modalAgenda.onclick=e=>{
-  if(e.target.id==="modalAgenda") modalAgenda.style.display="none";
-};
+/* CONFIRMAR */
+async function confirmar(){
+  const fim = (()=> {
+    const [h,m]=horarioSelecionado.split(":").map(Number);
+    const total=h*60+m+servicoAtual.duracao_minutos;
+    return String(Math.floor(total/60)).padStart(2,"0")+":"+String(total%60).padStart(2,"0");
+  })();
+
+  await sb.from("agendamentos").insert({
+    user_id:lojaId,
+    servico_id:servicoAtual.id,
+    data:dataSelecionada,
+    hora_inicio:horarioSelecionado,
+    hora_fim:fim,
+    cliente_nome:localStorage.getItem("cliente_nome"),
+    cliente_whats:localStorage.getItem("cliente_whats")
+  });
+
+  alert("Agendamento confirmado!");
+  location.reload();
+}
 
 /* START */
 if(lojaId) iniciar();
