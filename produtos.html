@@ -4,341 +4,126 @@
 <meta charset="UTF-8">
 <title>Produtos & Serviços • AgendaBeauty</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+/* ========= DESIGN SYSTEM ========= */
 :root{
   --primary:#ff6a00;
   --primary-soft:#fff3e8;
   --bg:#f4f6fb;
-  --card:#ffffff;
+  --card:#fff;
   --border:#e6e8ee;
   --radius:16px;
-
   --text:#111827;
   --muted:#6b7280;
-
   --success:#16a34a;
   --warning:#f59e0b;
   --danger:#dc2626;
-
   --shadow-sm:0 3px 10px rgba(0,0,0,.06);
   --shadow-md:0 8px 24px rgba(0,0,0,.08);
   --shadow-lg:0 16px 36px rgba(0,0,0,.12);
-
-  --transition:.22s ease;
+  --transition:.2s ease;
 }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Inter, system-ui, -apple-system, sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
+body{background:var(--bg);padding:22px;color:var(--text)}
 
-body{
-  background:var(--bg);
-  padding:24px;
-  color:var(--text);
-}
-
-/* ================= HEADER ================= */
-.header{
-  max-width:1600px;
-  margin:0 auto 22px;
-}
-.header h1{
-  font-size:28px;
-  font-weight:800;
-}
+/* ========= HEADER ========= */
+.header{max-width:1600px;margin:auto}
+.header h1{font-size:28px;font-weight:800}
 .header span{color:var(--primary)}
-.header p{
-  margin-top:4px;
-  color:var(--muted);
-  font-size:13px;
-}
+.header p{font-size:13px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:18px 0}
+.kpi{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm)}
+.kpi small{font-size:12px;color:var(--muted)}
+.kpi h2{font-size:24px}
 
-/* ================= KPIs ================= */
-.kpis{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:16px;
-  margin-top:18px;
-}
-.kpi{
-  background:var(--card);
-  border-radius:var(--radius);
-  padding:16px 18px;
-  box-shadow:var(--shadow-sm);
-  transition:var(--transition);
-}
-.kpi:hover{
-  transform:translateY(-2px);
-  box-shadow:var(--shadow-md);
-}
-.kpi small{
-  font-size:12px;
-  color:var(--muted);
-  font-weight:600;
-}
-.kpi h2{
-  margin-top:2px;
-  font-size:24px;
-  font-weight:800;
-}
-
-/* ================= LAYOUT ================= */
-.container{
-  max-width:1600px;
-  margin:auto;
-  display:grid;
-  grid-template-columns:420px 1fr;
-  gap:24px;
-}
-
-/* ================= CARD ================= */
-.card{
-  background:var(--card);
-  border-radius:var(--radius);
-  padding:20px;
-  box-shadow:var(--shadow-md);
-}
-.card h3{
-  margin-bottom:18px;
-  font-size:16px;
-  font-weight:700;
-}
-
-/* ================= FORM ================= */
-input,
-textarea,
-select{
-  width:100%;
-  height:40px;
-  padding:0 12px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  font-size:13px;
-  margin-bottom:10px;
-  background:#fff;
-  transition:var(--transition);
-}
-
-textarea{
-  height:auto;
-  padding:10px 12px;
-  resize:none;
-}
-
-input::placeholder,
-textarea::placeholder{
-  color:#9ca3af;
-}
-
-input:focus,
-textarea:focus,
-select:focus{
-  outline:none;
-  border-color:var(--primary);
-  box-shadow:0 0 0 3px var(--primary-soft);
-}
-
-.row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-/* ================= SWITCH ================= */
-.switch{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-size:12px;
-  margin:6px 0;
-}
-.switch input{
-  appearance:none;
-  width:34px;
-  height:20px;
-  background:#e5e7eb;
-  border-radius:999px;
-  position:relative;
-  cursor:pointer;
-  transition:var(--transition);
-}
-.switch input::after{
-  content:"";
-  width:16px;
-  height:16px;
-  background:#fff;
-  border-radius:50%;
-  position:absolute;
-  top:2px;
-  left:2px;
-  box-shadow:0 2px 6px rgba(0,0,0,.25);
-  transition:var(--transition);
-}
-.switch input:checked{
-  background:var(--primary);
-}
-.switch input:checked::after{
-  transform:translateX(14px);
-}
-
-/* ================= UPLOAD ================= */
-.upload{
-  margin-top:10px;
-  border:2px dashed var(--border);
-  border-radius:14px;
-  padding:14px;
-  text-align:center;
-  cursor:pointer;
-  transition:var(--transition);
-}
-.upload:hover{
-  background:#fafafa;
-  border-color:var(--primary);
-}
-.upload span{
-  font-size:12px;
-  color:var(--muted);
-}
-.upload img{
-  width:100%;
-  height:140px;
-  object-fit:cover;
-  border-radius:12px;
-}
-
-/* ================= BUTTON ================= */
-button{
-  margin-top:14px;
-  height:44px;
-  border:none;
-  border-radius:999px;
+/* ========= LIST ========= */
+.container{max-width:1600px;margin:auto}
+.top-actions{display:flex;justify-content:space-between;margin-bottom:14px}
+.btn-main{
   background:linear-gradient(135deg,#ff6a00,#ff9a57);
-  color:#fff;
-  font-weight:800;
-  font-size:14px;
-  cursor:pointer;
-  width:100%;
-  transition:var(--transition);
-}
-button:hover{
-  transform:translateY(-1px);
-  filter:brightness(.96);
+  color:#fff;border:none;border-radius:999px;
+  padding:10px 18px;font-weight:800;cursor:pointer
 }
 
-/* ================= FILTERS ================= */
 .filters{
-  display:flex;
-  gap:10px;
-  margin-bottom:18px;
-  padding:12px;
-  background:#f9fafb;
-  border-radius:14px;
+  display:flex;gap:10px;padding:12px;
+  background:#f9fafb;border-radius:14px;margin-bottom:14px
 }
-.filters input,
-.filters select{
-  height:40px;
+.filters input,.filters select{
+  height:40px;padding:0 12px;border-radius:12px;border:1px solid var(--border)
 }
 
-/* ================= GRID ================= */
 .grid{
   display:grid;
   grid-template-columns:repeat(6,minmax(180px,1fr));
-  gap:14px;
+  gap:14px
 }
-
-/* ================= ITEM CARD ================= */
 .item{
-  background:#fff;
-  border-radius:16px;
-  box-shadow:var(--shadow-sm);
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-  min-height:270px;
-  transition:var(--transition);
+  background:#fff;border-radius:16px;
+  box-shadow:var(--shadow-sm);overflow:hidden;
+  display:flex;flex-direction:column;min-height:260px;
+  transition:var(--transition)
 }
-.item:hover{
-  transform:translateY(-3px);
-  box-shadow:var(--shadow-lg);
-}
-
-/* IMAGE */
-.item img{
-  width:100%;
-  height:120px;
-  object-fit:cover;
-  background:#f3f4f6;
-}
-
-/* BODY */
-.item-body{
-  padding:12px;
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-
-/* BADGES */
-.badges{
-  display:flex;
-  flex-wrap:wrap;
-  gap:5px;
-}
-.badge{
-  font-size:9.5px;
-  padding:3px 8px;
-  border-radius:999px;
-  font-weight:700;
-  background:#f1f5f9;
-  color:#475569;
-}
+.item:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.item img{width:100%;height:120px;object-fit:cover;background:#eee}
+.item-body{padding:12px;display:flex;flex-direction:column;gap:4px}
+.badges{display:flex;gap:5px;flex-wrap:wrap}
+.badge{font-size:9px;padding:3px 8px;border-radius:999px;background:#f1f5f9}
 .badge.off{background:#fee2e2;color:var(--danger)}
 .badge.low{background:#fff3cd;color:var(--warning)}
 .badge.ok{background:#dcfce7;color:var(--success)}
 .badge.promo{background:#fdf2f8;color:#be185d}
-
-/* TEXT */
-.item-body h4{
-  font-size:13px;
-  font-weight:700;
-  line-height:1.25;
-}
-.price{
-  font-size:16px;
-  font-weight:800;
-}
-.margin{
-  font-size:11px;
-  color:var(--muted);
-}
-.item-body small{
-  font-size:11px;
-  color:var(--muted);
-}
-
-/* ACTION */
+.item-body h4{font-size:13px}
+.price{font-weight:800}
 .actions{
-  margin-top:auto;
-  font-size:12px;
-  color:var(--primary);
-  font-weight:700;
-  cursor:pointer;
-  opacity:0;
-  transform:translateY(6px);
-  transition:var(--transition);
+  margin-top:auto;font-size:12px;
+  color:var(--primary);font-weight:700;
+  cursor:pointer;opacity:0;transition:.2s
 }
-.item:hover .actions{
-  opacity:1;
-  transform:translateY(0);
-}
+.item:hover .actions{opacity:1}
 
+/* ========= MODAL ========= */
+.modal{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;align-items:center;justify-content:center;
+  z-index:1000
+}
+.modal.show{display:flex}
+.modal-card{
+  width:520px;max-height:90vh;overflow:auto;
+  background:#fff;border-radius:18px;
+  padding:20px;box-shadow:var(--shadow-lg)
+}
+.modal h3{margin-bottom:14px}
+input,textarea,select{
+  width:100%;height:40px;
+  margin-bottom:10px;padding:0 12px;
+  border-radius:12px;border:1px solid var(--border)
+}
+textarea{height:auto;padding:10px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.switch{display:flex;gap:8px;font-size:12px}
+.switch input{accent-color:var(--primary)}
+.upload{
+  border:2px dashed var(--border);
+  border-radius:14px;padding:14px;text-align:center;
+  cursor:pointer;margin-bottom:10px
+}
+.upload img{width:100%;height:140px;object-fit:cover;border-radius:12px}
+.modal-actions{display:flex;gap:10px}
+.modal-actions button{flex:1}
+.btn-cancel{background:#e5e7eb;color:#111}
+
+/* ========= BUTTON ========= */
+button{
+  height:42px;border:none;border-radius:999px;
+  font-weight:800;cursor:pointer
+}
 </style>
 </head>
 
@@ -347,65 +132,20 @@ button:hover{
 <div class="header">
   <h1>Produtos & <span>Serviços</span></h1>
   <p>Gerencie serviços, produtos, estoque, promoções e preços</p>
-
   <div class="kpis">
-    <div class="kpi"><small>Itens cadastrados</small><h2 id="kpiTotal">0</h2></div>
-    <div class="kpi"><small>Serviços ativos</small><h2 id="kpiServicos">0</h2></div>
+    <div class="kpi"><small>Itens</small><h2 id="kpiTotal">0</h2></div>
+    <div class="kpi"><small>Serviços</small><h2 id="kpiServicos">0</h2></div>
     <div class="kpi"><small>Estoque baixo</small><h2 id="kpiBaixo">0</h2></div>
-    <div class="kpi"><small>Promoções ativas</small><h2 id="kpiPromo">0</h2></div>
+    <div class="kpi"><small>Promoções</small><h2 id="kpiPromo">0</h2></div>
   </div>
 </div>
 
 <div class="container">
+  <div class="top-actions">
+    <div></div>
+    <button class="btn-main" onclick="abrirModal()">+ Cadastrar item</button>
+  </div>
 
-<!-- FORM -->
-<div class="card">
-<h3 id="formTitle">Cadastrar item</h3>
-
-<select id="tipo">
-  <option value="SERVICO">Serviço</option>
-  <option value="PRODUTO">Produto</option>
-</select>
-
-<input id="nome" placeholder="Nome">
-<textarea id="descricao" placeholder="Descrição"></textarea>
-<input id="categoria" placeholder="Categoria">
-
-<div class="row">
-  <input id="preco" placeholder="Preço de venda">
-  <input id="custo" placeholder="Custo">
-</div>
-
-<div class="row">
-  <input id="precoPromo" placeholder="Preço promocional">
-  <input id="ordem" placeholder="Ordem de exibição">
-</div>
-
-<label class="switch"><input type="checkbox" id="promoAtiva"> Promoção ativa</label>
-<input id="duracao" type="number" placeholder="Duração (min)">
-
-<div class="row">
-  <input id="estoque" type="number" placeholder="Estoque atual">
-  <input id="estoqueMin" type="number" placeholder="Estoque mínimo">
-</div>
-
-<label class="switch"><input type="checkbox" id="controlaEstoque"> Controlar estoque</label>
-<label class="switch"><input type="checkbox" id="ativo" checked> Ativo</label>
-<label class="switch"><input type="checkbox" id="podeAgendar"> Disponível para agenda</label>
-
-<textarea id="obs" placeholder="Observações internas"></textarea>
-
-<label class="upload">
-  <img id="preview" style="display:none">
-  <span id="uploadText">Selecionar imagem</span>
-  <input id="imagem" type="file" accept="image/*" hidden>
-</label>
-
-<button onclick="salvar()">Salvar</button>
-</div>
-
-<!-- LIST -->
-<div class="card">
   <div class="filters">
     <input id="search" placeholder="Buscar">
     <select id="filtroTipo">
@@ -413,37 +153,67 @@ button:hover{
       <option value="PRODUTO">Produtos</option>
       <option value="SERVICO">Serviços</option>
     </select>
-    <select id="filtroEstoque">
-      <option value="">Estoque</option>
-      <option value="BAIXO">Baixo</option>
-      <option value="OK">Ok</option>
-    </select>
   </div>
 
   <div class="grid" id="lista"></div>
 </div>
 
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <h3 id="formTitle">Cadastrar item</h3>
+
+    <select id="tipo">
+      <option value="SERVICO">Serviço</option>
+      <option value="PRODUTO">Produto</option>
+    </select>
+
+    <input id="nome" placeholder="Nome">
+    <textarea id="descricao" placeholder="Descrição"></textarea>
+    <input id="categoria" placeholder="Categoria">
+
+    <div class="row">
+      <input id="preco" placeholder="Preço">
+      <input id="custo" placeholder="Custo">
+    </div>
+
+    <label class="switch"><input type="checkbox" id="promoAtiva"> Promoção ativa</label>
+
+    <div class="upload" onclick="imagem.click()">
+      <img id="preview" style="display:none">
+      <span id="uploadText">Selecionar imagem</span>
+      <input type="file" id="imagem" hidden>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-main" onclick="salvar()">Salvar</button>
+    </div>
+  </div>
 </div>
 
 <script>
-const sb = window.__sbProdutos ??= window.supabase.createClient(
+const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-let userId=null,itens=[],editId=null;
+let itens=[],editId=null,userId=null;
 
 (async()=>{
   const {data:{session}}=await sb.auth.getSession();
-  if(!session) return location.href="login.html";
+  if(!session) location.href="login.html";
   userId=session.user.id;
   carregar();
 })();
 
-tipo.onchange=()=>{
-  duracao.style.display = tipo.value==="SERVICO"?"block":"none";
-  controlaEstoque.checked = tipo.value==="PRODUTO";
-};
+function abrirModal(){
+  reset();
+  modal.classList.add("show");
+}
+function fecharModal(){
+  modal.classList.remove("show");
+}
 
 imagem.onchange=()=>{
   const f=imagem.files[0];
@@ -454,8 +224,6 @@ imagem.onchange=()=>{
   }
 };
 
-search.oninput=filtroTipo.onchange=filtroEstoque.onchange=render;
-
 async function salvar(){
   const payload={
     user_id:userId,
@@ -465,16 +233,7 @@ async function salvar(){
     categoria:categoria.value,
     preco:Number(preco.value.replace(',','.')),
     custo:custo.value||null,
-    preco_promocional:precoPromo.value||null,
-    promocao_ativa:promoAtiva.checked,
-    duracao_minutos:tipo.value==="SERVICO"?duracao.value:null,
-    estoque_atual:estoque.value||null,
-    estoque_minimo:estoqueMin.value||null,
-    controla_estoque:controlaEstoque.checked,
-    ativo:ativo.checked,
-    pode_agendar:podeAgendar.checked,
-    ordem_exibicao:ordem.value||0,
-    observacoes_internas:obs.value
+    promocao_ativa:promoAtiva.checked
   };
 
   let data;
@@ -491,36 +250,20 @@ async function salvar(){
     await sb.from("produtos_servicos").update({imagem_url:signed.signedUrl}).eq("id",data.id);
   }
 
-  reset();carregar();
+  fecharModal();
+  carregar();
 }
 
 async function carregar(){
-  const {data}=await sb.from("produtos_servicos")
-    .select("*")
-    .order("ordem_exibicao",{ascending:true});
-
+  const {data}=await sb.from("produtos_servicos").select("*");
   itens=data||[];
-  atualizarKPIs();
   render();
-}
-
-function atualizarKPIs(){
-  kpiTotal.innerText = itens.length;
-  kpiServicos.innerText = itens.filter(i=>i.tipo==="SERVICO" && i.ativo).length;
-  kpiBaixo.innerText = itens.filter(i=>i.controla_estoque && i.estoque_atual<=i.estoque_minimo).length;
-  kpiPromo.innerText = itens.filter(i=>i.promocao_ativa).length;
+  kpiTotal.innerText=itens.length;
 }
 
 function render(){
   lista.innerHTML="";
-  itens.filter(i=>{
-    if(search.value && !i.nome.toLowerCase().includes(search.value.toLowerCase())) return false;
-    if(filtroTipo.value && i.tipo!==filtroTipo.value) return false;
-    if(filtroEstoque.value==="BAIXO" && !(i.controla_estoque && i.estoque_atual<=i.estoque_minimo)) return false;
-    if(filtroEstoque.value==="OK" && !(i.controla_estoque && i.estoque_atual>i.estoque_minimo)) return false;
-    return true;
-  }).forEach(i=>{
-    const margem = i.custo ? (((i.preco - i.custo)/i.preco)*100).toFixed(0) : null;
+  itens.forEach(i=>{
     lista.innerHTML+=`
     <div class="item">
       ${i.imagem_url?`<img src="${i.imagem_url}">`:""}
@@ -528,16 +271,9 @@ function render(){
         <div class="badges">
           <span class="badge">${i.tipo}</span>
           ${i.promocao_ativa?`<span class="badge promo">Promo</span>`:""}
-          ${!i.ativo?`<span class="badge off">Inativo</span>`:""}
-          ${i.controla_estoque && i.estoque_atual<=i.estoque_minimo
-            ? `<span class="badge low">Estoque baixo</span>`
-            : i.controla_estoque
-              ? `<span class="badge ok">Estoque ok</span>`:""}
         </div>
         <h4>${i.nome}</h4>
         <div class="price">R$ ${i.preco}</div>
-        ${margem?`<div class="margin">Margem ${margem}%</div>`:""}
-        <small>${i.categoria||""}</small>
         <div class="actions" onclick="editar('${i.id}')">Editar</div>
       </div>
     </div>`;
@@ -547,28 +283,28 @@ function render(){
 function editar(id){
   const i=itens.find(x=>x.id===id);
   editId=id;
-  tipo.value=i.tipo; tipo.onchange();
+  formTitle.innerText="Editar item";
+  tipo.value=i.tipo;
   nome.value=i.nome;
   descricao.value=i.descricao;
-  categoria.value=i.categoria||"";
+  categoria.value=i.categoria;
   preco.value=i.preco;
   custo.value=i.custo||"";
-  precoPromo.value=i.preco_promocional||"";
   promoAtiva.checked=i.promocao_ativa;
-  duracao.value=i.duracao_minutos||"";
-  estoque.value=i.estoque_atual||"";
-  estoqueMin.value=i.estoque_minimo||"";
-  controlaEstoque.checked=i.controla_estoque;
-  ativo.checked=i.ativo;
-  podeAgendar.checked=i.pode_agendar;
-  ordem.value=i.ordem_exibicao||0;
-  obs.value=i.observacoes_internas||"";
-  window.scrollTo({top:0,behavior:"smooth"});
+  if(i.imagem_url){
+    preview.src=i.imagem_url;
+    preview.style.display="block";
+    uploadText.style.display="none";
+  }
+  abrirModal();
 }
 
 function reset(){
   editId=null;
-  document.querySelectorAll("input,textarea").forEach(e=>e.value="");
+  formTitle.innerText="Cadastrar item";
+  document.querySelectorAll("#modal input, #modal textarea").forEach(e=>e.value="");
+  preview.style.display="none";
+  uploadText.style.display="block";
 }
 </script>
 
