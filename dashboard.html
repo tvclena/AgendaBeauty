@@ -12,8 +12,6 @@
   viewport-fit=cover">
 
 <meta name="theme-color" content="#ff6a00">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
@@ -26,6 +24,7 @@
   --border:#e5e7eb;
   --text:#111827;
   --muted:#6b7280;
+  --danger:#dc2626;
 
   --topbar-h:56px;
   --navbar-h:68px;
@@ -42,10 +41,11 @@
 html,body{
   width:100vw;
   height:100vh;
-  overflow:hidden; /* impede scroll geral */
+  overflow:hidden;
+  background:var(--bg);
 }
 
-/* ================= TOPBAR FIXA ================= */
+/* ================= TOPBAR ================= */
 .topbar{
   position:fixed;
   top:0;left:0;right:0;
@@ -58,18 +58,13 @@ html,body{
   padding:0 16px;
   z-index:10;
 }
-
-.topbar h1{
-  font-size:18px;
-  font-weight:800;
-}
+.topbar h1{font-size:18px;font-weight:800}
 
 .avatar{
-  width:36px;
-  height:36px;
+  width:36px;height:36px;
   border-radius:50%;
   background:linear-gradient(135deg,#ff6a00,#ff9a57);
-  display:flex; /* SEMPRE VISÍVEL NO HOME */
+  display:flex;
   align-items:center;
   justify-content:center;
   color:#fff;
@@ -77,30 +72,18 @@ html,body{
   cursor:pointer;
 }
 
-/* ================= ÁREA DE CONTEÚDO ================= */
+/* ================= CONTENT ================= */
 .content{
   position:fixed;
   top:var(--topbar-h);
   bottom:var(--navbar-h);
-  left:0;
-  right:0;
+  left:0;right:0;
   background:#fff;
-  overflow-y:auto;
-  overflow-x:hidden;
-
-  scrollbar-width:none;
+  overflow:hidden;
 }
-.content::-webkit-scrollbar{
-  display:none;
-}
+iframe{width:100%;height:100%;border:none}
 
-iframe{
-  width:100%;
-  height:100%;
-  border:none;
-}
-
-/* ================= NAVBAR FIXA ================= */
+/* ================= NAVBAR ================= */
 .navbar{
   position:fixed;
   bottom:0;left:0;right:0;
@@ -111,7 +94,6 @@ iframe{
   justify-content:space-around;
   align-items:center;
   padding-bottom:env(safe-area-inset-bottom);
-  z-index:10;
 }
 
 .nav-item{
@@ -122,7 +104,6 @@ iframe{
   align-items:center;
   cursor:pointer;
 }
-
 .nav-item i{font-size:22px}
 .nav-item.active{color:var(--primary)}
 
@@ -135,6 +116,8 @@ iframe{
   align-items:center;
   justify-content:center;
   z-index:999;
+  color:#fff;
+  font-weight:700;
 }
 
 /* ================= PROFILE MODAL ================= */
@@ -150,18 +133,25 @@ iframe{
 .profile-box{
   width:100%;
   background:#fff;
-  border-radius:18px 18px 0 0;
+  border-radius:20px 20px 0 0;
   padding:20px;
+  max-height:92vh;
+  overflow:auto;
 }
 
 .profile-img{
-  width:80px;
-  height:80px;
+  width:84px;height:84px;
   border-radius:50%;
   background:#eee;
-  margin:0 auto 12px;
+  margin:0 auto 14px;
   background-size:cover;
   background-position:center;
+}
+
+.profile-box h3{
+  font-size:14px;
+  margin:14px 0 6px;
+  color:var(--muted);
 }
 
 .profile-box input{
@@ -170,9 +160,10 @@ iframe{
   border-radius:12px;
   border:1px solid var(--border);
   margin-bottom:10px;
+  font-size:13px;
 }
 
-.profile-box button{
+.btn-primary{
   width:100%;
   padding:14px;
   border:none;
@@ -180,13 +171,25 @@ iframe{
   background:var(--primary);
   color:#fff;
   font-weight:800;
+  margin-top:6px;
+}
+
+.btn-logout{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:999px;
+  background:#fee2e2;
+  color:var(--danger);
+  font-weight:800;
+  margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="overlay"><div>Validando sessão…</div></div>
+<div id="overlay">Validando sessão…</div>
 
 <!-- TOPBAR -->
 <div class="topbar">
@@ -194,37 +197,43 @@ iframe{
   <div class="avatar" id="avatar" onclick="openProfile()">A</div>
 </div>
 
-<!-- CONTEÚDO -->
+<!-- CONTENT -->
 <div class="content">
   <iframe id="frame" src="home.html"></iframe>
 </div>
 
 <!-- NAVBAR -->
 <nav class="navbar">
-  <div class="nav-item active" onclick="go(this,'home.html')">
-    <i class="ri-home-5-line"></i>Home
-  </div>
-  <div class="nav-item" onclick="go(this,'produtos.html')">
-    <i class="ri-calendar-line"></i>loja
-  </div>
- <div class="nav-item" onclick="go(this,'agenda.html')">
-    <i class="ri-calendar-line"></i>Agenda
-  </div>
-  <div class="nav-item" onclick="go(this,'config.html')">
-    <i class="ri-user-3-line"></i>Ajustes
-  </div>
+  <div class="nav-item active" onclick="go(this,'home.html')"><i class="ri-home-5-line"></i>Home</div>
+  <div class="nav-item" onclick="go(this,'produtos.html')"><i class="ri-store-2-line"></i>Loja</div>
+  <div class="nav-item" onclick="go(this,'agenda.html')"><i class="ri-calendar-line"></i>Agenda</div>
+  <div class="nav-item" onclick="go(this,'config.html')"><i class="ri-settings-3-line"></i>Ajustes</div>
 </nav>
 
 <!-- PROFILE MODAL -->
 <div id="profileModal" onclick="closeProfile(event)">
   <div class="profile-box" onclick="event.stopPropagation()">
+
     <div class="profile-img" id="profileImg"></div>
+    <input type="file" id="pFoto">
+
+    <h3>Dados do negócio</h3>
     <input id="pNegocio" placeholder="Nome da loja">
     <input id="pEmail" disabled>
     <input id="pWhatsapp" placeholder="WhatsApp">
     <input id="pEmailContato" placeholder="Email de contato">
-    <input type="file" id="pFoto">
-    <button onclick="salvarPerfil()">Salvar</button>
+
+    <h3>Endereço</h3>
+    <input id="pCep" placeholder="CEP">
+    <input id="pRua" placeholder="Rua">
+    <input id="pNumero" placeholder="Número">
+    <input id="pBairro" placeholder="Bairro">
+    <input id="pCidade" placeholder="Cidade">
+    <input id="pUf" placeholder="UF">
+
+    <button class="btn-primary" onclick="salvarPerfil()">Salvar alterações</button>
+    <button class="btn-logout" onclick="sair()">Sair da conta</button>
+
   </div>
 </div>
 
@@ -233,6 +242,7 @@ const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
+
 let user=null;
 
 /* AUTH */
@@ -244,11 +254,19 @@ async function proteger(){
   const {data:p} = await sb.from("user_profile")
     .select("*").eq("user_id",user.id).single();
 
-  avatar.innerText = p.negocio[0].toUpperCase();
-  pNegocio.value = p.negocio;
+  avatar.innerText = p.negocio?.[0]?.toUpperCase() || "A";
+  pNegocio.value = p.negocio || "";
   pEmail.value = user.email;
   pWhatsapp.value = p.whatsapp || "";
   pEmailContato.value = p.email_contato || "";
+
+  pCep.value = p.cep || "";
+  pRua.value = p.rua || "";
+  pNumero.value = p.numero || "";
+  pBairro.value = p.bairro || "";
+  pCidade.value = p.cidade || "";
+  pUf.value = p.uf || "";
+
   if(p.avatar_url) profileImg.style.backgroundImage=`url(${p.avatar_url})`;
 
   overlay.style.display="none";
@@ -259,36 +277,56 @@ proteger();
 function go(el,page){
   document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
   el.classList.add("active");
-  frame.src = page;
+  frame.src=page;
 }
 
 /* PROFILE */
 function openProfile(){ profileModal.style.display="flex"; }
 function closeProfile(){ profileModal.style.display="none"; }
 
+/* CEP AUTOCOMPLETE */
+pCep.addEventListener("blur", async ()=>{
+  const cep=pCep.value.replace(/\D/g,'');
+  if(cep.length!==8) return;
+  const r=await fetch(`https://viacep.com.br/ws/${cep}/json/`).then(r=>r.json());
+  if(r.erro) return;
+  pRua.value=r.logradouro||"";
+  pBairro.value=r.bairro||"";
+  pCidade.value=r.localidade||"";
+  pUf.value=r.uf||"";
+});
+
 /* SAVE PROFILE */
 async function salvarPerfil(){
-  let avatarUrl = null;
+  let avatarUrl=null;
 
   if(pFoto.files.length){
-    const path = `${user.id}.jpg`;
-    await sb.storage.from("avatars").upload(path,pFoto.files[0],{upsert:true});
-    const {data:u} = await sb.storage.from("avatars").createSignedUrl(path,31536000);
-    avatarUrl = u.signedUrl;
-
-    await sb.from("produtos_servicos")
-      .update({imagem_url:avatarUrl})
-      .eq("user_id",user.id);
+    const path=`perfil-${user.id}.jpg`;
+    await sb.storage.from("produtos").upload(path,pFoto.files[0],{upsert:true});
+    const {data:u}=await sb.storage.from("produtos").createSignedUrl(path,31536000);
+    avatarUrl=u.signedUrl;
   }
 
   await sb.from("user_profile").update({
     negocio:pNegocio.value,
     whatsapp:pWhatsapp.value,
     email_contato:pEmailContato.value,
-    avatar_url:avatarUrl
+    avatar_url:avatarUrl,
+    cep:pCep.value,
+    rua:pRua.value,
+    numero:pNumero.value,
+    bairro:pBairro.value,
+    cidade:pCidade.value,
+    uf:pUf.value
   }).eq("user_id",user.id);
 
   location.reload();
+}
+
+/* LOGOUT */
+async function sair(){
+  await sb.auth.signOut();
+  location.href="login.html";
 }
 </script>
 
