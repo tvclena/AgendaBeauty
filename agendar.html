@@ -4,48 +4,26 @@
 <meta charset="UTF-8">
 <title>Agendamento</title>
 
-<meta name="viewport"
-  content="width=device-width,
-  initial-scale=1,
-  maximum-scale=1,
-  user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{
-  margin:0;
-  font-family:Inter;
-  background:#f4f6fb;
-}
-.chat{
-  padding:14px;
-  max-width:520px;
-  margin:auto;
-}
-.msg{
-  max-width:80%;
-  margin-bottom:10px;
-  padding:12px 14px;
-  border-radius:18px;
-  font-size:14px;
-}
-.bot{
-  background:#fff;
-}
-.user{
-  background:#ff6a00;
-  color:#fff;
-  margin-left:auto;
-}
-.options{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin:10px 0;
+body{margin:0;font-family:Inter;background:#f4f6fb}
+.chat{padding:14px;max-width:520px;margin:auto}
+.msg{max-width:80%;margin-bottom:10px;padding:12px 14px;border-radius:18px;font-size:14px}
+.bot{background:#fff}
+.user{background:#ff6a00;color:#fff;margin-left:auto}
+
+.carousel{
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  padding:10px 0;
 }
 .card{
+  min-width:160px;
   background:#fff;
   border-radius:16px;
   overflow:hidden;
@@ -61,20 +39,27 @@ body{
   font-weight:800;
   font-size:13px;
 }
-.day, .time{
+
+.options{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:8px;
+}
+.option{
   background:#fff;
   border-radius:999px;
   padding:10px;
   text-align:center;
+  font-weight:800;
   cursor:pointer;
 }
+
 .input{
   position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  padding:10px;
+  bottom:0;left:0;right:0;
   background:#fff;
+  padding:10px;
   display:flex;
   gap:10px;
 }
@@ -99,7 +84,7 @@ body{
 <div class="chat" id="chat"></div>
 
 <div class="input">
-  <input id="text" placeholder="Digite aqui">
+  <input id="input" placeholder="Digite aqui">
   <button onclick="send()">➤</button>
 </div>
 
@@ -109,142 +94,146 @@ const sb = supabase.createClient(
  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-const lojaId = new URLSearchParams(location.search).get("l");
-let etapa = "nome";
-let dados = {};
-let agendaAtual = {};
-
-const chat = document.getElementById("chat");
-const input = document.getElementById("text");
-
-function bot(t){
-  chat.innerHTML += `<div class="msg bot">${t}</div>`;
-  chat.scrollTop = chat.scrollHeight;
+/* ================= CONTEXTO ================= */
+function getLojaId(){
+  const q = new URLSearchParams(location.search).get("l");
+  if(q){ localStorage.setItem("LOJA_ID", q); return q; }
+  return localStorage.getItem("LOJA_ID");
 }
-function user(t){
-  chat.innerHTML += `<div class="msg user">${t}</div>`;
-  chat.scrollTop = chat.scrollHeight;
-}
+const lojaId = getLojaId();
 
-bot("Olá 😊 Vamos agendar seu horário?");
+let etapa="nome";
+let dados={};
+let agendaDia=[];
+let duracao=0;
+
+const chat=document.getElementById("chat");
+const input=document.getElementById("input");
+
+/* ================= UTIL ================= */
+function delay(ms=1000){ return new Promise(r=>setTimeout(r,ms)); }
+function bot(t){ delay().then(()=>{ chat.innerHTML+=`<div class="msg bot">${t}</div>`; chat.scrollTop=chat.scrollHeight; }); }
+function user(t){ chat.innerHTML+=`<div class="msg user">${t}</div>`; chat.scrollTop=chat.scrollHeight; }
+function toMin(h){ const[a,b]=h.split(":").map(Number); return a*60+b; }
+function toHour(m){ return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"); }
+
+/* ================= INÍCIO ================= */
+bot("Olá 😊 Vamos fazer seu agendamento?");
 bot("Qual é o seu nome completo?");
 
+/* ================= SEND ================= */
 async function send(){
-  const v = input.value.trim();
+  const v=input.value.trim();
   if(!v) return;
   user(v);
-  input.value = "";
+  input.value="";
 
   if(etapa==="nome"){
-    dados.nome = v;
-    etapa = "whats";
+    dados.nome=v;
+    etapa="whats";
+    await delay();
     bot(`Prazer, <b>${dados.nome}</b>! Qual seu WhatsApp?`);
+    input.type="tel";
+    input.inputMode="numeric";
     return;
   }
 
   if(etapa==="whats"){
-    dados.whatsapp = v.replace(/\D/g,'');
-    etapa = "servico";
-    bot("Perfeito! Escolha um serviço:");
+    dados.whatsapp=v.replace(/\D/g,'');
+    etapa="servico";
+    await delay();
+    bot("Escolha um serviço:");
     listarServicos();
-    return;
   }
 }
 
+/* ================= SERVIÇOS ================= */
 async function listarServicos(){
-  const { data } = await sb
-    .from("produtos_servicos")
+  const {data}=await sb.from("produtos_servicos")
     .select("*")
-    .eq("user_id", lojaId)
+    .eq("user_id",lojaId)
     .eq("tipo","SERVICO")
     .eq("ativo",true)
     .eq("pode_agendar",true);
 
-  chat.innerHTML += `
-    <div class="options">
+  chat.innerHTML+=`
+    <div class="carousel">
       ${data.map(s=>`
-        <div class="card" onclick="selectServico('${s.id}',${s.duracao_minutos},'${s.nome}')">
+        <div class="card" onclick="selectServico('${s.id}',${s.duracao_minutos})">
           <img src="${s.imagem_url||''}">
           <div>${s.nome}<br>R$ ${s.preco}</div>
         </div>
       `).join("")}
-    </div>
-  `;
+    </div>`;
 }
 
-function selectServico(id,dur,nome){
+/* ================= DIAS ================= */
+async function selectServico(id,d){
   dados.servico_id=id;
-  dados.duracao=dur;
-  bot(`Ótima escolha! Vamos ver os dias disponíveis 👇`);
-  listarDias();
-}
+  duracao=d;
+  await delay();
+  bot("Agora escolha o dia disponível:");
 
-async function listarDias(){
-  const hoje = new Date().toISOString().split("T")[0];
-  const { data } = await sb
-    .from("agenda_loja")
+  const hoje=new Date().toISOString().split("T")[0];
+  const {data}=await sb.from("agenda_loja")
     .select("*")
-    .eq("user_id", lojaId)
-    .gte("data", hoje)
-    .eq("fechado", false);
+    .eq("user_id",lojaId)
+    .gte("data",hoje)
+    .eq("fechado",false);
 
-  chat.innerHTML += `
+  chat.innerHTML+=`
     <div class="options">
       ${data.map(d=>`
-        <div class="day" onclick="selectDia('${d.data}',${JSON.stringify(d.horarios).replace(/"/g,'&quot;')})">
-          ${new Date(d.data).toLocaleDateString("pt-BR",{weekday:"short",day:"numeric"})}
+        <div class="option" onclick='selectDia("${d.data}",${JSON.stringify(d.horarios)})'>
+          ${new Date(d.data).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"})}
         </div>
       `).join("")}
-    </div>
-  `;
+    </div>`;
 }
 
-function selectDia(data,horarios){
+/* ================= HORÁRIOS ================= */
+async function selectDia(data,horarios){
   dados.data=data;
-  agendaAtual=horarios;
-  bot("Agora escolha um horário:");
-  listarHorarios();
-}
+  agendaDia=horarios;
+  await delay();
+  bot("Perfeito! Escolha um horário:");
 
-function listarHorarios(){
-  const slots=[];
-  agendaAtual.forEach(h=>{
+  let slots=[];
+  agendaDia.forEach(h=>{
     let s=toMin(h.inicio), e=toMin(h.fim);
-    while(s+dados.duracao<=e){
+    while(s+duracao<=e){
       slots.push(toHour(s));
-      s+=dados.duracao;
+      s+=duracao;
     }
   });
 
-  chat.innerHTML += `
+  chat.innerHTML+=`
     <div class="options">
       ${slots.map(h=>`
-        <div class="time" onclick="confirmar('${h}')">${h}</div>
+        <div class="option" onclick='confirmar("${h}")'>${h}</div>
       `).join("")}
-    </div>
-  `;
+    </div>`;
 }
 
+/* ================= CONFIRMAR ================= */
 async function confirmar(h){
   dados.hora_inicio=h;
-  dados.hora_fim=toHour(toMin(h)+dados.duracao);
+  dados.hora_fim=toHour(toMin(h)+duracao);
 
   await sb.from("agendamentos").insert({
-    user_id: lojaId,
-    servico_id: dados.servico_id,
-    data: dados.data,
-    hora_inicio: dados.hora_inicio,
-    hora_fim: dados.hora_fim,
-    cliente_nome: dados.nome,
-    cliente_whatsapp: dados.whatsapp
+    user_id:lojaId,
+    servico_id:dados.servico_id,
+    data:dados.data,
+    hora_inicio:dados.hora_inicio,
+    hora_fim:dados.hora_fim,
+    cliente_nome:dados.nome,
+    cliente_whatsapp:dados.whatsapp
   });
 
+  await delay();
   bot("✅ Agendamento confirmado!");
   bot(`${dados.data} às ${dados.hora_inicio}`);
 }
-
-function toMin(h){ const[a,b]=h.split(":").map(Number); return a*60+b; }
-function toHour(m){ return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"); }
 </script>
 
 </body>
