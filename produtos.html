@@ -17,15 +17,11 @@
   --radius:18px;
   --danger:#dc2626;
 }
-
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
 body{background:var(--bg);padding:28px}
 
 /* HEADER */
-.header{
-  max-width:1300px;
-  margin:0 auto 20px;
-}
+.header{max-width:1300px;margin:0 auto 20px}
 .header h1{font-size:26px}
 .header span{color:var(--primary)}
 
@@ -46,8 +42,6 @@ body{background:var(--bg);padding:28px}
   box-shadow:0 10px 30px rgba(0,0,0,.06);
 }
 
-.card h3{margin-bottom:16px}
-
 /* FORM */
 input,textarea,select{
   width:100%;
@@ -56,8 +50,7 @@ input,textarea,select{
   border:1px solid var(--border);
   margin-bottom:12px;
 }
-
-input[type="file"]{display:none}
+input[type=file]{display:none}
 
 .upload{
   border:2px dashed var(--border);
@@ -73,10 +66,7 @@ input[type="file"]{display:none}
   object-fit:cover;
   border-radius:12px;
 }
-.upload span{
-  color:#6b7280;
-  font-size:14px;
-}
+.upload span{color:#6b7280;font-size:14px}
 
 button{
   padding:14px;
@@ -89,34 +79,18 @@ button{
   width:100%;
 }
 
-/* LIST HEADER */
+/* LIST */
 .list-header{
   display:flex;
   justify-content:space-between;
-  align-items:center;
-  margin-bottom:16px;
   gap:12px;
+  margin-bottom:16px;
 }
-
-.list-header input{
-  max-width:300px;
-}
-
-#btnExcluir{
-  display:none;
-  background:#fee2e2;
-  color:var(--danger);
-  padding:10px 16px;
-  border-radius:12px;
-}
-
-/* GRID */
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
   gap:16px;
 }
-
 .item{
   border:1px solid var(--border);
   border-radius:16px;
@@ -124,57 +98,24 @@ button{
   background:#fff;
   position:relative;
 }
-
-.item img{
-  width:100%;
-  height:150px;
-  object-fit:cover;
-}
-
-/* CHECKBOX */
-.check{
-  position:absolute;
-  top:12px;
-  right:12px;
-  transform:scale(1.2);
-  z-index:10;
-}
-
-.item-body{
-  padding:14px;
-}
-
-.badge{
-  font-size:11px;
-  padding:4px 10px;
-  border-radius:999px;
-  background:#eaf1ff;
-  display:inline-block;
-  margin-bottom:6px;
-}
-
-.price{
-  font-weight:700;
-  margin-top:6px;
-}
-
-.actions span{
-  font-size:13px;
-  cursor:pointer;
-  color:var(--primary);
-}
+.item img{width:100%;height:150px;object-fit:cover}
+.check{position:absolute;top:10px;right:10px}
+.item-body{padding:14px}
+.badge{font-size:11px;padding:4px 10px;border-radius:999px;background:#eaf1ff}
+.price{font-weight:700;margin-top:6px}
+.actions span{font-size:13px;color:var(--primary);cursor:pointer}
 
 /* OVERLAY */
-#overlaySalvar{
+#overlay{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.45);
   display:none;
   align-items:center;
   justify-content:center;
-  z-index:9999;
+  z-index:999;
 }
-#overlaySalvar div{
+#overlay div{
   background:#fff;
   padding:22px 30px;
   border-radius:16px;
@@ -185,10 +126,7 @@ button{
 
 <body>
 
-<!-- OVERLAY -->
-<div id="overlaySalvar">
-  <div>Salvando…</div>
-</div>
+<div id="overlay"><div>Salvando…</div></div>
 
 <div class="header">
   <h1>Produtos & <span>Serviços</span></h1>
@@ -223,36 +161,35 @@ button{
   <div class="card">
     <div class="list-header">
       <input id="search" placeholder="Buscar produto ou serviço">
-      <button id="btnExcluir" onclick="excluirSelecionados()">Excluir selecionados</button>
+      <button id="btnExcluir" style="display:none;background:#fee2e2;color:#dc2626"
+        onclick="excluirSelecionados()">Excluir</button>
     </div>
 
-    <div id="statusLista"></div>
-    <div class="grid" id="lista"></div>
+    <div id="lista" class="grid"></div>
   </div>
 
 </div>
 
 <script>
-/* 🔐 PROTEÇÃO */
-const negocio = JSON.parse(localStorage.getItem("negocioLogado"));
-if(!negocio) location.href="login.html";
-const LOJA_ID = negocio.id;
-
-/* SUPABASE */
-const supabase = window.supabase.createClient(
-  "https://ssmsjryjwhnrbjyzklno.supabase.co",
-  "sb_publishable_5Xe5sBRsp-6aLLvMwiTsCA_vRcPpNnV"
+const sb = supabase.createClient(
+  "https://egxjgmzukjyyxmkukwub.supabase.co",
+  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-let itens=[], editId=null;
+let userId=null, itens=[], editId=null;
 
-/* TIPO */
-tipo.onchange=()=>{
-  duracao.style.display = tipo.value==="SERVICO" ? "block" : "none";
-};
+/* INIT */
+(async()=>{
+  const { data:{session} } = await sb.auth.getSession();
+  if(!session) return location.href="login.html";
+  userId=session.user.id;
+  carregar();
+})();
+
+/* UI */
+tipo.onchange=()=>duracao.style.display = tipo.value==="SERVICO"?"block":"none";
 tipo.onchange();
 
-/* PREVIEW */
 imagem.onchange=()=>{
   const f=imagem.files[0];
   if(f){
@@ -262,27 +199,19 @@ imagem.onchange=()=>{
   }
 };
 
-/* MÁSCARA */
 preco.oninput=e=>{
   let v=e.target.value.replace(/\D/g,'');
   v=(v/100).toLocaleString('pt-BR',{minimumFractionDigits:2});
   e.target.value=v;
 };
 
-/* BOTÃO EXCLUIR */
-function atualizarBotaoExcluir(){
-  const qtd=document.querySelectorAll(".check:checked").length;
-  btnExcluir.style.display = qtd>0 ? "inline-block" : "none";
-}
-
 /* SALVAR */
 async function salvar(){
-  overlaySalvar.style.display="flex";
-
+  overlay.style.display="flex";
   const valor=parseFloat(preco.value.replace(/\./g,'').replace(',','.'));
 
   let payload={
-    loja_id:LOJA_ID,
+    user_id:userId,
     tipo:tipo.value,
     nome:nome.value,
     descricao:descricao.value,
@@ -292,94 +221,48 @@ async function salvar(){
 
   let data;
   if(editId){
-    ({data}=await supabase.from("produtos_servicos")
-      .update(payload).eq("id",editId).select().single());
+    ({data}=await sb.from("produtos_servicos").update(payload).eq("id",editId).select().single());
   }else{
-    ({data}=await supabase.from("produtos_servicos")
-      .insert([payload]).select().single());
+    ({data}=await sb.from("produtos_servicos").insert(payload).select().single());
   }
 
   if(imagem.files.length){
-    const path=`${LOJA_ID}/${data.id}.jpg`;
-    await supabase.storage.from("produtos")
-      .upload(path,imagem.files[0],{upsert:true});
-    const url=supabase.storage.from("produtos").getPublicUrl(path).data.publicUrl;
-    await supabase.from("produtos_servicos")
-      .update({imagem_url:url}).eq("id",data.id);
+    const path=`${userId}/${data.id}.jpg`;
+    await sb.storage.from("produtos").upload(path,imagem.files[0],{upsert:true});
+    const url=sb.storage.from("produtos").getPublicUrl(path).data.publicUrl;
+    await sb.from("produtos_servicos").update({imagem_url:url}).eq("id",data.id);
   }
 
-  resetForm();
-  await carregar();
-  overlaySalvar.style.display="none";
+  reset();
+  carregar();
+  overlay.style.display="none";
 }
 
 /* LISTAR */
 async function carregar(){
-  statusLista.style.display = "block";
-  statusLista.innerHTML = "🔄 Buscando seus produtos e serviços…";
-
-  const { data, error } = await supabase
+  const { data } = await sb
     .from("produtos_servicos")
     .select("*")
-    .eq("loja_id", LOJA_ID)
     .order("created_at",{ascending:false});
 
-  if(error){
-    statusLista.innerHTML = "Erro ao carregar produtos.";
-    return;
-  }
-
-  itens = data || [];
-
-  if(itens.length === 0){
-    statusLista.innerHTML = `
-      <h3 style="margin-bottom:8px;color:#111">
-        Nenhum produto ou serviço cadastrado
-      </h3>
-      <p>
-        Comece cadastrando seu primeiro produto ou serviço
-        utilizando o formulário ao lado 👈
-      </p>
-    `;
-    lista.innerHTML = "";
-    return;
-  }
-
-  statusLista.style.display = "none";
-
-  lista.innerHTML = "";
-  let index = 0;
-  const intervalo = setInterval(()=>{
-    if(index >= itens.length){
-      clearInterval(intervalo);
-      atualizarBotaoExcluir();
-      return;
-    }
-
-    renderItem(itens[index]);
-    index++;
-  }, 80); // velocidade do efeito
+  itens=data||[];
+  lista.innerHTML="";
+  itens.forEach(render);
 }
 
-/* RENDER */
-function renderItem(i){
-  lista.innerHTML += `
+function render(i){
+  lista.innerHTML+=`
     <div class="item">
-      <input class="check" type="checkbox" value="${i.id}" onchange="atualizarBotaoExcluir()">
-      ${i.imagem_url ? `<img src="${i.imagem_url}">` : ""}
+      <input type="checkbox" class="check" value="${i.id}">
+      ${i.imagem_url?`<img src="${i.imagem_url}">`:""}
       <div class="item-body">
         <span class="badge">${i.tipo}</span>
         <h4>${i.nome}</h4>
-        <div class="price">
-          R$ ${i.preco.toLocaleString('pt-BR',{minimumFractionDigits:2})}
-        </div>
-        ${i.duracao_minutos ? `<small>${i.duracao_minutos} min</small>` : ""}
-        <div class="actions">
-          <span onclick="editar('${i.id}')">Editar</span>
-        </div>
+        <div class="price">R$ ${i.preco.toFixed(2).replace('.',',')}</div>
+        ${i.duracao_minutos?`<small>${i.duracao_minutos} min</small>`:""}
+        <div class="actions"><span onclick="editar('${i.id}')">Editar</span></div>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
 /* EDITAR */
@@ -390,25 +273,22 @@ function editar(id){
   tipo.onchange();
   nome.value=i.nome;
   descricao.value=i.descricao;
-  preco.value=i.preco.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  preco.value=i.preco.toFixed(2).replace('.',',');
   duracao.value=i.duracao_minutos||"";
   formTitle.innerText="Editar item";
-  window.scrollTo({top:0,behavior:"smooth"});
+  scrollTo({top:0,behavior:"smooth"});
 }
 
 /* EXCLUIR */
 async function excluirSelecionados(){
   const ids=[...document.querySelectorAll(".check:checked")].map(c=>c.value);
-  if(!ids.length) return;
-
-  if(!confirm(`Deseja realmente excluir ${ids.length} item(ns)?`)) return;
-
-  await supabase.from("produtos_servicos").delete().in("id",ids);
+  if(!ids.length||!confirm("Excluir itens selecionados?"))return;
+  await sb.from("produtos_servicos").delete().in("id",ids);
   carregar();
 }
 
 /* RESET */
-function resetForm(){
+function reset(){
   editId=null;
   formTitle.innerText="Cadastrar item";
   nome.value=descricao.value=preco.value=duracao.value="";
@@ -416,8 +296,6 @@ function resetForm(){
   preview.style.display="none";
   uploadText.style.display="block";
 }
-
-carregar();
 </script>
 
 </body>
