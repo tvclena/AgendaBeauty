@@ -169,26 +169,20 @@ body{
 
 <script>
 /* =======================
-   SUPABASE (PRONTO)
+   SUPABASE (SEM CONFLITO)
    ======================= */
-const supabase = window.supabase.createClient(
+const sbHome = window.supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-/* =======================
-   FUTURO: CARREGAR DADOS
-   ======================= */
-/*
+/* FUTURO: carregar dados */
 async function carregarDados(){
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await sbHome.auth.getSession();
   if(!session) return;
 
-  // Aqui entram os selects:
-  // clientes, agenda, faturamento, serviços
+  // selects futuros aqui
 }
-carregarDados();
-*/
 </script>
 
 </body>
