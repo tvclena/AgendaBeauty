@@ -29,171 +29,114 @@
   --topbar-h:56px;
   --navbar-h:68px;
 }
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter;-webkit-tap-highlight-color: transparent;}
+html,body{width:100vw;height:100vh;overflow:hidden;background:var(--bg);}
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Inter;
-  -webkit-tap-highlight-color: transparent;
-}
-
-html,body{
-  width:100vw;
-  height:100vh;
-  overflow:hidden;
-  background:var(--bg);
-}
-
-/* ================= TOPBAR ================= */
+/* TOPBAR */
 .topbar{
-  position:fixed;
-  top:0;left:0;right:0;
-  height:var(--topbar-h);
-  background:#fff;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 16px;
-  z-index:10;
+  position:fixed;top:0;left:0;right:0;height:var(--topbar-h);
+  background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:10;
 }
 .topbar h1{font-size:18px;font-weight:800}
-
 .avatar{
-  width:36px;height:36px;
-  border-radius:50%;
-  background:#ddd;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
-  font-weight:800;
-  cursor:pointer;
-  background-size:cover;
-  background-position:center;
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:800;cursor:pointer;
+  background-size:cover;background-position:center;
 }
 
-/* ================= CONTENT ================= */
-.content{
-  position:fixed;
-  top:var(--topbar-h);
-  bottom:var(--navbar-h);
-  left:0;right:0;
-  background:#fff;
-  overflow:hidden;
-}
+/* CONTENT */
+.content{position:fixed;top:var(--topbar-h);bottom:var(--navbar-h);left:0;right:0;background:#fff;overflow:hidden;}
 iframe{width:100%;height:100%;border:none}
 
-/* ================= NAVBAR ================= */
+/* NAVBAR */
 .navbar{
-  position:fixed;
-  bottom:0;left:0;right:0;
-  height:var(--navbar-h);
-  background:#fff;
-  border-top:1px solid var(--border);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
+  position:fixed;bottom:0;left:0;right:0;height:var(--navbar-h);
+  background:#fff;border-top:1px solid var(--border);
+  display:flex;justify-content:space-around;align-items:center;
   padding-bottom:env(safe-area-inset-bottom);
 }
-
-.nav-item{
-  font-size:11px;
-  color:var(--muted);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  cursor:pointer;
-}
+.nav-item{font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;cursor:pointer;}
 .nav-item i{font-size:22px}
 .nav-item.active{color:var(--primary)}
 
-/* ================= OVERLAY ================= */
+/* OVERLAY */
 #overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:999;
-  color:#fff;
-  font-weight:700;
-  display:none;
+  position:fixed;inset:0;background:rgba(0,0,0,.45);
+  display:flex;align-items:center;justify-content:center;z-index:9999;
+}
+#overlay .box{
+  background:#fff;padding:16px 18px;border-radius:14px;
+  font-weight:800;color:#111;box-shadow:0 18px 50px rgba(0,0,0,.18);
 }
 
-/* ================= PROFILE MODAL ================= */
+/* PROFILE MODAL */
 #profileModal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.4);
-  display:none;
-  align-items:flex-end;
-  z-index:1000;
+  position:fixed;inset:0;background:rgba(0,0,0,.4);
+  display:none;align-items:flex-end;z-index:10000;
 }
-
 .profile-box{
-  width:100%;
-  background:#fff;
-  border-radius:22px 22px 0 0;
-  padding:20px;
-  max-height:92vh;
-  overflow:auto;
+  width:100%;background:#fff;border-radius:20px 20px 0 0;
+  padding:18px;max-height:92vh;overflow:auto;
+}
+.profile-top{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding-bottom:10px;border-bottom:1px solid var(--border);
+}
+.profile-top strong{font-size:15px}
+.profile-top button{
+  border:none;background:#f3f4f6;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer;
 }
 
+.profile-img-wrap{display:flex;justify-content:center;margin:14px 0 10px;}
 .profile-img{
-  width:90px;height:90px;
-  border-radius:50%;
-  background:#eee;
-  margin:0 auto 14px;
-  background-size:cover;
-  background-position:center;
-  cursor:pointer;
+  width:86px;height:86px;border-radius:50%;
+  background:#eee;background-size:cover;background-position:center;
+  border:3px solid #fff;box-shadow:0 10px 26px rgba(0,0,0,.12);
+  position:relative;
+}
+.profile-img .cam{
+  position:absolute;right:-2px;bottom:-2px;
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  border:3px solid #fff;
 }
 
 .profile-box h3{
-  font-size:13px;
-  margin:14px 0 6px;
-  color:var(--muted);
+  font-size:12px;margin:14px 0 8px;color:var(--muted);letter-spacing:.02em;
+  text-transform:uppercase;
 }
+.field{
+  display:flex;flex-direction:column;gap:6px;margin-bottom:10px;
+}
+.field label{font-size:12px;color:#6b7280}
+.field input{
+  width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);
+  font-size:13px;outline:none;
+}
+.field input:focus{border-color:#ffd6b8;box-shadow:0 0 0 4px rgba(255,106,0,.10);}
 
-.profile-box input{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  margin-bottom:10px;
-  font-size:13px;
-}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 
 .btn-primary{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:999px;
-  background:var(--primary);
-  color:#fff;
-  font-weight:800;
-  margin-top:6px;
+  width:100%;padding:14px;border:none;border-radius:999px;
+  background:var(--primary);color:#fff;font-weight:900;margin-top:6px;cursor:pointer;
+}
+.btn-logout{
+  width:100%;padding:14px;border:none;border-radius:999px;
+  background:#fee2e2;color:var(--danger);font-weight:900;margin-top:10px;cursor:pointer;
 }
 
-.btn-logout{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:999px;
-  background:#fee2e2;
-  color:var(--danger);
-  font-weight:800;
-  margin-top:10px;
-}
+.tip{font-size:12px;color:#6b7280;text-align:center;margin-top:10px;}
 </style>
 </head>
 
 <body>
 
-<div id="overlay">Processando…</div>
+<div id="overlay"><div class="box" id="overlayText">Validando sessão…</div></div>
 
 <!-- TOPBAR -->
 <div class="topbar">
@@ -218,26 +161,80 @@ iframe{width:100%;height:100%;border:none}
 <div id="profileModal" onclick="closeProfile(event)">
   <div class="profile-box" onclick="event.stopPropagation()">
 
-    <div class="profile-img" id="profileImg" onclick="pFoto.click()"></div>
+    <div class="profile-top">
+      <strong>Perfil</strong>
+      <button onclick="closeProfile()">Fechar</button>
+    </div>
+
+    <div class="profile-img-wrap">
+      <div class="profile-img" id="profileImg">
+        <div class="cam" onclick="pFoto.click()"><i class="ri-camera-line"></i></div>
+      </div>
+    </div>
+
     <input type="file" id="pFoto" hidden accept="image/*">
 
     <h3>Dados do negócio</h3>
-    <input id="pNegocio" placeholder="Nome da loja">
-    <input id="pEmail" disabled>
-    <input id="pWhatsapp" placeholder="WhatsApp">
-    <input id="pEmailContato" placeholder="Email de contato">
+
+    <div class="field">
+      <label>Nome da loja</label>
+      <input id="pNegocio" placeholder="Ex: Barbearia Central">
+    </div>
+
+    <div class="field">
+      <label>E-mail (login)</label>
+      <input id="pEmail" disabled>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>WhatsApp</label>
+        <input id="pWhatsapp" placeholder="(77) 99999-9999" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>E-mail de contato</label>
+        <input id="pEmailContato" placeholder="contato@seunegocio.com">
+      </div>
+    </div>
 
     <h3>Endereço</h3>
-    <input id="pCep" placeholder="CEP">
-    <input id="pRua" placeholder="Rua">
-    <input id="pNumero" placeholder="Número">
-    <input id="pBairro" placeholder="Bairro">
-    <input id="pCidade" placeholder="Cidade">
-    <input id="pUf" placeholder="UF">
+
+    <div class="row">
+      <div class="field">
+        <label>CEP</label>
+        <input id="pCep" placeholder="00000-000" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>Número</label>
+        <input id="pNumero" placeholder="123" inputmode="numeric">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Rua</label>
+      <input id="pRua" placeholder="Rua Exemplo">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Bairro</label>
+        <input id="pBairro" placeholder="Centro">
+      </div>
+      <div class="field">
+        <label>Cidade</label>
+        <input id="pCidade" placeholder="Barreiras">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>UF</label>
+      <input id="pUf" placeholder="BA" maxlength="2" style="text-transform:uppercase">
+    </div>
 
     <button class="btn-primary" onclick="salvarPerfil()">Salvar alterações</button>
     <button class="btn-logout" onclick="sair()">Sair da conta</button>
 
+    <div class="tip">Nada é obrigatório — mas preencher ajuda na organização ✅</div>
   </div>
 </div>
 
@@ -247,163 +244,211 @@ const sb = supabase.createClient(
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-let user=null, fotoBlob=null;
+let user = null;
+let profile = null;
+let fotoBlob = null; // ✅ vamos enviar blob reduzido
 
 /* ================= AUTH ================= */
-(async()=>{
-  overlay.style.display="flex";
+async function proteger(){
   const {data:{session}} = await sb.auth.getSession();
   if(!session){ location.href="login.html"; return; }
-  user=session.user;
+  user = session.user;
 
-  const {data:p} = await sb.from("user_profile")
-    .select("*").eq("user_id",user.id).single();
+  const {data:p, error} = await sb.from("user_profile")
+    .select("*")
+    .eq("user_id", user.id)
+    .single();
 
-  avatar.innerText = p.negocio?.[0]?.toUpperCase() || "A";
-  pNegocio.value = p.negocio || "";
-  pEmail.value = user.email;
-  pWhatsapp.value = p.whatsapp || "";
-  pEmailContato.value = p.email_contato || "";
+  profile = p || {};
 
-  pCep.value = p.cep || "";
-  pRua.value = p.rua || "";
-  pNumero.value = p.numero || "";
-  pBairro.value = p.bairro || "";
-  pCidade.value = p.cidade || "";
-  pUf.value = p.uf || "";
+  // Avatar letra / imagem
+  const letra = (profile?.negocio?.[0] || user.email?.[0] || "A").toUpperCase();
+  avatar.textContent = letra;
 
-  if(p.avatar_url){
-    avatar.style.backgroundImage=`url(${p.avatar_url})`;
-    profileImg.style.backgroundImage=`url(${p.avatar_url})`;
+  pEmail.value = user.email || "";
+  pNegocio.value = profile.negocio || "";
+  pWhatsapp.value = maskWhats(profile.whatsapp || "");
+  pEmailContato.value = profile.email_contato || "";
+
+  pCep.value = profile.cep || "";
+  pRua.value = profile.rua || "";
+  pNumero.value = profile.numero || "";
+  pBairro.value = profile.bairro || "";
+  pCidade.value = profile.cidade || "";
+  pUf.value = (profile.uf || "").toUpperCase();
+
+  // Se tiver avatar_path, gera signed url
+  if(profile.avatar_path){
+    const url = await getSigned(profile.avatar_path);
+    if(url){
+      profileImg.style.backgroundImage = `url(${url})`;
+      avatar.style.backgroundImage = `url(${url})`;
+      avatar.textContent = ""; // some letra
+    }
+  } else if(profile.avatar_url){
+    // compatibilidade caso já tenha avatar_url antigo
+    profileImg.style.backgroundImage = `url(${profile.avatar_url})`;
+    avatar.style.backgroundImage = `url(${profile.avatar_url})`;
+    avatar.textContent = "";
   }
 
   overlay.style.display="none";
-})();
+}
+proteger();
 
 /* ================= NAV ================= */
 function go(el,page){
   document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
   el.classList.add("active");
-  frame.src=page;
+  frame.src = page;
 }
 
-/* ================= PROFILE ================= */
+/* ================= PROFILE MODAL ================= */
 function openProfile(){ profileModal.style.display="flex"; }
-function closeProfile(){ profileModal.style.display="none"; }
+function closeProfile(e){
+  if(e && e.target && e.target.id !== "profileModal") return;
+  profileModal.style.display="none";
+}
 
-/* ================= FOTO PREVIEW ================= */
-pFoto.onchange=()=>{
-  const f=pFoto.files[0];
-  if(!f) return;
-  const img=new Image();
-  img.onload=()=>{
-    const c=document.createElement("canvas");
-    c.width=c.height=600;
-    const s=Math.min(img.width,img.height);
-    c.getContext("2d").drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,600,600);
-    c.toBlob(b=>{
-      fotoBlob=b;
-      profileImg.style.backgroundImage=`url(${URL.createObjectURL(b)})`;
-    },"image/jpeg",0.9);
+/* ================= MASKS ================= */
+function maskWhats(digits){
+  const v = String(digits).replace(/\D/g,'').slice(0,11);
+  if(!v) return "";
+  return v.replace(/^(\d{2})(\d)/,"($1) $2").replace(/(\d{5})(\d)/,"$1-$2");
+}
+pWhatsapp.addEventListener("input", e=>{
+  e.target.value = maskWhats(e.target.value);
+});
+pCep.addEventListener("input", e=>{
+  let v = e.target.value.replace(/\D/g,'').slice(0,8);
+  if(v.length>5) v = v.slice(0,5)+"-"+v.slice(5);
+  e.target.value = v;
+});
+
+/* ================= CEP AUTOCOMPLETE ================= */
+pCep.addEventListener("blur", async ()=>{
+  const cep = pCep.value.replace(/\D/g,'');
+  if(cep.length !== 8) return;
+  try{
+    const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`).then(r=>r.json());
+    if(r.erro) return;
+    if(!pRua.value) pRua.value = r.logradouro || "";
+    if(!pBairro.value) pBairro.value = r.bairro || "";
+    if(!pCidade.value) pCidade.value = r.localidade || "";
+    if(!pUf.value) pUf.value = (r.uf || "").toUpperCase();
+  }catch(err){}
+});
+
+/* ================= FOTO: PREVIEW IMEDIATO + REDUÇÃO ================= */
+pFoto.addEventListener("change", ()=>{
+  const file = pFoto.files?.[0];
+  if(!file) return;
+
+  // preview imediato
+  const tempUrl = URL.createObjectURL(file);
+  profileImg.style.backgroundImage = `url(${tempUrl})`;
+  avatar.style.backgroundImage = `url(${tempUrl})`;
+  avatar.textContent = "";
+
+  // gera blob quadrado e leve (para mobile)
+  const img = new Image();
+  img.onload = ()=>{
+    const size = Math.min(img.width, img.height);
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 700;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(
+      img,
+      (img.width - size)/2,
+      (img.height - size)/2,
+      size, size,
+      0,0,700,700
+    );
+    canvas.toBlob((b)=>{ fotoBlob = b; }, "image/jpeg", 0.9);
   };
-  img.src=URL.createObjectURL(f);
-};
+  img.src = tempUrl;
+});
 
-/* ================= CEP ================= */
-pCep.onblur=async()=>{
-  const cep=pCep.value.replace(/\D/g,'');
-  if(cep.length!==8) return;
-  const r=await fetch(`https://viacep.com.br/ws/${cep}/json/`).then(r=>r.json());
-  if(r.erro) return;
-  pRua.value=r.logradouro||"";
-  pBairro.value=r.bairro||"";
-  pCidade.value=r.localidade||"";
-  pUf.value=r.uf||"";
-};
+/* ================= SIGNED URL (PRIVATE BUCKET) ================= */
+async function getSigned(path){
+  try{
+    // ✅ use 7 dias para evitar 400
+    const { data, error } = await sb.storage
+      .from("produtos")
+      .createSignedUrl(path, 60*60*24*7);
 
-/* ================= SAVE ================= */
+    if(error) return null;
+    return data?.signedUrl || null;
+  }catch(e){
+    return null;
+  }
+}
+
+/* ================= SAVE PROFILE ================= */
 async function salvarPerfil(){
-  overlay.style.display="flex";
-  let avatarUrl=null;
-
-  if(fotoBlob){
-    const path=`perfil-${user.id}.jpg`;
-    await sb.storage.from("produtos").upload(path,fotoBlob,{upsert:true});
-async function salvarPerfil(){
+  overlayText.innerText = "Salvando perfil…";
   overlay.style.display = "flex";
 
-  let avatarUrl = null;
+  let avatarPath = profile?.avatar_path || null;
 
-  if (fotoBlob) {
-    const path = `perfil-${user.id}.jpg`;
+  // upload se tiver foto nova
+  if(fotoBlob){
+    avatarPath = `${user.id}/perfil.jpg`;
 
-    const { error: uploadError } = await sb.storage
+    const { error: upErr } = await sb.storage
       .from("produtos")
-      .upload(path, fotoBlob, { upsert: true });
+      .upload(avatarPath, fotoBlob, { upsert:true, contentType:"image/jpeg" });
 
-    if (uploadError) {
-      overlay.style.display = "none";
-      alert("Erro ao enviar imagem");
+    if(upErr){
+      overlay.style.display="none";
+      alert("Não consegui enviar a foto. Verifique as permissões do Storage.");
       return;
     }
-
-    // ✅ USO CORRETO
-    const { data } = sb.storage
-      .from("produtos")
-      .getPublicUrl(path);
-
-    avatarUrl = data.publicUrl;
-
-    // preview no avatar do topo também
-    avatar.style.backgroundImage = `url(${avatarUrl})`;
   }
 
-  const { error: updateError } = await sb
-    .from("user_profile")
-    .update({
-      negocio: pNegocio.value || null,
-      whatsapp: pWhatsapp.value || null,
-      email_contato: pEmailContato.value || null,
-      avatar_url: avatarUrl,
-      cep: pCep.value || null,
-      rua: pRua.value || null,
-      numero: pNumero.value || null,
-      bairro: pBairro.value || null,
-      cidade: pCidade.value || null,
-      uf: pUf.value || null
-    })
+  // Atualiza perfil (nada obrigatório)
+  const payload = {
+    negocio: pNegocio.value || null,
+    whatsapp: pWhatsapp.value.replace(/\D/g,'') || null,
+    email_contato: pEmailContato.value || null,
+    avatar_path: avatarPath || null, // ✅ salva o PATH (não signedUrl)
+    cep: pCep.value || null,
+    rua: pRua.value || null,
+    numero: pNumero.value || null,
+    bairro: pBairro.value || null,
+    cidade: pCidade.value || null,
+    uf: (pUf.value || "").toUpperCase() || null
+  };
+
+  const { error: updErr } = await sb.from("user_profile")
+    .update(payload)
     .eq("user_id", user.id);
 
-  overlay.style.display = "none";
+  overlay.style.display="none";
 
-  if (updateError) {
-    alert("Erro ao salvar perfil");
+  if(updErr){
+    alert("Erro ao salvar no banco (user_profile).");
     return;
   }
 
-  closeProfile();
-}
+  // Atualiza imagens com signedUrl novo
+  if(avatarPath){
+    const url = await getSigned(avatarPath);
+    if(url){
+      profileImg.style.backgroundImage = `url(${url})`;
+      avatar.style.backgroundImage = `url(${url})`;
+      avatar.textContent = "";
+    }
+  }
 
-
-  await sb.from("user_profile").update({
-    negocio:pNegocio.value,
-    whatsapp:pWhatsapp.value,
-    email_contato:pEmailContato.value,
-    avatar_url:avatarUrl,
-    cep:pCep.value,
-    rua:pRua.value,
-    numero:pNumero.value,
-    bairro:pBairro.value,
-    cidade:pCidade.value,
-    uf:pUf.value
-  }).eq("user_id",user.id);
-
-  overlay.style.display="none";
+  fotoBlob = null;
   closeProfile();
 }
 
 /* ================= LOGOUT ================= */
 async function sair(){
+  overlayText.innerText = "Saindo…";
+  overlay.style.display = "flex";
   await sb.auth.signOut();
   location.href="login.html";
 }
