@@ -34,6 +34,7 @@ body{background:var(--bg);padding:32px}
   max-width:1200px;
   margin:auto;
   box-shadow:0 10px 30px rgba(0,0,0,.06);
+  position:relative;
 }
 .calendar-header{
   display:flex;
@@ -103,6 +104,25 @@ body{background:var(--bg);padding:32px}
 .horario button{background:#fee2e2;border:none;border-radius:10px;padding:0 12px;cursor:pointer}
 .add-btn{background:#eaf1ff;border:none;border-radius:12px;padding:10px;width:100%;cursor:pointer}
 .save-btn{background:var(--primary);color:#fff;border:none;border-radius:30px;padding:14px;width:100%;margin-top:18px;cursor:pointer}
+
+/* OVERLAY LOADING */
+#loading{
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,.75);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:50;
+  border-radius:var(--radius);
+}
+#loading div{
+  background:#fff;
+  padding:22px 32px;
+  border-radius:14px;
+  font-weight:600;
+  box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
 </style>
 </head>
 
@@ -113,18 +133,25 @@ body{background:var(--bg);padding:32px}
 </div>
 
 <div class="calendar">
+
+  <!-- OVERLAY -->
+  <div id="loading"><div>Carregando agenda…</div></div>
+
   <div class="calendar-header">
     <button onclick="changeMonth(-1)">◀</button>
     <h2 id="monthYear"></h2>
     <button onclick="changeMonth(1)">▶</button>
   </div>
+
   <div class="weekdays">
     <div>Dom</div><div>Seg</div><div>Ter</div>
     <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
   </div>
+
   <div class="days" id="days"></div>
 </div>
 
+<!-- MODAL -->
 <div id="modal">
   <div class="modal-box">
     <h3 id="modalDate"></h3>
@@ -137,20 +164,21 @@ body{background:var(--bg);padding:32px}
 
 <script>
 const sb = supabase.createClient(
-    "https://egxjgmzukjyyxmkukwub.supabase.co",
+  "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-
-  
 let userId, agenda={}, current=new Date(), selected="";
 
-/* PROTEÇÃO */
+/* INIT */
 (async()=>{
+  render(); // renderiza estrutura imediatamente
+
   const { data:{session} } = await sb.auth.getSession();
   if(!session) return location.href="login.html";
+
   userId=session.user.id;
-  carregar();
+  await carregar();
 })();
 
 /* CALENDÁRIO */
@@ -158,36 +186,50 @@ function render(){
   const y=current.getFullYear(), m=current.getMonth();
   document.getElementById("monthYear").innerText =
     current.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+
   const days=document.getElementById("days");
   days.innerHTML="";
   const first=new Date(y,m,1).getDay();
   const total=new Date(y,m+1,0).getDate();
+
   for(let i=0;i<first;i++) days.innerHTML+="<div></div>";
+
   for(let d=1;d<=total;d++){
     const key=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
     const div=document.createElement("div");
     div.className="day";
-    div.onclick=()=>open(key,d);
+    div.onclick=()=>open(key);
     div.innerHTML=`<div class="day-number">${d}</div>`;
+
     if(agenda[key]){
-      if(agenda[key].fechado) div.innerHTML+=`<div class="badge closed">Fechado</div>`;
-      else agenda[key].horarios.forEach(h=>{
-        div.innerHTML+=`<div class="time-pill">${h.inicio} - ${h.fim}</div>`;
-      });
+      if(agenda[key].fechado){
+        div.innerHTML+=`<div class="badge closed">Fechado</div>`;
+      }else{
+        agenda[key].horarios.forEach(h=>{
+          div.innerHTML+=`<div class="time-pill">${h.inicio} - ${h.fim}</div>`;
+        });
+      }
     }
     days.appendChild(div);
   }
 }
 
-function changeMonth(v){ current.setMonth(current.getMonth()+v); render(); }
+function changeMonth(v){
+  current.setMonth(current.getMonth()+v);
+  document.getElementById("loading").style.display="flex";
+  carregar();
+}
 
 /* MODAL */
-function open(key,d){
+function open(key){
   selected=key;
   document.getElementById("modalDate").innerText =
     new Date(key).toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long"});
-  document.getElementById("horarios").innerHTML="";
+
+  const horarios=document.getElementById("horarios");
+  horarios.innerHTML="";
   document.getElementById("fechado").checked=agenda[key]?.fechado||false;
+
   (agenda[key]?.horarios||[{inicio:"",fim:""}]).forEach(h=>addHorario(h.inicio,h.fim));
   modal.style.display="flex";
 }
@@ -208,22 +250,30 @@ async function salvar(){
     const i=h.children[0].value,f=h.children[1].value;
     if(i&&f) horarios.push({inicio:i,fim:f});
   });
+
   await sb.from("agenda_loja").upsert({
     user_id:userId,
     data:selected,
     fechado,
     horarios
   },{onConflict:"user_id,data"});
+
   modal.style.display="none";
+  document.getElementById("loading").style.display="flex";
   carregar();
 }
 
 /* LOAD */
 async function carregar(){
   const {data}=await sb.from("agenda_loja").select("*");
+
   agenda={};
-  data?.forEach(r=>agenda[r.data]={fechado:r.fechado,horarios:r.horarios||[]});
+  data?.forEach(r=>{
+    agenda[r.data]={fechado:r.fechado,horarios:r.horarios||[]};
+  });
+
   render();
+  document.getElementById("loading").style.display="none";
 }
 </script>
 
