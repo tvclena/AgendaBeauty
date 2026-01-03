@@ -194,12 +194,15 @@ button{
 
 /* ================= GRID (ÁREA COM SCROLL) ================= */
 .grid{
-  display:grid;
-  grid-template-columns:repeat(7, minmax(170px,1fr));
-  gap:14px;
-  overflow-y:auto;          /* ✅ scroll só aqui */
-  padding-right:6px;
+  flex: 1;                 /* 🔑 ISSO ATIVA A ROLAGEM */
+  display: grid;
+  grid-template-columns: repeat(7, minmax(170px,1fr));
+  gap: 14px;
+  overflow-y: auto;        /* rolagem vertical */
+  overflow-x: hidden;     /* sem rolagem lateral */
+  padding-right: 6px;
 }
+
 
 /* barra de rolagem discreta */
 .grid::-webkit-scrollbar{
