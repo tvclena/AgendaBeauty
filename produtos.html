@@ -258,9 +258,12 @@ async function salvar() {
     await sb.storage.from("produtos")
       .upload(path, imagem.files[0], { upsert: true });
 
-    const url = sb.storage
-      .from("produtos")
-      .getPublicUrl(path).data.publicUrl;
+const { data: signed } = await sb.storage
+  .from("produtos")
+  .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 ano
+
+const url = signed.signedUrl;
+
 
     await sb.from("produtos_servicos")
       .update({ imagem_url: url })
