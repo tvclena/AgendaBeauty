@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Agenda Fácil</title>
 
-<!-- ❌ IMPEDE ZOOM -->
 <meta name="viewport"
   content="width=device-width,
   initial-scale=1,
@@ -12,10 +11,7 @@
   user-scalable=no,
   viewport-fit=cover">
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#ff6a00">
-
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 
@@ -31,116 +27,66 @@
   --text:#111827;
   --muted:#6b7280;
 }
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
+body{background:var(--bg);height:100vh;display:flex;flex-direction:column}
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Inter;
-  -webkit-tap-highlight-color: transparent;
-}
-
-html,body{
-  height:100%;
-  overscroll-behavior: none;
-}
-
-body{
-  background:var(--bg);
-  display:flex;
-  flex-direction:column;
-  touch-action: manipulation;
-}
-
-/* ===== TOP BAR ===== */
+/* TOP */
 .topbar{
-  height:56px;
-  background:#fff;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 16px;
+  height:56px;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 16px;
 }
-.topbar h1{
-  font-size:18px;
-  font-weight:800;
-}
-
+.topbar h1{font-size:18px;font-weight:800}
 .avatar{
-  width:36px;
-  height:36px;
-  border-radius:50%;
+  width:36px;height:36px;border-radius:50%;
   background:linear-gradient(135deg,#ff6a00,#ff9a57);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
-  font-weight:800;
-  display:none;
+  display:none;align-items:center;justify-content:center;
+  color:#fff;font-weight:800;cursor:pointer;
 }
 
-/* ===== CONTENT ===== */
-.iframe-wrap{
-  flex:1;
-  background:#fff;
-}
-iframe{
-  width:100%;
-  height:100%;
-  border:none;
-}
+/* IFRAME */
+.iframe-wrap{flex:1;background:#fff}
+iframe{width:100%;height:100%;border:none}
 
-/* ===== NAV BAR ===== */
+/* NAV */
 .navbar{
-  height:68px;
-  background:#fff;
-  border-top:1px solid var(--border);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  padding-bottom:env(safe-area-inset-bottom);
+  height:68px;background:#fff;border-top:1px solid var(--border);
+  display:flex;justify-content:space-around;align-items:center;
 }
-
 .nav-item{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  font-size:11px;
-  color:var(--muted);
-  cursor:pointer;
-  position:relative;
+  font-size:11px;color:var(--muted);
+  display:flex;flex-direction:column;align-items:center;
 }
-
 .nav-item i{font-size:22px}
 .nav-item.active{color:var(--primary)}
 
-.badge{
-  position:absolute;
-  top:0;
-  right:-6px;
-  background:var(--primary);
-  color:#fff;
-  font-size:9px;
-  padding:2px 5px;
-  border-radius:999px;
+/* OVERLAY */
+#overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);
+  display:flex;align-items:center;justify-content:center;z-index:999;
 }
 
-/* ===== LOADING ===== */
-#overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:999;
+/* PROFILE MODAL */
+#profileModal{
+  position:fixed;inset:0;background:rgba(0,0,0,.4);
+  display:none;align-items:flex-end;z-index:1000;
 }
-#overlay div{
-  background:#fff;
-  padding:22px 32px;
-  border-radius:14px;
-  font-weight:700;
+.profile-box{
+  background:#fff;width:100%;border-radius:18px 18px 0 0;
+  padding:20px;
+}
+.profile-box h3{margin-bottom:12px}
+.profile-box input{
+  width:100%;padding:12px;border-radius:12px;
+  border:1px solid var(--border);margin-bottom:10px;
+}
+.profile-box button{
+  width:100%;padding:14px;border:none;border-radius:999px;
+  background:var(--primary);color:#fff;font-weight:800;
+}
+.profile-img{
+  width:80px;height:80px;border-radius:50%;
+  background:#eee;margin:0 auto 12px;
+  background-size:cover;background-position:center;
 }
 </style>
 </head>
@@ -151,7 +97,7 @@ iframe{
 
 <div class="topbar">
   <h1>Agenda Fácil</h1>
-  <div class="avatar" id="avatar">A</div>
+  <div class="avatar" id="avatar" onclick="openProfile()">A</div>
 </div>
 
 <div class="iframe-wrap">
@@ -159,56 +105,86 @@ iframe{
 </div>
 
 <nav class="navbar">
-  <div class="nav-item active" onclick="go(this,'home.html')">
-    <i class="ri-home-5-line"></i>Home
-  </div>
-  <div class="nav-item" onclick="go(this,'agenda.html')">
-    <i class="ri-calendar-line"></i>Agenda
-  </div>
-  <div class="nav-item" onclick="go(this,'mensagens.html')">
-    <i class="ri-mail-line"></i>Mensagens
-    <span class="badge">2</span>
-  </div>
-  <div class="nav-item" onclick="go(this,'perfil.html')">
-    <i class="ri-user-3-line"></i>Perfil
-  </div>
+  <div class="nav-item active" onclick="go(this,'home.html')"><i class="ri-home-5-line"></i>Home</div>
+  <div class="nav-item" onclick="go(this,'agenda.html')"><i class="ri-calendar-line"></i>Agenda</div>
+  <div class="nav-item" onclick="go(this,'perfil.html')"><i class="ri-user-3-line"></i>Perfil</div>
 </nav>
+
+<!-- PROFILE MODAL -->
+<div id="profileModal" onclick="closeProfile(event)">
+  <div class="profile-box" onclick="event.stopPropagation()">
+    <div class="profile-img" id="profileImg"></div>
+    <input id="pNegocio" placeholder="Nome da loja">
+    <input id="pEmail" disabled>
+    <input id="pWhatsapp" placeholder="WhatsApp">
+    <input id="pEmailContato" placeholder="Email de contato">
+    <input type="file" id="pFoto">
+    <button onclick="salvarPerfil()">Salvar</button>
+  </div>
+</div>
 
 <script>
 const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
+let user=null;
 
 /* AUTH */
 async function proteger(){
   const {data:{session}} = await sb.auth.getSession();
-  if(!session){ location.href="login.html"; return; }
+  if(!session){location.href="login.html";return;}
+  user=session.user;
 
-  const {data:profile} = await sb
-    .from("user_profile")
-    .select("negocio")
-    .eq("user_id",session.user.id)
-    .single();
+  const {data:p} = await sb.from("user_profile")
+    .select("*").eq("user_id",user.id).single();
 
-  avatar.innerText = profile.negocio[0].toUpperCase();
-  document.getElementById("overlay").style.display="none";
+  avatar.innerText=p.negocio[0].toUpperCase();
+  pNegocio.value=p.negocio;
+  pEmail.value=user.email;
+  pWhatsapp.value=p.whatsapp||"";
+  pEmailContato.value=p.email_contato||"";
+  if(p.avatar_url) profileImg.style.backgroundImage=`url(${p.avatar_url})`;
+
+  overlay.style.display="none";
 }
 proteger();
 
 /* NAV */
 function go(el,page){
-  document.querySelectorAll(".nav-item")
-    .forEach(i=>i.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
   el.classList.add("active");
-
-  frame.src = page;
-  avatar.style.display = page === "home.html" ? "flex" : "none";
+  frame.src=page;
+  avatar.style.display = page==="home.html" ? "flex":"none";
 }
 
-/* PWA */
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js");
+/* PROFILE */
+function openProfile(){ profileModal.style.display="flex"; }
+function closeProfile(e){ profileModal.style.display="none"; }
+
+/* SAVE PROFILE */
+async function salvarPerfil(){
+  let avatarUrl=null;
+  if(pFoto.files.length){
+    const path=`${user.id}.jpg`;
+    await sb.storage.from("avatars").upload(path,pFoto.files[0],{upsert:true});
+    const {data:u}=await sb.storage.from("avatars").createSignedUrl(path,31536000);
+    avatarUrl=u.signedUrl;
+
+    // atualiza produtos também
+    await sb.from("produtos_servicos")
+      .update({imagem_url:avatarUrl})
+      .eq("user_id",user.id);
+  }
+
+  await sb.from("user_profile").update({
+    negocio:pNegocio.value,
+    whatsapp:pWhatsapp.value,
+    email_contato:pEmailContato.value,
+    avatar_url:avatarUrl
+  }).eq("user_id",user.id);
+
+  location.reload();
 }
 </script>
 
