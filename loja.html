@@ -313,7 +313,13 @@ header h1{
     </div>
     <div class="chat" id="chat"></div>
     <div class="chat-input">
-      <input id="input" placeholder="Digite aqui…">
+<input
+  id="input"
+  placeholder="Digite aqui…"
+  autocomplete="off"
+  autocorrect="off"
+  autocapitalize="off"
+>
       <button onclick="enviar()">Enviar</button>
     </div>
   </div>
@@ -395,7 +401,7 @@ function abrirChat(id=null){
 function fecharChat(){chatOverlay.style.display="none"}
 
 function enviar(){
-  const v=input.value.trim();
+let v = input.value.trim();
   if(!v)return;
   addMsg(v,"user");
   input.value="";
@@ -405,10 +411,19 @@ function enviar(){
     etapa="whats";
     delay(()=>addMsg("Seu WhatsApp 📱"));
   }
-  else if(etapa==="whats"){
-    cliente.whats=v;
-    servicoSelecionado ? listarDias() : listarServicosChat();
+else if(etapa==="whats"){
+  const limpo = v.replace(/\D/g,'');
+  if(limpo.length < 10){
+    delay(()=>addMsg("Digite um WhatsApp válido 📱"));
+    return;
   }
+
+  cliente.whats = limpo;
+  input.type = "text";
+  input.value = "";
+  servicoSelecionado ? listarDias() : listarServicosChat();
+}
+
 }
 
 async function listarServicosChat(){
@@ -494,6 +509,29 @@ async function confirmar(h){
   });
 }
 
+function maskCelular(v){
+  v = v.replace(/\D/g,'').slice(0,11);
+
+  if(v.length >= 11){
+    return v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+  }
+  if(v.length >= 7){
+    return v.replace(/^(\d{2})(\d{5})(\d+)/, "($1) $2-$3");
+  }
+  if(v.length >= 3){
+    return v.replace(/^(\d{2})(\d+)/, "($1) $2");
+  }
+  return v;
+}
+
+
+
+
+
+
+
+
+  
 /* ===== INIT ===== */
 async function init(){
   const {data:p}=await sb.from("user_profile")
