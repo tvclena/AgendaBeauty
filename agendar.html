@@ -216,7 +216,7 @@ const lojaId = new URLSearchParams(location.search).get("l");
 let servicos = [];
 let servicoSelecionado = null;
 
-/* ===== LOAD ===== */
+/* ===== LOAD SERVIÇOS ===== */
 async function load(){
   const { data, error } = await sb
     .from("produtos_servicos")
@@ -232,7 +232,7 @@ async function load(){
     return;
   }
 
-  servicos = data;
+  servicos = data || [];
   render();
 }
 
@@ -279,25 +279,33 @@ mWhats.addEventListener("input", e=>{
   e.target.value = maskWhats(e.target.value);
 });
 
-/* ===== CONFIRMAR ===== */
+/* ===== CONFIRMAR AGENDAMENTO (INTEGRAÇÃO REAL) ===== */
 function confirmar(){
-  if(!mNome.value.trim()){
+  const nome = mNome.value.trim();
+  const whats = mWhats.value.replace(/\D/g,'');
+
+  if(!nome){
     alert("Informe seu nome completo");
     return;
   }
-  if(mWhats.value.replace(/\D/g,'').length < 10){
+  if(whats.length < 10){
     alert("Informe um WhatsApp válido");
     return;
   }
 
-  // 👉 próximo passo: calendário
-  alert(
-    `Serviço: ${servicoSelecionado.nome}\n` +
-    `Nome: ${mNome.value}\n` +
-    `WhatsApp: ${mWhats.value}`
-  );
+  // 🔐 SALVA CONTEXTO DO AGENDAMENTO
+  sessionStorage.setItem("agendamento", JSON.stringify({
+    loja_id: lojaId,
+    servico_id: servicoSelecionado.id,
+    servico_nome: servicoSelecionado.nome,
+    duracao: servicoSelecionado.duracao_minutos,
+    preco: servicoSelecionado.preco,
+    cliente_nome: nome,
+    cliente_whatsapp: whats
+  }));
 
-  closeModal();
+  // 👉 PRÓXIMA ETAPA
+  location.href = `escolher-dia.html?l=${lojaId}`;
 }
 
 load();
