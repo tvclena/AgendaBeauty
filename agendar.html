@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Agendamento</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -17,19 +17,22 @@
   --border:#e5e7eb;
 }
 
-*{box-sizing:border-box;font-family:Inter}
+*{
+  box-sizing:border-box;
+  font-family:Inter;
+  -webkit-tap-highlight-color:transparent;
+}
 
-body{
+html,body{
   margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden; /* 🔒 TRAVA VIEWPORT */
   background:var(--bg);
-  height:100vh;
-  overflow:hidden;
 }
 
 /* ===== TOPO FIXO ===== */
 .top{
-  position:fixed;
-  top:0;left:0;right:0;
   height:56px;
   background:#fff;
   border-bottom:1px solid var(--border);
@@ -37,19 +40,19 @@ body{
   align-items:center;
   padding:0 16px;
   font-weight:800;
-  z-index:10;
 }
 
-/* ===== CHAT ===== */
+/* ===== CONTAINER FIXO ===== */
+.wrapper{
+  height:calc(100% - 136px); /* topo + input */
+  overflow:hidden;
+}
+
+/* ===== CHAT (ÚNICO SCROLL) ===== */
 .chat{
-  position:fixed;
-  top:56px;
-  bottom:80px;
-  left:0;
-  right:0;
-  padding:14px;
+  height:100%;
   overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
+  padding:14px;
 }
 
 .msg{
@@ -72,7 +75,6 @@ body{
   display:flex;
   gap:12px;
   overflow-x:auto;
-  padding:6px 0;
 }
 
 .service{
@@ -80,8 +82,8 @@ body{
   background:#fff;
   border-radius:18px;
   overflow:hidden;
-  position:relative;
   cursor:pointer;
+  position:relative;
 }
 
 .service img{
@@ -96,11 +98,10 @@ body{
   font-size:13px;
 }
 
-/* OVERLAY */
 .loading{
   position:absolute;
   inset:0;
-  background:rgba(255,255,255,.8);
+  background:rgba(255,255,255,.85);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -116,12 +117,11 @@ body{
 
 .day{
   background:#fff;
-  border-radius:14px;
-  padding:14px 0;
+  border-radius:12px;
+  padding:16px 0;
   text-align:center;
   font-weight:800;
   cursor:pointer;
-  position:relative;
 }
 
 /* ===== HORÁRIOS ===== */
@@ -140,18 +140,14 @@ body{
   cursor:pointer;
 }
 
-/* ===== INPUT ===== */
+/* ===== INPUT FIXO ===== */
 .input{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
   height:80px;
-  padding:10px;
   background:#fff;
   border-top:1px solid var(--border);
   display:flex;
   gap:10px;
+  padding:10px;
 }
 
 .input input{
@@ -159,6 +155,7 @@ body{
   padding:14px;
   border-radius:999px;
   border:1px solid var(--border);
+  font-size:15px;
 }
 
 .input button{
@@ -184,7 +181,9 @@ body{
 
 <div class="top">Agendamento</div>
 
-<div class="chat" id="chat"></div>
+<div class="wrapper">
+  <div class="chat" id="chat"></div>
+</div>
 
 <div class="input">
   <input id="input" placeholder="Digite aqui">
@@ -198,15 +197,23 @@ const sb = supabase.createClient(
 );
 
 const lojaId = new URLSearchParams(location.search).get("l");
-let etapa="nome", dados={}, agenda=[], duracao=0;
+
+let etapa="nome";
+let dados={};
+let agenda=[];
+let duracao=0;
+let bloqueado=false;
 
 const chat=document.getElementById("chat");
 const input=document.getElementById("input");
 
 function scrollFinal(){
-  requestAnimationFrame(()=>chat.scrollTop=chat.scrollHeight);
+  chat.scrollTop = chat.scrollHeight;
 }
-function delay(ms=1000){return new Promise(r=>setTimeout(r,ms));}
+
+function delay(ms=1000){
+  return new Promise(r=>setTimeout(r,ms));
+}
 
 function bot(t){
   delay().then(()=>{
@@ -214,6 +221,7 @@ function bot(t){
     scrollFinal();
   });
 }
+
 function user(t){
   chat.innerHTML+=`<div class="msg user">${t}</div>`;
   scrollFinal();
@@ -223,10 +231,12 @@ function user(t){
 bot("Olá 😊 Vamos agendar seu horário?");
 bot("Qual é o seu nome completo?");
 
-/* ===== SEND ===== */
 async function send(){
+  if(bloqueado) return;
+
   const v=input.value.trim();
   if(!v) return;
+
   user(v);
   input.value="";
   scrollFinal();
@@ -237,6 +247,13 @@ async function send(){
     bot(`Prazer, <b>${dados.nome}</b>! Qual seu WhatsApp?`);
     input.type="tel";
     input.inputMode="numeric";
+    input.addEventListener("input",()=>{
+      input.value = input.value
+        .replace(/\D/g,'')
+        .slice(0,11)
+        .replace(/^(\d{2})(\d)/,"($1) $2")
+        .replace(/(\d{5})(\d)/,"$1-$2");
+    },{once:true});
     return;
   }
 
@@ -248,7 +265,6 @@ async function send(){
   }
 }
 
-/* ===== SERVIÇOS ===== */
 async function listarServicos(){
   const {data}=await sb.from("produtos_servicos")
     .select("*")
@@ -269,8 +285,10 @@ async function listarServicos(){
   scrollFinal();
 }
 
-/* ===== DIAS ===== */
 async function selectServico(el,id,d){
+  if(bloqueado) return;
+  bloqueado=true;
+
   el.innerHTML+=`<div class="loading">Carregando…</div>`;
   dados.servico=id;
   duracao=d;
@@ -282,13 +300,12 @@ async function selectServico(el,id,d){
     .gte("data",hoje)
     .eq("fechado",false);
 
-  el.querySelector(".loading")?.remove();
   bot("Escolha o dia:");
 
   chat.innerHTML+=`
     <div class="days">
       ${data.map(d=>`
-        <div class="day" onclick='selectDia(this,"${d.data}",${JSON.stringify(d.horarios).replace(/"/g,"&quot;")})'>
+        <div class="day" onclick="selectDia('${d.data}',${JSON.stringify(d.horarios).replace(/"/g,"&quot;")})">
           ${new Date(d.data).getDate()}
         </div>
       `).join("")}
@@ -296,9 +313,9 @@ async function selectServico(el,id,d){
   scrollFinal();
 }
 
-/* ===== HORÁRIOS ===== */
-function selectDia(el,data,horarios){
-  el.innerHTML+=`<div class="loading">…</div>`;
+function selectDia(data,horarios){
+  if(dados.data) return;
+
   dados.data=data;
   agenda=horarios;
 
@@ -311,7 +328,6 @@ function selectDia(el,data,horarios){
     }
   });
 
-  el.querySelector(".loading")?.remove();
   bot("Escolha o horário:");
 
   chat.innerHTML+=`
@@ -323,8 +339,9 @@ function selectDia(el,data,horarios){
   scrollFinal();
 }
 
-/* ===== CONFIRMAR ===== */
 async function confirmar(h){
+  if(dados.inicio) return;
+
   dados.inicio=h;
   dados.fim=toHour(toMin(h)+duracao);
 
@@ -348,6 +365,7 @@ async function confirmar(h){
     </div>
   `);
 }
+
 function toMin(h){const[a,b]=h.split(":").map(Number);return a*60+b;}
 function toHour(m){return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");}
 </script>
