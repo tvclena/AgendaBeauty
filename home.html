@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Home • Agenda Fácil</title>
 
-<!-- ❌ BLOQUEIA ZOOM -->
 <meta name="viewport"
   content="width=device-width,
   initial-scale=1,
@@ -26,6 +25,7 @@
   --radius:16px;
 }
 
+/* RESET CRÍTICO */
 *{
   margin:0;
   padding:0;
@@ -34,14 +34,28 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html,body{
-  width:100%;
+html, body{
+  width:100vw;
+  max-width:100vw;
   height:100%;
+  overflow-x:hidden !important;
   overscroll-behavior: none;
 }
 
+/* SCROLL APENAS VERTICAL, SEM BARRA */
 body{
   background:var(--bg);
+  overflow-y:auto;
+  scrollbar-width:none; /* Firefox */
+}
+body::-webkit-scrollbar{
+  display:none; /* Chrome / Safari */
+}
+
+/* CONTAINER REAL DO APP */
+.app{
+  width:100%;
+  max-width:100vw;
   padding:16px;
 }
 
@@ -60,7 +74,7 @@ body{
 /* ================= KPIs ================= */
 .grid{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
+  grid-template-columns:repeat(2, minmax(0,1fr));
   gap:12px;
   margin-bottom:20px;
 }
@@ -71,6 +85,7 @@ body{
   padding:14px;
   box-shadow:0 6px 18px rgba(0,0,0,.06);
   position:relative;
+  overflow:hidden; /* evita vazamento */
 }
 
 .card small{
@@ -117,6 +132,14 @@ body{
   justify-content:space-between;
   align-items:center;
   font-size:13px;
+  gap:10px;
+}
+
+.item span{
+  max-width:70%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .badge{
@@ -126,6 +149,7 @@ body{
   border-radius:999px;
   font-size:11px;
   font-weight:700;
+  white-space:nowrap;
 }
 
 .empty{
@@ -139,75 +163,69 @@ body{
 
 <body>
 
-<div class="header">
-  <h1>Bem-vindo ao <span>Agenda Fácil</span></h1>
-</div>
+<div class="app">
 
-<!-- KPIs -->
-<div class="grid">
-  <div class="card">
-    <small>Agendamentos hoje</small>
-    <h2 id="kpiHoje">0</h2>
-    <i class="ri-calendar-check-line"></i>
+  <div class="header">
+    <h1>Bem-vindo ao <span>Agenda Fácil</span></h1>
   </div>
 
-  <div class="card">
-    <small>Clientes</small>
-    <h2 id="kpiClientes">0</h2>
-    <i class="ri-user-3-line"></i>
+  <!-- KPIs -->
+  <div class="grid">
+    <div class="card">
+      <small>Agendamentos hoje</small>
+      <h2 id="kpiHoje">0</h2>
+      <i class="ri-calendar-check-line"></i>
+    </div>
+
+    <div class="card">
+      <small>Clientes</small>
+      <h2 id="kpiClientes">0</h2>
+      <i class="ri-user-3-line"></i>
+    </div>
+
+    <div class="card">
+      <small>Faturamento mês</small>
+      <h2 id="kpiFaturamento">R$ 0</h2>
+      <i class="ri-currency-line"></i>
+    </div>
+
+    <div class="card">
+      <small>Serviços ativos</small>
+      <h2 id="kpiServicos">0</h2>
+      <i class="ri-scissors-line"></i>
+    </div>
   </div>
 
-  <div class="card">
-    <small>Faturamento mês</small>
-    <h2 id="kpiFaturamento">R$ 0</h2>
-    <i class="ri-currency-line"></i>
+  <!-- AGENDA -->
+  <div class="list">
+    <h3>Agenda de hoje</h3>
+    <div id="agendaHoje">
+      <div class="empty">Nenhum horário agendado hoje</div>
+    </div>
   </div>
 
-  <div class="card">
-    <small>Serviços ativos</small>
-    <h2 id="kpiServicos">0</h2>
-    <i class="ri-scissors-line"></i>
-  </div>
-</div>
+  <!-- AVISOS -->
+  <div class="list">
+    <h3>Avisos</h3>
 
-<!-- AGENDA -->
-<div class="list">
-  <h3>Agenda de hoje</h3>
-  <div id="agendaHoje">
-    <div class="empty">Nenhum horário agendado hoje</div>
-  </div>
-</div>
+    <div class="item">
+      <span>Complete seu cadastro</span>
+      <span class="badge">Importante</span>
+    </div>
 
-<!-- AVISOS -->
-<div class="list">
-  <h3>Avisos</h3>
-
-  <div class="item">
-    <span>Complete seu cadastro</span>
-    <span class="badge">Importante</span>
+    <div class="item">
+      <span>Configure seus horários</span>
+      <span class="badge">Agenda</span>
+    </div>
   </div>
 
-  <div class="item">
-    <span>Configure seus horários</span>
-    <span class="badge">Agenda</span>
-  </div>
 </div>
 
 <script>
-/* ================= SUPABASE ================= */
 const sbHome = window.supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
-
-/* FUTURO: carregar dados */
-async function carregarDados(){
-  const { data:{session} } = await sbHome.auth.getSession();
-  if(!session) return;
-
-  // consultas futuras
-}
-// carregarDados();
 </script>
 
 </body>
