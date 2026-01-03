@@ -26,61 +26,74 @@
   --danger:#dc2626;
 }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Inter;
-}
-
-body{
-  background:var(--bg);
-  color:var(--text);
-  padding-bottom:72px;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
+body{background:var(--bg);color:var(--text);padding-bottom:74px}
 
 /* TOPO */
 .top{
   background:var(--primary);
   color:#fff;
-  padding:18px;
+  padding:16px;
   font-weight:800;
   text-align:center;
 }
 
-/* PERFIL CLIENTE */
+/* PERFIL */
 .profile{
   background:#fff;
   margin:14px;
   padding:14px;
-  border-radius:14px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.profile-left{
   display:flex;
   align-items:center;
   gap:12px;
 }
-.profile .avatar{
-  width:42px;
-  height:42px;
-  border-radius:50%;
+.avatar{
+  width:44px;height:44px;border-radius:50%;
   background:var(--primary);
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:800;
+  color:#fff;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
 }
 .profile small{color:var(--muted)}
+.logout{
+  font-size:12px;
+  color:#dc2626;
+  font-weight:800;
+  cursor:pointer;
+}
+
+/* BANNER */
+#banner{
+  display:none;
+  margin:14px;
+  border-radius:18px;
+  overflow:hidden;
+  position:relative;
+}
+#banner img{
+  width:100%;
+  height:160px;
+  object-fit:cover;
+}
+#banner span{
+  position:absolute;
+  bottom:0;left:0;right:0;
+  padding:10px;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  font-weight:800;
+}
 
 /* SEÇÕES */
-.section{
-  display:none;
-  padding:14px;
-}
-.section.active{
-  display:block;
-}
+.section{display:none;padding:14px}
+.section.active{display:block}
 
-/* CARDS */
+/* CARD */
 .card{
   background:var(--card);
   border-radius:16px;
@@ -103,13 +116,11 @@ body{
   object-fit:cover;
   border-radius:12px;
 }
-.item strong{
-  display:block;
-  margin-top:6px;
-}
+.item strong{display:block;margin-top:6px}
+.item small{color:var(--muted)}
 .item button{
   width:100%;
-  margin-top:6px;
+  margin-top:8px;
   padding:10px;
   border:none;
   border-radius:999px;
@@ -125,17 +136,14 @@ body{
   overflow-x:auto;
 }
 .day{
-  min-width:70px;
+  min-width:72px;
   padding:10px;
   text-align:center;
   border-radius:12px;
   background:#e5e7eb;
   font-weight:700;
 }
-.day.active{
-  background:var(--primary);
-  color:#fff;
-}
+.day.active{background:var(--primary);color:#fff}
 
 /* HORÁRIOS */
 .times{
@@ -148,23 +156,15 @@ body{
   padding:10px;
   text-align:center;
   border-radius:10px;
-  font-weight:700;
+  font-weight:800;
 }
-.time.available{
-  background:var(--success);
-  color:#fff;
-}
-.time.unavailable{
-  background:var(--danger);
-  color:#fff;
-}
+.time.available{background:var(--success);color:#fff}
+.time.unavailable{background:var(--danger);color:#fff}
 
 /* NAVBAR */
 nav{
   position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
+  bottom:0;left:0;right:0;
   background:#fff;
   border-top:1px solid #ddd;
   display:flex;
@@ -178,22 +178,28 @@ nav button{
   font-weight:800;
   color:var(--muted);
 }
-nav button.active{
-  color:var(--primary);
-}
+nav button.active{color:var(--primary)}
 </style>
 </head>
 
 <body>
 
-<div class="top">Agendamento</div>
+<div class="top" id="nomeLoja">Agendamento</div>
 
 <div class="profile">
-  <div class="avatar">👤</div>
-  <div>
-    <strong id="clienteNome">Visitante</strong><br>
-    <small id="clienteWhats">Informe seu WhatsApp</small>
+  <div class="profile-left">
+    <div class="avatar" id="avatar">👤</div>
+    <div>
+      <strong id="clienteNome">Visitante</strong><br>
+      <small id="clienteWhats"></small>
+    </div>
   </div>
+  <div class="logout" onclick="sair()">Sair</div>
+</div>
+
+<div id="banner">
+  <img id="bannerImg">
+  <span id="bannerTxt"></span>
 </div>
 
 <!-- SERVIÇOS -->
@@ -206,61 +212,100 @@ nav button.active{
   <div class="card">
     <strong id="servicoSelecionado">Selecione um serviço</strong>
   </div>
-
   <div class="days" id="days"></div>
   <div class="times" id="times"></div>
 </div>
 
 <!-- MEUS -->
 <div id="meus" class="section">
-  <div class="card">
-    Meus agendamentos aparecerão aqui
-  </div>
+  <div class="card">Meus agendamentos aparecerão aqui</div>
 </div>
 
 <nav>
-  <button id="btnServ" class="active" onclick="show('servicos')">Serviços</button>
-  <button id="btnAg" onclick="show('agendar')">Agendar</button>
-  <button id="btnMeus" onclick="show('meus')">Meus</button>
+  <button id="b1" class="active" onclick="show('servicos')">Serviços</button>
+  <button id="b2" onclick="show('agendar')">Agendar</button>
+  <button id="b3" onclick="show('meus')">Meus</button>
 </nav>
 
 <script>
 const sb = supabase.createClient(
-  "https://egxjgmzukjyyxmkukwub.supabase.co",
-  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+ "https://egxjgmzukjyyxmkukwub.supabase.co",
+ "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
 const lojaId = new URLSearchParams(location.search).get("l");
-let servicos = [];
-let servicoAtual = null;
+let servicos=[], servicoAtual=null;
+
+/* LOGIN CLIENTE */
+function initCliente(){
+  let nome = localStorage.getItem("cliente_nome");
+  let whats = localStorage.getItem("cliente_whats");
+
+  if(!nome || !whats){
+    nome = prompt("Seu nome:");
+    whats = prompt("Seu WhatsApp:");
+    localStorage.setItem("cliente_nome",nome);
+    localStorage.setItem("cliente_whats",whats);
+  }
+
+  clienteNome.innerText = nome;
+  clienteWhats.innerText = whats;
+  avatar.innerText = nome[0].toUpperCase();
+}
+
+function sair(){
+  localStorage.clear();
+  location.reload();
+}
 
 /* NAV */
 function show(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-
   document.getElementById(id).classList.add('active');
-  if(id==='servicos') btnServ.classList.add('active');
-  if(id==='agendar') btnAg.classList.add('active');
-  if(id==='meus') btnMeus.classList.add('active');
+  if(id==='servicos') b1.classList.add('active');
+  if(id==='agendar') b2.classList.add('active');
+  if(id==='meus') b3.classList.add('active');
+}
+
+/* LOJA */
+async function carregarLoja(){
+  const {data:p} = await sb.from("user_profile")
+    .select("negocio,avatar_url")
+    .eq("user_id",lojaId).single();
+
+  nomeLoja.innerText = p?.negocio || "Agendamento";
+
+  const {data:cfg} = await sb.from("config_loja")
+    .select("*").eq("user_id",lojaId).single();
+
+  if(cfg?.cor_primaria){
+    document.documentElement.style.setProperty('--primary',cfg.cor_primaria);
+    themeColor.content = cfg.cor_primaria;
+  }
+
+  if(cfg?.banner_ativo){
+    banner.style.display="block";
+    bannerImg.src = cfg.banner_url;
+    bannerTxt.innerText = cfg.banner_texto;
+  }
 }
 
 /* SERVIÇOS */
 async function carregarServicos(){
-  const { data } = await sb
-    .from("produtos_servicos")
+  const {data} = await sb.from("produtos_servicos")
     .select("*")
-    .eq("user_id", lojaId)
+    .eq("user_id",lojaId)
     .eq("tipo","SERVICO")
-    .eq("ativo", true);
+    .eq("ativo",true);
 
-  servicos = data || [];
+  servicos=data||[];
 
-  listaServicos.innerHTML = servicos.map(s=>`
+  listaServicos.innerHTML=servicos.map(s=>`
     <div class="item card">
-      <img src="${s.imagem_url || ''}">
+      <img src="${s.imagem_url||''}">
       <strong>${s.nome}</strong>
-      <small>R$ ${Number(s.preco).toFixed(2)}</small>
+      <small>${s.duracao_minutos||0} min • R$ ${Number(s.preco).toFixed(2)}</small>
       <button onclick="selecionarServico('${s.id}')">Agendar</button>
     </div>
   `).join("");
@@ -275,15 +320,14 @@ function selecionarServico(id){
 
 /* DIAS */
 function carregarDias(){
-  const hoje = new Date();
-  const arr = [];
+  const hoje=new Date();
+  const arr=[];
   for(let i=0;i<7;i++){
-    const d = new Date();
+    const d=new Date();
     d.setDate(hoje.getDate()+i);
     arr.push(d.toISOString().slice(0,10));
   }
-
-  days.innerHTML = arr.map(d=>`
+  days.innerHTML=arr.map(d=>`
     <div class="day" onclick="selecionarDia('${d}',this)">
       ${d.slice(8,10)}/${d.slice(5,7)}
     </div>
@@ -295,32 +339,30 @@ async function selecionarDia(data,el){
   document.querySelectorAll('.day').forEach(d=>d.classList.remove('active'));
   el.classList.add('active');
 
-  const { data:agenda } = await sb
-    .from("agenda_loja")
+  const {data:agenda}=await sb.from("agenda_loja")
     .select("*")
-    .eq("user_id", lojaId)
-    .eq("data", data)
-    .single();
+    .eq("user_id",lojaId)
+    .eq("data",data).single();
 
-  if(!agenda || agenda.fechado){
-    times.innerHTML = `<div class="time unavailable">Fechado</div>`;
+  if(!agenda||agenda.fechado){
+    times.innerHTML='<div class="time unavailable">Fechado</div>';
     return;
   }
 
-  const horarios = JSON.parse(agenda.horarios || "[]");
+  const hrs=JSON.parse(agenda.horarios||"[]");
 
-  times.innerHTML = horarios.map(h=>`
-    <div class="time available">
-      ${h.inicio}
-    </div>
+  times.innerHTML=hrs.map(h=>`
+    <div class="time available">${h.inicio}</div>
   `).join("");
 }
 
 /* INIT */
 if(!lojaId){
-  document.body.innerHTML="<h2 style='padding:40px'>Loja inválida</h2>";
+ document.body.innerHTML="<h2 style='padding:40px'>Loja inválida</h2>";
 }else{
-  carregarServicos();
+ initCliente();
+ carregarLoja();
+ carregarServicos();
 }
 </script>
 
