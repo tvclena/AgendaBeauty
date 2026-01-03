@@ -2,8 +2,14 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Entrar • AgendaBeauty</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entrar • Agenda Fácil</title>
+
+<meta name="viewport"
+  content="width=device-width,
+  initial-scale=1,
+  maximum-scale=1,
+  user-scalable=no,
+  viewport-fit=cover">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -14,6 +20,7 @@
   --border:#e5e7eb;
   --radius:18px;
   --danger:#c62828;
+  --muted:#6b7280;
 }
 
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
@@ -38,7 +45,7 @@ body{
   background:linear-gradient(120deg,rgba(0,0,0,.75),rgba(0,0,0,.3));
 }
 .left div{position:relative;z-index:2;padding:80px}
-.left h1{font-size:40px}
+.left h1{font-size:38px}
 .left span{color:var(--primary)}
 
 /* RIGHT */
@@ -67,8 +74,32 @@ button{
   border-radius:30px;
   background:var(--primary);
   color:#fff;
-  font-weight:700;
+  font-weight:800;
   cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+
+/* LOADING BUTTON */
+button.loading{
+  pointer-events:none;
+  opacity:.85;
+}
+button.loading::after{
+  content:"";
+  width:22px;
+  height:22px;
+  border:3px solid rgba(255,255,255,.4);
+  border-top-color:#fff;
+  border-radius:50%;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{
+  to{transform:translate(-50%,-50%) rotate(360deg)}
 }
 
 .msg{
@@ -93,7 +124,8 @@ button{
   margin-top:8px;
 }
 
-#overlay{
+/* OVERLAY */
+#overlay,#welcome{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.55);
@@ -102,23 +134,37 @@ button{
   justify-content:center;
   z-index:999;
 }
-#overlay div{
+.modal{
   background:#fff;
-  padding:30px 40px;
-  border-radius:16px;
-  font-weight:700;
+  padding:36px;
+  border-radius:18px;
+  text-align:center;
+  max-width:380px;
 }
+.modal h3{margin-bottom:6px}
+.modal p{color:var(--muted);font-size:14px}
 </style>
 </head>
 
 <body>
 
-<div id="overlay"><div>Validando acesso…</div></div>
+<!-- OVERLAY -->
+<div id="overlay">
+  <div class="modal">Validando acesso…</div>
+</div>
+
+<!-- WELCOME -->
+<div id="welcome">
+  <div class="modal">
+    <h3 id="welcomeTitle">Bem-vindo 👋</h3>
+    <p>Estamos preparando seu painel</p>
+  </div>
+</div>
 
 <div class="left">
   <div>
     <h1>A gestão do seu salão<br>começa com um <span>login</span></h1>
-    <p>Controle agenda, clientes e profissionais em um só lugar.</p>
+    <p>Agenda, clientes e controle em um só lugar.</p>
   </div>
 </div>
 
@@ -135,7 +181,7 @@ button{
     <form id="loginForm">
       <input id="email" type="email" placeholder="E-mail" required>
       <input id="senha" type="password" placeholder="Senha" required>
-      <button type="submit">Entrar</button>
+      <button id="btnLogin" type="submit">Entrar</button>
     </form>
 
     <div class="links">
@@ -147,28 +193,31 @@ button{
 </div>
 
 <script>
-/* =================================================
-   SUPABASE CLIENT — SEM CONFLITO
-   ================================================= */
-if(!window.sb){
-  window.sb = window.supabase.createClient(
-    "https://egxjgmzukjyyxmkukwub.supabase.co",
-    "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
-  );
-}
-const sb = window.sb;
+/* SUPABASE */
+const sb = supabase.createClient(
+  "https://egxjgmzukjyyxmkukwub.supabase.co",
+  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+);
 
-/* ELEMENTOS */
 const overlay = document.getElementById("overlay");
+const welcome = document.getElementById("welcome");
 const errorBox = document.getElementById("errorBox");
 const emailInput = document.getElementById("email");
 const senhaInput = document.getElementById("senha");
+const btnLogin = document.getElementById("btnLogin");
+
+/* ✅ PREENCHE AUTOMATICAMENTE APÓS CADASTRO */
+const savedEmail = localStorage.getItem("cad_email");
+const savedSenha = localStorage.getItem("cad_senha");
+if(savedEmail) emailInput.value = savedEmail;
+if(savedSenha) senhaInput.value = savedSenha;
 
 /* LOGIN */
-document.getElementById("loginForm").addEventListener("submit", async (e)=>{
+document.getElementById("loginForm").addEventListener("submit", async e=>{
   e.preventDefault();
-  errorBox.style.display = "none";
-  overlay.style.display = "flex";
+  errorBox.style.display="none";
+  btnLogin.classList.add("loading");
+  overlay.style.display="flex";
 
   const { data, error } = await sb.auth.signInWithPassword({
     email: emailInput.value.trim().toLowerCase(),
@@ -176,46 +225,48 @@ document.getElementById("loginForm").addEventListener("submit", async (e)=>{
   });
 
   if(error){
-    overlay.style.display = "none";
-    errorBox.innerText = "E-mail ou senha inválidos.";
-    errorBox.style.display = "block";
+    overlay.style.display="none";
+    btnLogin.classList.remove("loading");
+    errorBox.innerText="E-mail ou senha inválidos.";
+    errorBox.style.display="block";
     return;
   }
 
-  /* GARANTE QUE EXISTE PERFIL */
-  const { data: profile } = await sb
+  /* BUSCA NOME DO NEGÓCIO */
+  const { data:profile } = await sb
     .from("user_profile")
-    .select("id")
+    .select("negocio")
     .eq("user_id", data.user.id)
     .single();
 
-  overlay.style.display = "none";
+  overlay.style.display="none";
+  welcome.style.display="flex";
+  document.getElementById("welcomeTitle").innerText =
+    `Bem-vindo ao ${profile?.negocio || "Agenda Fácil"} 👋`;
 
-  if(!profile){
-    errorBox.innerText = "Perfil não encontrado.";
-    errorBox.style.display = "block";
-    await sb.auth.signOut();
-    return;
-  }
+  /* LIMPA DADOS TEMPORÁRIOS */
+  localStorage.removeItem("cad_email");
+  localStorage.removeItem("cad_senha");
 
-  /* ✅ REDIRECIONAMENTO GARANTIDO */
-  window.location.replace("dashboard.html");
+  setTimeout(()=>{
+    window.location.replace("dashboard.html");
+  },1600);
 });
 
 /* RESET SENHA */
 document.getElementById("resetSenha").addEventListener("click", async e=>{
   e.preventDefault();
-  const email = emailInput.value.trim().toLowerCase();
-  if(!email){
+  if(!emailInput.value){
     errorBox.innerText="Informe seu e-mail.";
     errorBox.style.display="block";
     return;
   }
 
   overlay.style.display="flex";
-  await sb.auth.resetPasswordForEmail(email,{
-    redirectTo: window.location.origin + "/login.html"
-  });
+  await sb.auth.resetPasswordForEmail(
+    emailInput.value.trim().toLowerCase(),
+    { redirectTo: location.origin + "/login.html" }
+  );
   overlay.style.display="none";
 
   errorBox.innerText="E-mail de recuperação enviado.";
