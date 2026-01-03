@@ -329,9 +329,61 @@ async function salvarPerfil(){
   if(fotoBlob){
     const path=`perfil-${user.id}.jpg`;
     await sb.storage.from("produtos").upload(path,fotoBlob,{upsert:true});
-    const {data:u}=await sb.storage.from("produtos").createSignedUrl(path,31536000);
-    avatarUrl=u.signedUrl;
+async function salvarPerfil(){
+  overlay.style.display = "flex";
+
+  let avatarUrl = null;
+
+  if (fotoBlob) {
+    const path = `perfil-${user.id}.jpg`;
+
+    const { error: uploadError } = await sb.storage
+      .from("produtos")
+      .upload(path, fotoBlob, { upsert: true });
+
+    if (uploadError) {
+      overlay.style.display = "none";
+      alert("Erro ao enviar imagem");
+      return;
+    }
+
+    // ✅ USO CORRETO
+    const { data } = sb.storage
+      .from("produtos")
+      .getPublicUrl(path);
+
+    avatarUrl = data.publicUrl;
+
+    // preview no avatar do topo também
+    avatar.style.backgroundImage = `url(${avatarUrl})`;
   }
+
+  const { error: updateError } = await sb
+    .from("user_profile")
+    .update({
+      negocio: pNegocio.value || null,
+      whatsapp: pWhatsapp.value || null,
+      email_contato: pEmailContato.value || null,
+      avatar_url: avatarUrl,
+      cep: pCep.value || null,
+      rua: pRua.value || null,
+      numero: pNumero.value || null,
+      bairro: pBairro.value || null,
+      cidade: pCidade.value || null,
+      uf: pUf.value || null
+    })
+    .eq("user_id", user.id);
+
+  overlay.style.display = "none";
+
+  if (updateError) {
+    alert("Erro ao salvar perfil");
+    return;
+  }
+
+  closeProfile();
+}
+
 
   await sb.from("user_profile").update({
     negocio:pNegocio.value,
