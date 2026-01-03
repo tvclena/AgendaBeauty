@@ -2,306 +2,305 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Agendar horário</title>
+<title>Agendar serviço</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ff6a00">
+<meta name="viewport"
+  content="width=device-width,
+  initial-scale=1,
+  maximum-scale=1,
+  user-scalable=no,
+  viewport-fit=cover">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  
 <style>
 :root{
   --primary:#ff6a00;
   --bg:#f4f6fb;
-  --card:#ffffff;
   --border:#e5e7eb;
   --text:#111827;
   --muted:#6b7280;
-
-  --ok:#22c55e;
-  --warn:#f97316;
-  --closed:#ef4444;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Inter;
+}
 
 body{
   background:var(--bg);
   padding:16px;
 }
 
-/* HEADER */
-.header{
-  text-align:center;
-  margin-bottom:14px;
+/* ===== SEARCH ===== */
+.search{
+  margin-bottom:16px;
 }
-.header h1{
-  font-size:20px;
-  font-weight:800;
-}
-.header span{color:var(--primary)}
 
-/* CALENDAR */
-.calendar{
+.search input{
+  width:100%;
+  padding:14px 16px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  font-size:14px;
+}
+
+/* ===== GRID ===== */
+.grid{
   display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:6px;
-  margin-bottom:14px;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:14px;
 }
 
-.day{
-  background:#fff;
-  border-radius:10px;
-  padding:10px 0;
-  text-align:center;
-  font-size:13px;
-  font-weight:700;
-  cursor:pointer;
-  border:2px solid transparent;
-}
-
-.day.ok{background:#dcfce7;color:#166534}
-.day.warn{background:#ffedd5;color:#9a3412}
-.day.closed{background:#fee2e2;color:#991b1b}
-
-.day.active{
-  border-color:var(--primary);
-}
-
-/* CARD */
 .card{
   background:#fff;
   border-radius:18px;
-  padding:16px;
-  box-shadow:0 10px 28px rgba(0,0,0,.08);
-  margin-bottom:12px;
-}
-
-/* HORÁRIOS */
-.times{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-}
-.time{
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:10px 0;
-  text-align:center;
-  font-weight:700;
-  font-size:13px;
-  cursor:pointer;
-}
-.time.active{
-  background:var(--primary);
-  color:#fff;
-  border-color:var(--primary);
-}
-
-/* SERVICES */
-.services{
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
   display:flex;
-  gap:10px;
-  overflow-x:auto;
+  flex-direction:column;
 }
-.service{
-  min-width:160px;
-  background:#f9fafb;
-  border-radius:14px;
+
+.card img{
+  width:100%;
+  height:110px;
+  object-fit:cover;
+  background:#eee;
+}
+
+.card-body{
   padding:12px;
-  border:2px solid transparent;
-  cursor:pointer;
+  flex:1;
 }
-.service.active{
-  border-color:var(--primary);
-}
-.service h4{
+
+.card-body strong{
   font-size:14px;
 }
-.service small{
+
+.meta{
+  font-size:12px;
   color:var(--muted);
+  margin:6px 0 10px;
+  display:flex;
+  justify-content:space-between;
 }
 
-/* BUTTON */
-.btn{
-  width:100%;
-  height:48px;
+.price{
+  font-weight:800;
+}
+
+.card button{
+  margin:0 12px 12px;
+  padding:12px;
   border:none;
   border-radius:999px;
   background:var(--primary);
   color:#fff;
-  font-weight:900;
-  font-size:15px;
+  font-weight:800;
   cursor:pointer;
 }
 
-/* POPUP */
-.popup{
+/* ===== MODAL ===== */
+#modal{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.45);
   display:none;
   align-items:center;
   justify-content:center;
-  z-index:1000;
+  z-index:9999;
 }
-.popup-box{
+
+.modal-box{
   background:#fff;
-  border-radius:18px;
+  width:100%;
+  max-width:360px;
+  border-radius:22px;
   padding:20px;
-  width:90%;
-  max-width:340px;
-  text-align:center;
 }
-.popup-box button{
-  margin-top:14px;
+
+.modal-box h3{
+  margin-bottom:6px;
+}
+
+.modal-box p{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:14px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:12px;
+}
+
+.field label{
+  font-size:12px;
+  color:#6b7280;
+}
+
+.field input{
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+}
+
+.actions button{
+  flex:1;
+  padding:12px;
+  border-radius:999px;
+  border:none;
+  font-weight:800;
+}
+
+.confirm{
+  background:var(--primary);
+  color:#fff;
+}
+
+.cancel{
+  background:#e5e7eb;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  <h1>Agendar em <span id="nomeLoja">…</span></h1>
+<div class="search">
+  <input id="busca" placeholder="Buscar serviço">
 </div>
 
-<!-- CALENDÁRIO -->
-<div class="calendar" id="calendar"></div>
+<div id="grid" class="grid"></div>
 
-<!-- HORÁRIOS -->
-<div class="card">
-  <h3>Horários disponíveis</h3>
-  <div class="times" id="times"></div>
-</div>
+<!-- MODAL -->
+<div id="modal" onclick="closeModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <h3 id="mServico">Agendar</h3>
+    <p>Informe seus dados para continuar</p>
 
-<!-- SERVIÇOS -->
-<div class="card">
-  <h3>Escolha o serviço</h3>
-  <div class="services" id="services"></div>
-</div>
+    <div class="field">
+      <label>Nome completo</label>
+      <input id="mNome" placeholder="Seu nome completo">
+    </div>
 
-<button class="btn" onclick="confirmar()">Confirmar agendamento</button>
+    <div class="field">
+      <label>WhatsApp</label>
+      <input id="mWhats" placeholder="(77) 99999-9999" inputmode="numeric">
+    </div>
 
-<!-- POPUP -->
-<div class="popup" id="popup">
-  <div class="popup-box">
-    <strong>Escolha um serviço</strong>
-    <p style="margin-top:6px;color:#6b7280;font-size:14px">
-      Para continuar, selecione o serviço desejado.
-    </p>
-    <button class="btn" onclick="popup.style.display='none'">Ok</button>
+    <div class="actions">
+      <button class="cancel" onclick="closeModal()">Cancelar</button>
+      <button class="confirm" onclick="confirmar()">Continuar</button>
+    </div>
   </div>
 </div>
 
 <script>
-/* SUPABASE */
 const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
 const lojaId = new URLSearchParams(location.search).get("l");
-
-let diaSelecionado = null;
-let horarioSelecionado = null;
+let servicos = [];
 let servicoSelecionado = null;
 
-/* LOAD */
-(async ()=>{
-  const {data:loja} = await sb
-    .from("user_profile")
-    .select("negocio")
-    .eq("user_id",lojaId)
-    .single();
-
-  nomeLoja.innerText = loja?.negocio || "";
-
-  carregarCalendario();
-  carregarServicos();
-})();
-
-/* CALENDÁRIO */
-function carregarCalendario(){
-  calendar.innerHTML="";
-  const hoje = new Date();
-
-  for(let i=0;i<14;i++){
-    const d = new Date();
-    d.setDate(hoje.getDate()+i);
-
-    const el = document.createElement("div");
-    el.className="day ok";
-    el.innerText=d.getDate();
-
-    el.onclick=()=>{
-      document.querySelectorAll(".day").forEach(x=>x.classList.remove("active"));
-      el.classList.add("active");
-      diaSelecionado=d.toISOString().slice(0,10);
-      carregarHorarios();
-    };
-
-    calendar.appendChild(el);
-  }
-}
-
-/* HORÁRIOS */
-function carregarHorarios(){
-  times.innerHTML="";
-  ["09:00","10:00","11:00","14:00","15:00","16:00"].forEach(h=>{
-    const el=document.createElement("div");
-    el.className="time";
-    el.innerText=h;
-    el.onclick=()=>{
-      document.querySelectorAll(".time").forEach(t=>t.classList.remove("active"));
-      el.classList.add("active");
-      horarioSelecionado=h;
-    };
-    times.appendChild(el);
-  });
-}
-
-/* SERVIÇOS */
-async function carregarServicos(){
-  const {data} = await sb
+/* ===== LOAD ===== */
+async function load(){
+  const { data, error } = await sb
     .from("produtos_servicos")
     .select("*")
-    .eq("user_id",lojaId)
-    .eq("ativo",true);
+    .eq("user_id", lojaId)
+    .eq("tipo", "SERVICO")
+    .eq("ativo", true)
+    .eq("pode_agendar", true)
+    .order("ordem_exibicao");
 
-  services.innerHTML="";
-  data.forEach(s=>{
-    const el=document.createElement("div");
-    el.className="service";
-    el.innerHTML=`<h4>${s.nome}</h4><small>R$ ${s.preco}</small>`;
-    el.onclick=()=>{
-      document.querySelectorAll(".service").forEach(x=>x.classList.remove("active"));
-      el.classList.add("active");
-      servicoSelecionado=s;
-    };
-    services.appendChild(el);
-  });
-}
-
-/* CONFIRMAR */
-async function confirmar(){
-  if(!servicoSelecionado){
-    popup.style.display="flex";
+  if(error){
+    console.error(error);
     return;
   }
 
-  await sb.from("agendamentos").insert({
-    loja_id: lojaId,
-    data: diaSelecionado,
-    horario: horarioSelecionado,
-    servico: servicoSelecionado.nome,
-    preco: servicoSelecionado.preco
-  });
-
-  alert("Agendamento realizado com sucesso!");
-  location.reload();
+  servicos = data;
+  render();
 }
+
+function render(){
+  const q = busca.value.toLowerCase();
+
+  grid.innerHTML = servicos
+    .filter(s => s.nome.toLowerCase().includes(q))
+    .map(s => `
+      <div class="card">
+        <img src="${s.imagem_url || ''}">
+        <div class="card-body">
+          <strong>${s.nome}</strong>
+          <div class="meta">
+            <span>${s.duracao_minutos ? `⏱ ${s.duracao_minutos} min` : ''}</span>
+            <span class="price">R$ ${Number(s.preco).toFixed(2)}</span>
+          </div>
+        </div>
+        <button onclick='openModal(${JSON.stringify(s)})'>Agendar</button>
+      </div>
+    `).join("");
+}
+
+busca.addEventListener("input", render);
+
+/* ===== MODAL ===== */
+function openModal(s){
+  servicoSelecionado = s;
+  mServico.innerText = s.nome;
+  modal.style.display = "flex";
+}
+
+function closeModal(e){
+  if(e && e.target !== modal) return;
+  modal.style.display = "none";
+}
+
+function maskWhats(v){
+  v = v.replace(/\D/g,'').slice(0,11);
+  return v.replace(/^(\d{2})(\d)/,"($1) $2").replace(/(\d{5})(\d)/,"$1-$2");
+}
+
+mWhats.addEventListener("input", e=>{
+  e.target.value = maskWhats(e.target.value);
+});
+
+/* ===== CONFIRMAR ===== */
+function confirmar(){
+  if(!mNome.value.trim()){
+    alert("Informe seu nome completo");
+    return;
+  }
+  if(mWhats.value.replace(/\D/g,'').length < 10){
+    alert("Informe um WhatsApp válido");
+    return;
+  }
+
+  // 👉 próximo passo: calendário
+  alert(
+    `Serviço: ${servicoSelecionado.nome}\n` +
+    `Nome: ${mNome.value}\n` +
+    `WhatsApp: ${mWhats.value}`
+  );
+
+  closeModal();
+}
+
+load();
 </script>
 
 </body>
