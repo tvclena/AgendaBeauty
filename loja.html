@@ -25,11 +25,10 @@
   --success:#16a34a;
   --danger:#dc2626;
 }
-
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-body{background:var(--bg);color:var(--text);padding-bottom:84px}
+body{background:var(--bg);color:var(--text);padding-bottom:90px}
 
-/* ===== LOGIN ===== */
+/* LOGIN */
 #login{
   position:fixed;inset:0;
   background:var(--bg);
@@ -56,7 +55,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:84px}
   background:var(--primary);color:#fff;font-weight:800;
 }
 
-/* ===== APP ===== */
+/* APP */
 #app{display:none}
 
 /* TOPO */
@@ -88,11 +87,21 @@ body{background:var(--bg);color:var(--text);padding-bottom:84px}
 .logout{font-size:12px;color:var(--danger);font-weight:800}
 
 /* BANNER */
-#banner{display:none;margin:14px;border-radius:18px;overflow:hidden}
+#banner{
+  display:none;
+  margin:14px;
+  border-radius:18px;
+  overflow:hidden;
+  position:relative;
+}
 #banner img{width:100%;height:160px;object-fit:cover}
 #banner span{
-  position:absolute;bottom:0;left:0;right:0;
-  padding:10px;background:rgba(0,0,0,.55);color:#fff;font-weight:800;
+  position:absolute;
+  bottom:0;left:0;right:0;
+  padding:10px;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  font-weight:800;
 }
 
 /* TABS */
@@ -165,7 +174,8 @@ body{background:var(--bg);color:var(--text);padding-bottom:84px}
   border-radius:24px 24px 0 0;
   padding:16px;
 }
-.modal-box h3{margin-bottom:8px}
+.modal-box h3{margin-bottom:6px}
+.modal-box p{color:var(--muted);margin-bottom:10px}
 .horarios{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -223,10 +233,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:84px}
   <button id="tabProdutos" onclick="mostrar('produtos')">Produtos</button>
 </div>
 
-<!-- SERVIÇOS -->
 <div id="servicos" class="grid"></div>
-
-<!-- PRODUTOS -->
 <div id="produtos" class="grid" style="display:none"></div>
 
 </div>
@@ -235,7 +242,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:84px}
 <div id="modalAgenda">
   <div class="modal-box">
     <h3 id="servicoNome"></h3>
-    <p style="color:#6b7280;margin-bottom:10px">Escolha um horário disponível</p>
+    <p>Escolha um horário disponível</p>
     <div class="horarios" id="listaHorarios"></div>
   </div>
 </div>
@@ -250,6 +257,10 @@ const lojaId = new URLSearchParams(location.search).get("l");
 
 /* LOGIN */
 function entrar(){
+  if(!loginNome.value || !loginWhats.value){
+    alert("Informe nome e WhatsApp");
+    return;
+  }
   localStorage.setItem("cliente_nome",loginNome.value);
   localStorage.setItem("cliente_whats",loginWhats.value);
   iniciar();
@@ -262,12 +273,17 @@ function sair(){
 /* INIT */
 function iniciar(){
   const nome = localStorage.getItem("cliente_nome");
-  if(!nome){ login.style.display="flex"; return; }
+  if(!nome){
+    login.style.display="flex";
+    return;
+  }
   login.style.display="none";
   app.style.display="block";
+
   clienteNome.innerText = nome;
   clienteWhats.innerText = localStorage.getItem("cliente_whats");
   avatar.innerText = nome[0].toUpperCase();
+
   carregarLoja();
   carregarServicos();
   carregarProdutos();
@@ -275,29 +291,59 @@ function iniciar(){
 
 /* LOJA */
 async function carregarLoja(){
-  const {data:p} = await sb.from("user_profile").select("negocio").eq("user_id",lojaId).single();
+  const {data:p} = await sb
+    .from("user_profile")
+    .select("negocio")
+    .eq("user_id",lojaId)
+    .single();
+
   nomeLoja.innerText = p?.negocio || "Agendamento";
+
+  const {data:cfg} = await sb
+    .from("config_loja")
+    .select("*")
+    .eq("user_id",lojaId)
+    .single();
+
+  if(cfg?.cor_primaria){
+    document.documentElement.style.setProperty("--primary",cfg.cor_primaria);
+    themeColor.content = cfg.cor_primaria;
+  }
+
+  if(cfg?.banner_ativo){
+    banner.style.display="block";
+    bannerImg.src = cfg.banner_url;
+    bannerTxt.innerText = cfg.banner_texto || "";
+  }
 }
 
 /* SERVIÇOS */
 async function carregarServicos(){
-  const {data} = await sb.from("produtos_servicos")
-    .select("*").eq("user_id",lojaId).eq("tipo","SERVICO").eq("ativo",true);
+  const {data} = await sb
+    .from("produtos_servicos")
+    .select("*")
+    .eq("user_id",lojaId)
+    .eq("tipo","SERVICO")
+    .eq("ativo",true);
 
   servicos.innerHTML = (data||[]).map(s=>`
     <div class="item">
       <img src="${s.imagem_url||''}">
       <strong>${s.nome}</strong>
       <small>${s.duracao_minutos} min • R$ ${Number(s.preco).toFixed(2)}</small>
-      <button onclick="abrirAgenda('${s.nome}')">Agendar</button>
+      <button onclick='abrirAgenda(${JSON.stringify(s)})'>Agendar</button>
     </div>
   `).join("");
 }
 
 /* PRODUTOS */
 async function carregarProdutos(){
-  const {data} = await sb.from("produtos_servicos")
-    .select("*").eq("user_id",lojaId).eq("tipo","PRODUTO").eq("ativo",true);
+  const {data} = await sb
+    .from("produtos_servicos")
+    .select("*")
+    .eq("user_id",lojaId)
+    .eq("tipo","PRODUTO")
+    .eq("ativo",true);
 
   produtos.innerHTML = (data||[]).map(p=>`
     <div class="item">
@@ -317,16 +363,70 @@ function mostrar(sec){
   tabProdutos.classList.toggle("active",sec==="produtos");
 }
 
-/* AGENDA (visual) */
-function abrirAgenda(nome){
-  servicoNome.innerText = nome;
-  listaHorarios.innerHTML = ["09:00","10:00","11:00","14:00","15:00","16:00"]
-    .map(h=>`<button>${h}</button>`).join("");
+/* AGENDA */
+async function abrirAgenda(servico){
+  servicoNome.innerText = servico.nome;
+  listaHorarios.innerHTML = "Carregando...";
+
+  const hoje = new Date().toISOString().slice(0,10);
+
+  const {data, error} = await sb
+    .from("agenda_loja")
+    .select("fechado, horarios")
+    .eq("user_id",lojaId)
+    .eq("data",hoje)
+    .single();
+
+  if(error || !data){
+    listaHorarios.innerHTML = "<small>Agenda não configurada</small>";
+    modalAgenda.style.display="flex";
+    return;
+  }
+
+  if(data.fechado){
+    listaHorarios.innerHTML = "<small>Loja fechada hoje</small>";
+    modalAgenda.style.display="flex";
+    return;
+  }
+
+  let intervalos = [];
+  try{
+    intervalos = typeof data.horarios==="string"
+      ? JSON.parse(data.horarios)
+      : data.horarios;
+  }catch(e){}
+
+  const horarios = gerarHorarios(intervalos, servico.duracao_minutos);
+
+  listaHorarios.innerHTML = horarios.length
+    ? horarios.map(h=>`<button>${h}</button>`).join("")
+    : "<small>Sem horários disponíveis</small>";
+
   modalAgenda.style.display="flex";
 }
+
+function gerarHorarios(intervalos, duracao){
+  const slots=[];
+  intervalos.forEach(i=>{
+    if(!i.inicio||!i.fim) return;
+    let [hi,mi]=i.inicio.split(":").map(Number);
+    let [hf,mf]=i.fim.split(":").map(Number);
+    let ini=hi*60+mi, fim=hf*60+mf;
+    if(fim<=ini) return;
+    while(ini+duracao<=fim){
+      slots.push(
+        String(Math.floor(ini/60)).padStart(2,"0") + ":" +
+        String(ini%60).padStart(2,"0")
+      );
+      ini+=duracao;
+    }
+  });
+  return slots;
+}
+
 modalAgenda.onclick=e=>{
   if(e.target.id==="modalAgenda") modalAgenda.style.display="none";
-}
+};
 
 /* START */
 if(lojaId) iniciar();
