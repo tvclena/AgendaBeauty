@@ -11,6 +11,11 @@
   user-scalable=no,
   viewport-fit=cover">
 
+<meta name="theme-color" content="#ff6a00">
+
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -18,22 +23,29 @@
 :root{
   --primary:#ff6a00;
   --border:#e5e7eb;
-  --radius:18px;
+  --radius:22px;
   --danger:#c62828;
   --muted:#6b7280;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Inter;
+  -webkit-tap-highlight-color:transparent;
+}
 
 body{
   min-height:100vh;
   display:grid;
   grid-template-columns:1.2fr .8fr;
+  background:#000;
 }
 
-/* LEFT */
+/* ===== FUNDO COM FOTO ===== */
 .left{
-  background:url("https://images.unsplash.com/photo-1600948836101-f9ffda59d250")
+  background:url("https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&w=1600&q=80")
   center/cover no-repeat;
   position:relative;
   color:#fff;
@@ -42,45 +54,70 @@ body{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(120deg,rgba(0,0,0,.75),rgba(0,0,0,.3));
+  background:linear-gradient(
+    120deg,
+    rgba(0,0,0,.75),
+    rgba(0,0,0,.35)
+  );
 }
-.left div{position:relative;z-index:2;padding:80px}
-.left h1{font-size:38px}
+.left div{
+  position:relative;
+  z-index:2;
+  padding:80px;
+}
 .left span{color:var(--primary)}
 
-/* RIGHT */
-.right{display:flex;align-items:center;justify-content:center}
+/* ===== ÁREA DO CARD ===== */
+.right{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+}
+
 .card{
   width:100%;
   max-width:460px;
   padding:44px;
-  box-shadow:0 20px 60px rgba(0,0,0,.08);
-  border-radius:var(--radius);
   background:#fff;
+  border-radius:var(--radius);
+  box-shadow:0 20px 60px rgba(0,0,0,.08);
 }
 
+.card h2{
+  margin-bottom:6px;
+}
+
+.card p{
+  color:var(--muted);
+  margin-bottom:18px;
+}
+
+/* ===== FORM ===== */
 input{
   width:100%;
   padding:14px;
   margin-bottom:14px;
-  border-radius:12px;
+  border-radius:14px;
   border:1px solid var(--border);
+  font-size:14px;
 }
 
 button{
   width:100%;
   padding:15px;
   border:none;
-  border-radius:30px;
-  background:var(--primary);
+  border-radius:999px;
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
   color:#fff;
   font-weight:800;
+  font-size:15px;
   cursor:pointer;
   position:relative;
   overflow:hidden;
 }
 
-/* LOADING BUTTON */
+/* LOADING */
 button.loading{
   pointer-events:none;
   opacity:.85;
@@ -102,16 +139,18 @@ button.loading::after{
   to{transform:translate(-50%,-50%) rotate(360deg)}
 }
 
+/* ===== ERRO ===== */
 .msg{
   background:#ffe5e5;
   color:var(--danger);
   padding:12px;
-  border-radius:10px;
+  border-radius:12px;
   font-size:14px;
   margin-bottom:14px;
   display:none;
 }
 
+/* LINKS */
 .links{
   text-align:center;
   margin-top:18px;
@@ -124,7 +163,7 @@ button.loading::after{
   margin-top:8px;
 }
 
-/* OVERLAY */
+/* ===== MODAIS ===== */
 #overlay,#welcome{
   position:fixed;
   inset:0;
@@ -134,15 +173,81 @@ button.loading::after{
   justify-content:center;
   z-index:999;
 }
+
 .modal{
   background:#fff;
   padding:36px;
-  border-radius:18px;
+  border-radius:22px;
   text-align:center;
   max-width:380px;
 }
-.modal h3{margin-bottom:6px}
-.modal p{color:var(--muted);font-size:14px}
+
+.modal h3{
+  margin-bottom:6px;
+}
+.modal p{
+  color:var(--muted);
+  font-size:14px;
+}
+
+/* ========================= */
+/* 📱 MOBILE FIRST (CELULAR) */
+/* ========================= */
+@media (max-width: 900px){
+
+  body{
+    grid-template-columns:1fr;
+    overflow:hidden;
+  }
+
+  .left{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    filter:blur(7px);
+    transform:scale(1.08);
+  }
+
+  .left::after{
+    background:rgba(0,0,0,.55);
+  }
+
+  .left div{
+    display:none;
+  }
+
+  .right{
+    position:relative;
+    z-index:2;
+    min-height:100vh;
+    padding:24px 14px env(safe-area-inset-bottom);
+    align-items:flex-end;
+    background:transparent;
+  }
+
+  .card{
+    width:100%;
+    max-width:520px;
+    padding:28px 22px 30px;
+    border-radius:28px;
+    box-shadow:
+      0 30px 80px rgba(0,0,0,.25),
+      0 10px 30px rgba(0,0,0,.12);
+    animation:slideUp .4s ease;
+  }
+}
+
+/* ANIMAÇÃO */
+@keyframes slideUp{
+  from{
+    transform:translateY(40px);
+    opacity:0;
+  }
+  to{
+    transform:translateY(0);
+    opacity:1;
+  }
+}
 </style>
 </head>
 
@@ -161,6 +266,7 @@ button.loading::after{
   </div>
 </div>
 
+<!-- FUNDO -->
 <div class="left">
   <div>
     <h1>A gestão do seu salão<br>começa com um <span>login</span></h1>
@@ -168,13 +274,12 @@ button.loading::after{
   </div>
 </div>
 
+<!-- CARD -->
 <div class="right">
   <div class="card">
 
     <h2>Entrar</h2>
-    <p style="color:#6b7280;margin-bottom:18px">
-      Use seu e-mail e senha para continuar
-    </p>
+    <p>Use seu e-mail e senha para continuar</p>
 
     <div id="errorBox" class="msg"></div>
 
@@ -193,7 +298,6 @@ button.loading::after{
 </div>
 
 <script>
-/* SUPABASE */
 const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
@@ -205,12 +309,6 @@ const errorBox = document.getElementById("errorBox");
 const emailInput = document.getElementById("email");
 const senhaInput = document.getElementById("senha");
 const btnLogin = document.getElementById("btnLogin");
-
-/* ✅ PREENCHE AUTOMATICAMENTE APÓS CADASTRO */
-const savedEmail = localStorage.getItem("cad_email");
-const savedSenha = localStorage.getItem("cad_senha");
-if(savedEmail) emailInput.value = savedEmail;
-if(savedSenha) senhaInput.value = savedSenha;
 
 /* LOGIN */
 document.getElementById("loginForm").addEventListener("submit", async e=>{
@@ -232,7 +330,6 @@ document.getElementById("loginForm").addEventListener("submit", async e=>{
     return;
   }
 
-  /* BUSCA NOME DO NEGÓCIO */
   const { data:profile } = await sb
     .from("user_profile")
     .select("negocio")
@@ -241,12 +338,9 @@ document.getElementById("loginForm").addEventListener("submit", async e=>{
 
   overlay.style.display="none";
   welcome.style.display="flex";
+
   document.getElementById("welcomeTitle").innerText =
     `Bem-vindo ao ${profile?.negocio || "Agenda Fácil"} 👋`;
-
-  /* LIMPA DADOS TEMPORÁRIOS */
-  localStorage.removeItem("cad_email");
-  localStorage.removeItem("cad_senha");
 
   setTimeout(()=>{
     window.location.replace("dashboard.html");
