@@ -270,6 +270,38 @@ async function proteger(){
 
 proteger();
 
+async function carregarPerfil(){
+  const { data:p } = await sb
+    .from("user_profile")
+    .select("*")
+    .eq("user_id", user.id)
+    .single();
+
+  if(!p) return;
+
+  profile = p;
+
+  const letra = (p.negocio?.[0] || user.email?.[0] || "A").toUpperCase();
+  avatar.textContent = letra;
+
+  pEmail.value = user.email || "";
+  pNegocio.value = p.negocio || "";
+  pWhatsapp.value = maskWhats(p.whatsapp || "");
+  pEmailContato.value = p.email_contato || "";
+
+  pCep.value = p.cep || "";
+  pRua.value = p.rua || "";
+  pNumero.value = p.numero || "";
+  pBairro.value = p.bairro || "";
+  pCidade.value = p.cidade || "";
+  pUf.value = (p.uf || "").toUpperCase();
+
+  if(p.avatar_url){
+    profileImg.style.backgroundImage = `url(${p.avatar_url})`;
+    avatar.style.backgroundImage = `url(${p.avatar_url})`;
+    avatar.textContent = "";
+  }
+}
 
 
 /* ================= NAV ================= */
