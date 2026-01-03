@@ -7,203 +7,120 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://unpkg.com/cropperjs/dist/cropper.css" rel="stylesheet">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/cropperjs/dist/cropper.js"></script>
 
 <style>
-/* ==== BASE ==== */
-:root{
---primary:#ff6a00;--bg:#f5f7fb;--card:#fff;--border:#e5e7eb;
---danger:#dc2626;--success:#16a34a;--warning:#f59e0b;
---muted:#6b7280;--shadow:0 14px 34px rgba(0,0,0,.12);
---radius:16px
-}
+/* ===== BASE (IGUAL AO SEU) ===== */
+:root{--primary:#ff6a00;--bg:#f5f7fb;--card:#fff;--border:#e5e7eb;--radius:14px;--danger:#dc2626;--muted:#6b7280;--shadow:0 10px 28px rgba(0,0,0,.1)}
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-body{background:var(--bg);height:100vh;overflow:hidden;padding:16px}
-
-/* HEADER */
-.header{max-width:1800px;margin:auto}
+body{background:var(--bg);padding:20px;overflow:hidden}
+.header{max-width:1700px;margin-bottom:12px}
 .header h1{font-size:26px;font-weight:800}
 .header span{color:var(--primary)}
 .header p{font-size:12px;color:var(--muted)}
-
-/* KPIS */
-.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:16px 0}
-.kpi{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:var(--shadow)}
-.kpi small{font-size:11px;color:var(--muted)}
-.kpi h2{font-size:22px;font-weight:800}
-
-/* LAYOUT */
-.container{max-width:1800px;margin:auto;display:grid;grid-template-columns:500px 1fr;gap:18px;height:calc(100vh - 210px)}
-
-/* CARD */
-.card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
-.card h3{font-size:15px;font-weight:800;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:10px}
-
-/* FORM */
-.section{margin-bottom:14px}
-.section-title{font-size:11px;font-weight:800;color:var(--muted);margin-bottom:6px;text-transform:uppercase}
-input,textarea,select{
-width:100%;height:36px;padding:0 10px;border-radius:10px;
-border:1px solid var(--border);font-size:12px;margin-bottom:8px
-}
-textarea{padding:8px;height:auto}
+.container{max-width:1700px;display:grid;grid-template-columns:400px 1fr;gap:20px;height:calc(100vh - 160px)}
+.card{background:var(--card);border-radius:14px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+input,textarea,select{width:100%;height:36px;border-radius:10px;border:1px solid var(--border);padding:0 10px;font-size:12px;margin-bottom:8px}
+textarea{height:auto;padding:8px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.switch{display:flex;align-items:center;gap:6px;font-size:11px}
-
-/* UPLOAD */
-.upload-box{
-border:2px dashed var(--border);
-border-radius:12px;
-padding:10px;
-text-align:center;
-cursor:pointer
-}
-.upload-box img{width:100%;height:120px;object-fit:cover;border-radius:10px}
-.upload-box span{font-size:11px;color:var(--muted)}
-
-/* BUTTONS */
-.actions-form{display:flex;gap:10px}
-button{
-flex:1;height:42px;border:none;border-radius:22px;
-background:linear-gradient(135deg,#ff6a00,#ff9a57);
-color:#fff;font-weight:800;cursor:pointer
-}
-button.secondary{background:#111}
-
-/* LIST */
-.filters{display:flex;gap:8px;margin-bottom:10px}
-.grid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;overflow-y:auto}
-
-/* ITEM */
-.item{background:#fff;border-radius:var(--radius);box-shadow:0 10px 26px rgba(0,0,0,.12);overflow:hidden;display:flex;flex-direction:column}
-.image{height:90px;background:#f1f5f9;display:flex;align-items:center;justify-content:center}
+button{height:40px;border:none;border-radius:22px;background:linear-gradient(135deg,#ff6a00,#ff9a57);color:#fff;font-weight:700;cursor:pointer}
+.grid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;overflow:auto}
+.item{background:#fff;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.1);cursor:pointer}
+.image{height:80px;background:#eee;display:flex;align-items:center;justify-content:center}
 .image img{width:100%;height:100%;object-fit:cover}
-.image.no{background:linear-gradient(135deg,#ff6a00,#ff9a57);color:#fff;font-size:30px;font-weight:800}
-.item-body{padding:12px;display:flex;flex-direction:column;gap:4px;flex:1}
+.item-body{padding:10px}
+.actions{font-size:11px;color:var(--primary);font-weight:700}
 
-/* BADGES */
-.badges{display:flex;gap:4px;flex-wrap:wrap}
-.badge{font-size:9px;padding:3px 8px;border-radius:999px;font-weight:800}
-.badge.low{background:#fff3cd;color:var(--warning)}
-.badge.promo{background:#fde7f3;color:#be185d}
-.badge.off{background:#fee2e2;color:var(--danger)}
-.badge.margin{background:#ecfeff;color:#0369a1}
+/* ===== UPLOAD ===== */
+.upload{border:2px dashed var(--border);border-radius:10px;padding:10px;text-align:center;cursor:pointer}
+.upload img{width:100%;height:90px;object-fit:cover;border-radius:8px}
 
-/* ACTIONS */
-.actions{margin-top:auto;font-size:11px;font-weight:800;color:var(--primary);display:flex;gap:10px;cursor:pointer}
+/* ===== MODAL ===== */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:999}
+.modal-box{width:900px;max-height:90vh;background:#fff;border-radius:14px;padding:16px;overflow:auto}
+.modal-header{display:flex;gap:16px}
+.modal-header img{width:140px;height:180px;object-fit:cover;border-radius:8px}
 
-/* OVERLAY */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:999}
-.overlay div{background:#fff;padding:20px;border-radius:14px;font-weight:800}
+/* ===== OVERLAY ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000}
+.overlay div{background:#fff;padding:20px;border-radius:12px;font-weight:800}
 
-/* CROP MODAL */
-.crop-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:1000}
-.crop-box{background:#fff;border-radius:14px;padding:14px;width:420px}
+/* ===== CROP ===== */
+.crop-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:1001}
+.crop-box{background:#fff;padding:16px;border-radius:14px;width:420px}
 .crop-box img{max-width:100%}
-
-/* TOAST */
-.toast{position:fixed;bottom:20px;right:20px;background:#111;color:#fff;padding:10px 16px;border-radius:12px;font-size:12px;display:none}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-<h1>Produtos & <span>Serviços</span></h1>
-<p>Gestão completa com imagem, estoque, promoções e margem</p>
-
-<div class="kpis">
-<div class="kpi"><small>Total</small><h2 id="kpiTotal">0</h2></div>
-<div class="kpi"><small>Serviços</small><h2 id="kpiServicos">0</h2></div>
-<div class="kpi"><small>Produtos</small><h2 id="kpiProdutos">0</h2></div>
-<div class="kpi"><small>Promoções</small><h2 id="kpiPromo">0</h2></div>
-<div class="kpi"><small>Estoque baixo</small><h2 id="kpiBaixo">0</h2></div>
-<div class="kpi"><small>Margem</small><h2 id="kpiMargem">0%</h2></div>
-</div>
+  <h1>Produtos & <span>Serviços</span></h1>
+  <p>Gerencie serviços, produtos, estoque, promoções e preços</p>
 </div>
 
 <div class="container">
 
-<!-- FORM -->
+<!-- ===== CRIAR ===== -->
 <div class="card">
-<h3>Gestão do Item</h3>
+<h3>Cadastrar item</h3>
 
-<div class="section">
-<div class="section-title">Imagem</div>
-<label class="upload-box">
+<label class="upload">
 <img id="preview" style="display:none">
 <span id="uploadText">Selecionar imagem</span>
-<input type="file" id="imagem" hidden accept="image/*">
+<input type="file" id="imagem" hidden>
 </label>
-</div>
 
-<div class="section">
-<div class="section-title">Identificação</div>
 <select id="tipo"><option>SERVICO</option><option>PRODUTO</option></select>
-<input id="nome" placeholder="Nome *">
-<input id="categoria" placeholder="Categoria">
+<input id="nome" placeholder="Nome">
 <textarea id="descricao" placeholder="Descrição"></textarea>
-</div>
-
-<div class="section">
-<div class="section-title">Preços</div>
-<div class="row">
-<input id="preco" placeholder="Preço">
-<input id="custo" placeholder="Custo">
-</div>
-<input id="precoPromo" placeholder="Preço promocional">
-</div>
-
-<div class="section">
-<div class="section-title">Estoque</div>
-<div class="row">
-<input id="estoque" placeholder="Estoque">
-<input id="estoqueMin" placeholder="Estoque mínimo">
-</div>
-<label class="switch"><input type="checkbox" id="controlaEstoque"> Controlar estoque</label>
-</div>
-
-<div class="section">
-<div class="section-title">Status</div>
-<label class="switch"><input type="checkbox" id="ativo" checked> Ativo</label>
-<label class="switch"><input type="checkbox" id="promoAtiva"> Promoção ativa</label>
-<label class="switch"><input type="checkbox" id="podeAgendar"> Disponível agenda</label>
-</div>
-
-<div class="actions-form">
+<div class="row"><input id="preco" placeholder="Preço"><input id="custo" placeholder="Custo"></div>
 <button onclick="salvar()">Salvar</button>
-<button class="secondary" onclick="limpar()">Limpar</button>
-</div>
 </div>
 
-<!-- LIST -->
+<!-- ===== LISTA ===== -->
 <div class="card">
-<div class="filters">
-<input id="search" placeholder="Buscar" oninput="render()">
-<select id="filtroTipo" onchange="render()">
-<option value="">Todos</option>
-<option>SERVICO</option>
-<option>PRODUTO</option>
-</select>
-</div>
 <div class="grid" id="lista"></div>
 </div>
 
 </div>
 
-<!-- OVERLAYS -->
-<div class="overlay" id="overlay"><div>Salvando...</div></div>
-<div class="toast" id="toast"></div>
+<!-- ===== MODAL EDITAR ===== -->
+<div id="modal" class="modal">
+<div class="modal-box">
 
-<!-- CROP -->
-<div class="crop-modal" id="cropModal">
-<div class="crop-box">
-<img id="cropImage">
-<div class="actions-form">
-<button onclick="confirmarCrop()">Confirmar</button>
-<button class="secondary" onclick="cancelarCrop()">Cancelar</button>
+<div class="modal-header">
+<img id="mPreview">
+<div style="flex:1">
+<label>Nova imagem</label>
+<input type="file" id="mImagem">
 </div>
+</div>
+
+<input id="mNome">
+<textarea id="mDescricao"></textarea>
+<div class="row"><input id="mPreco"><input id="mCusto"></div>
+
+<div style="display:flex;gap:10px;margin-top:14px">
+<button onclick="salvarEdicao()">Salvar</button>
+<button onclick="fecharModal()">Cancelar</button>
+<button onclick="excluir()">Excluir</button>
+</div>
+
+</div>
+</div>
+
+<!-- ===== OVERLAY ===== -->
+<div id="overlay" class="overlay"><div>Salvando...</div></div>
+
+<!-- ===== CROP ===== -->
+<div id="cropModal" class="crop-modal">
+<div class="crop-box">
+<img id="cropImg">
+<button onclick="confirmarCrop()">Confirmar</button>
+<button onclick="cancelarCrop()">Cancelar</button>
 </div>
 </div>
 
@@ -213,54 +130,17 @@ const sb=supabase.createClient(
 "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-let itens=[],editId=null,userId=null,cropper=null,croppedBlob=null;
-
-const overlay=document.getElementById("overlay");
-const toastEl=document.getElementById("toast");
-const toast=msg=>{
-toastEl.innerText=msg;
-toastEl.style.display="block";
-setTimeout(()=>toastEl.style.display="none",3000);
-};
-
-imagem.onchange=e=>{
-const file=e.target.files[0];
-if(!file)return;
-const reader=new FileReader();
-reader.onload=()=>{
-cropImage.src=reader.result;
-cropModal.style.display="flex";
-setTimeout(()=>cropper=new Cropper(cropImage,{aspectRatio:1}),100);
-};
-reader.readAsDataURL(file);
-};
-
-function confirmarCrop(){
-cropper.getCroppedCanvas({width:500,height:500}).toBlob(blob=>{
-croppedBlob=blob;
-preview.src=URL.createObjectURL(blob);
-preview.style.display="block";
-uploadText.style.display="none";
-cropModal.style.display="none";
-cropper.destroy();
-});
-}
-
-function cancelarCrop(){
-cropModal.style.display="none";
-cropper.destroy();
-imagem.value="";
-}
+let itens=[], atual=null, userId=null, cropper=null, croppedBlob=null;
 
 (async()=>{
-const{data:{session}}=await sb.auth.getSession();
-if(!session)return;
+const {data:{session}}=await sb.auth.getSession();
+if(!session) return;
 userId=session.user.id;
 carregar();
 })();
 
 async function carregar(){
-const{data}=await sb.from("produtos_servicos").select("*").eq("user_id",userId);
+const {data}=await sb.from("produtos_servicos").select("*").eq("user_id",userId);
 itens=data||[];
 render();
 }
@@ -268,94 +148,93 @@ render();
 function render(){
 lista.innerHTML="";
 itens.forEach(i=>{
-lista.innerHTML+=`
-<div class="item">
-<div class="image ${i.imagem_url?'':'no'}">${i.imagem_url?`<img src="${i.imagem_url}">`:i.nome[0]}</div>
+const d=document.createElement("div");
+d.className="item";
+d.ondblclick=()=>abrirModal(i);
+d.innerHTML=`
+<div class="image">${i.imagem_url?`<img src="${i.imagem_url}">`:i.nome[0]}</div>
 <div class="item-body">
-<div class="badges">
-${i.promo_ativa?'<span class="badge promo">Promo</span>':''}
-${!i.ativo?'<span class="badge off">Inativo</span>':''}
-</div>
 <strong>${i.nome}</strong>
-<span>R$ ${i.preco||0}</span>
-<div class="actions">
-<span onclick="editar('${i.id}')">Editar</span>
-<span onclick="excluir('${i.id}')">Excluir</span>
-</div>
-</div>
+<div class="actions">Editar</div>
 </div>`;
+lista.appendChild(d);
 });
 }
 
-async function salvar(){
-if(!nome.value)return toast("Nome obrigatório");
-overlay.style.display="flex";
-
-let imagemUrl=null;
-if(croppedBlob){
-const nomeImg=`${userId}/${Date.now()}.jpg`;
-await sb.storage.from("produtos").upload(nomeImg,croppedBlob,{upsert:true});
-imagemUrl=sb.storage.from("produtos").getPublicUrl(nomeImg).data.publicUrl;
-}
-
-const dados={
-user_id:userId,tipo:tipo.value,nome:nome.value,
-categoria:categoria.value,descricao:descricao.value,
-preco:+preco.value||0,custo:+custo.value||0,
-preco_promo:+precoPromo.value||0,promo_ativa:promoAtiva.checked,
-estoque:+estoque.value||0,estoque_min:+estoqueMin.value||0,
-controla_estoque:controlaEstoque.checked,
-ativo:ativo.checked,pode_agendar:podeAgendar.checked,
-imagem_url:imagemUrl
-};
-
-editId
-?await sb.from("produtos_servicos").update(dados).eq("id",editId)
-:await sb.from("produtos_servicos").insert(dados);
-
-overlay.style.display="none";
-toast("Salvo com sucesso");
-limpar();
-carregar();
-}
-
-function editar(id){
-const i=itens.find(x=>x.id===id);
-editId=id;
-nome.value=i.nome;
-categoria.value=i.categoria;
-descricao.value=i.descricao;
-preco.value=i.preco;
-custo.value=i.custo;
-precoPromo.value=i.preco_promo;
-estoque.value=i.estoque;
-estoqueMin.value=i.estoque_min;
-promoAtiva.checked=i.promo_ativa;
-ativo.checked=i.ativo;
-controlaEstoque.checked=i.controla_estoque;
-podeAgendar.checked=i.pode_agendar;
-if(i.imagem_url){
-preview.src=i.imagem_url;
+/* ===== CRIAR ===== */
+imagem.onchange=e=>abrirCrop(e.target.files[0],blob=>{
+croppedBlob=blob;
+preview.src=URL.createObjectURL(blob);
 preview.style.display="block";
 uploadText.style.display="none";
-}
-}
+});
 
-async function excluir(id){
-if(!confirm("Excluir item?"))return;
-await sb.from("produtos_servicos").delete().eq("id",id);
-toast("Item excluído");
+async function salvar(){
+overlay.style.display="flex";
+let img=null;
+if(croppedBlob){
+const path=`${userId}/${Date.now()}.jpg`;
+await sb.storage.from("produtos").upload(path,croppedBlob,{upsert:true});
+img=sb.storage.from("produtos").getPublicUrl(path).data.publicUrl;
+}
+await sb.from("produtos_servicos").insert({
+user_id:userId,nome:nome.value,descricao:descricao.value,
+preco:+preco.value||0,custo:+custo.value||0,imagem_url:img
+});
+overlay.style.display="none";
 carregar();
 }
 
-function limpar(){
-document.querySelectorAll("input,textarea").forEach(i=>i.value="");
-document.querySelectorAll("input[type=checkbox]").forEach(i=>i.checked=false);
-ativo.checked=true;
-preview.style.display="none";
-uploadText.style.display="block";
-croppedBlob=null;
-editId=null;
+/* ===== MODAL ===== */
+function abrirModal(i){
+atual=i;
+modal.style.display="flex";
+mNome.value=i.nome;
+mDescricao.value=i.descricao;
+mPreco.value=i.preco;
+mCusto.value=i.custo;
+mPreview.src=i.imagem_url||"";
+}
+
+function fecharModal(){modal.style.display="none"}
+
+async function salvarEdicao(){
+overlay.style.display="flex";
+await sb.from("produtos_servicos").update({
+nome:mNome.value,descricao:mDescricao.value,
+preco:+mPreco.value||0,custo:+mCusto.value||0
+}).eq("id",atual.id);
+overlay.style.display="none";
+fecharModal();carregar();
+}
+
+async function excluir(){
+if(!confirm("Excluir item?"))return;
+await sb.from("produtos_servicos").delete().eq("id",atual.id);
+fecharModal();carregar();
+}
+
+/* ===== CROP ===== */
+function abrirCrop(file,cb){
+const r=new FileReader();
+r.onload=()=>{
+cropImg.src=r.result;
+cropModal.style.display="flex";
+setTimeout(()=>cropper=new Cropper(cropImg,{aspectRatio:1}),100);
+};
+r.readAsDataURL(file);
+window._cropCb=cb;
+}
+function confirmarCrop(){
+cropper.getCroppedCanvas({width:400,height:400}).toBlob(b=>{
+window._cropCb(b);
+cropper.destroy();
+cropModal.style.display="none";
+});
+}
+function cancelarCrop(){
+cropper.destroy();
+cropModal.style.display="none";
 }
 </script>
 
