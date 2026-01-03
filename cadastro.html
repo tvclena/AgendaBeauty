@@ -2,8 +2,19 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Cadastrar negócio • AgendaBeauty</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cadastrar negócio • Agenda Fácil</title>
+
+<meta name="viewport"
+  content="width=device-width,
+  initial-scale=1,
+  maximum-scale=1,
+  user-scalable=no,
+  viewport-fit=cover">
+
+<meta name="theme-color" content="#ff6a00">
+
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -14,9 +25,16 @@
   --border:#e5e7eb;
   --radius:18px;
   --danger:#c62828;
+  --muted:#6b7280;
 }
+
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-body{min-height:100vh;display:grid;grid-template-columns:1.2fr .8fr}
+
+body{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:1.2fr .8fr;
+}
 
 /* LEFT */
 .left{
@@ -31,11 +49,19 @@ body{min-height:100vh;display:grid;grid-template-columns:1.2fr .8fr}
   inset:0;
   background:linear-gradient(120deg,rgba(0,0,0,.75),rgba(0,0,0,.3));
 }
-.left div{position:relative;z-index:2;padding:80px}
+.left div{
+  position:relative;
+  z-index:2;
+  padding:80px;
+}
 .left span{color:var(--primary)}
 
 /* RIGHT */
-.right{display:flex;align-items:center;justify-content:center}
+.right{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 .card{
   width:100%;
   max-width:460px;
@@ -84,8 +110,8 @@ button{
   margin:-8px 0 14px 4px;
 }
 
-/* OVERLAY / MODAL */
-#overlay,#modal{
+/* OVERLAY */
+#overlay,#modal,#iosModal{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.55);
@@ -94,28 +120,65 @@ button{
   justify-content:center;
   z-index:999;
 }
-#overlay div,.modal-box{
+.modal-box{
   background:#fff;
-  padding:30px 40px;
-  border-radius:16px;
-  font-weight:700;
+  padding:32px;
+  border-radius:18px;
   text-align:center;
+  max-width:360px;
 }
-.modal-box button{border-radius:25px}
+.modal-box h3{margin-bottom:8px}
+.modal-box p{
+  color:var(--muted);
+  font-size:14px;
+  margin-bottom:16px;
+}
+.modal-box button{
+  margin-top:10px;
+  border-radius:999px;
+}
+.install-btn{
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
+}
+.secondary{
+  background:#e5e7eb;
+  color:#111;
+}
 </style>
 </head>
 
 <body>
 
 <!-- OVERLAY -->
-<div id="overlay"><div>Salvando cadastro…</div></div>
+<div id="overlay"><div class="modal-box">Salvando cadastro…</div></div>
 
-<!-- MODAL -->
+<!-- MODAL SUCESSO -->
 <div id="modal">
   <div class="modal-box">
-    <h3>Cadastro realizado!</h3>
-    <p>Seu negócio foi cadastrado com sucesso.</p>
-    <button onclick="irLogin()">Ir para login</button>
+    <h3>Cadastro realizado 🎉</h3>
+    <p>Agora você pode instalar o Agenda Fácil como app.</p>
+
+    <button id="btnInstall" class="install-btn" style="display:none">
+      Instalar App
+    </button>
+
+    <button id="btnIos" class="install-btn" style="display:none" onclick="abrirIOS()">
+      Instalar no iPhone
+    </button>
+
+    <button class="secondary" onclick="irLogin()">Ir para login</button>
+  </div>
+</div>
+
+<!-- MODAL IOS -->
+<div id="iosModal">
+  <div class="modal-box">
+    <h3>Instalar no iPhone 📱</h3>
+    <p>
+      1️⃣ Toque em <strong>Compartilhar</strong><br>
+      2️⃣ Selecione <strong>Adicionar à Tela de Início</strong>
+    </p>
+    <button onclick="fecharIOS()">Entendi</button>
   </div>
 </div>
 
@@ -146,10 +209,10 @@ button{
 
       <select id="tipo" required>
         <option value="">Tipo do negócio</option>
-        <option value="SALAO DE BELEZA">Salão de Beleza</option>
-        <option value="BARBEARIA">Barbearia</option>
-        <option value="CLINICA DE ESTETICA">Clínica de Estética</option>
-        <option value="STUDIO">Studio</option>
+        <option>SALAO DE BELEZA</option>
+        <option>BARBEARIA</option>
+        <option>CLINICA DE ESTETICA</option>
+        <option>STUDIO</option>
       </select>
 
       <input id="cidade" placeholder="Cidade" required>
@@ -167,93 +230,80 @@ button{
 </div>
 
 <script>
-/* =======================
-   SUPABASE CLIENT
-   ======================= */
-const sb = window.supabase.createClient(
+const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-/* ELEMENTOS */
-const overlay = document.getElementById("overlay");
-const modal = document.getElementById("modal");
-const errorBox = document.getElementById("errorBox");
-const emailError = document.getElementById("emailError");
+const overlay=document.getElementById("overlay");
+const modal=document.getElementById("modal");
+const iosModal=document.getElementById("iosModal");
+const btnInstall=document.getElementById("btnInstall");
+const btnIos=document.getElementById("btnIos");
 
-const responsavel = document.getElementById("responsavel");
-const whatsapp = document.getElementById("whatsapp");
-const negocio = document.getElementById("negocio");
-const tipo = document.getElementById("tipo");
-const cidade = document.getElementById("cidade");
-const uf = document.getElementById("uf");
-const email = document.getElementById("email");
-const senha = document.getElementById("senha");
+let deferredPrompt=null;
 
-/* WHATSAPP MASK */
-whatsapp.addEventListener("input", e => {
-  let v = e.target.value.replace(/\D/g,'').slice(0,11);
-  v = v.replace(/^(\d{2})(\d)/,"($1) $2")
-       .replace(/(\d{5})(\d)/,"$1-$2");
-  e.target.value = v;
+/* ANDROID PWA */
+window.addEventListener("beforeinstallprompt", e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  btnInstall.style.display="block";
 });
 
-/* UI */
-function showError(msg){
-  errorBox.innerText = msg;
-  errorBox.style.display = "block";
-}
-function showEmailError(show){
-  emailError.style.display = show ? "block" : "none";
+/* IOS CHECK */
+function isIOS(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
 }
 
-/* =======================
-   CADASTRO (CORRETO)
-   ======================= */
+/* CADASTRO */
 async function cadastrar(e){
   e.preventDefault();
-  errorBox.style.display = "none";
-  showEmailError(false);
-  overlay.style.display = "flex";
-
-  const emailValue = email.value.trim().toLowerCase();
-  const senhaValue = senha.value.trim();
+  overlay.style.display="flex";
 
   const { error } = await sb.auth.signUp({
-    email: emailValue,
-    password: senhaValue,
-    options: {
-      data: {
-        responsavel: responsavel.value.trim(),
-        whatsapp: whatsapp.value.replace(/\D/g,''),
-        negocio: negocio.value.trim(),
-        tipo: tipo.value,
-        cidade: cidade.value.trim(),
-        uf: uf.value.trim()
+    email: email.value.trim().toLowerCase(),
+    password: senha.value.trim(),
+    options:{
+      data:{
+        responsavel:responsavel.value,
+        whatsapp:whatsapp.value.replace(/\D/g,''),
+        negocio:negocio.value,
+        tipo:tipo.value,
+        cidade:cidade.value,
+        uf:uf.value
       }
     }
   });
 
-  overlay.style.display = "none";
-
+  overlay.style.display="none";
   if(error){
-    if(error.message.toLowerCase().includes("already")){
-      showEmailError(true);
-    }else{
-      showError(error.message);
-    }
+    alert(error.message);
     return;
   }
 
-  /* ✅ PERFIL SERÁ CRIADO PELO TRIGGER SQL */
-  modal.style.display = "flex";
+  modal.style.display="flex";
+
+  if(isIOS()){
+    btnIos.style.display="block";
+  }
 }
 
+/* INSTALL ANDROID */
+btnInstall.onclick=async()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt=null;
+};
+
+/* IOS MODAL */
+function abrirIOS(){ iosModal.style.display="flex"; }
+function fecharIOS(){ iosModal.style.display="none"; }
+
+/* LOGIN */
 function irLogin(){
-  window.location.href = "login.html";
+  location.href="login.html";
 }
 </script>
-
 
 </body>
 </html>
