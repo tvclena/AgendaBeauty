@@ -11,19 +11,13 @@
   user-scalable=no,
   viewport-fit=cover">
 
+<meta name="theme-color" content="#ff6a00">
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-:root{
-  --primary:#ff6a00;
-  --bg:#f4f6fb;
-  --card:#fff;
-  --border:#e5e7eb;
-  --text:#111827;
-  --muted:#6b7280;
-}
-
+/* ================= RESET / BASE ================= */
 *{
   margin:0;
   padding:0;
@@ -36,14 +30,22 @@ html,body{
   width:100%;
   height:100%;
   overflow-x:hidden;
+  background:#f4f6fb;
 }
 
-body{
-  background:var(--bg);
+/* ================= TOKENS ================= */
+:root{
+  --primary:#ff6a00;
+  --card:#ffffff;
+  --border:#e5e7eb;
+  --text:#111827;
+  --muted:#6b7280;
+}
+
+/* ================= HEADER ================= */
+.header{
   padding:12px;
 }
-
-/* ===== HEADER ===== */
 .header h1{
   font-size:18px;
   font-weight:800;
@@ -52,14 +54,13 @@ body{
 .header p{
   font-size:12px;
   color:var(--muted);
-  margin-bottom:12px;
 }
 
-/* ===== FILTERS ===== */
+/* ================= FILTERS ================= */
 .filters{
   display:flex;
   gap:8px;
-  margin-bottom:12px;
+  padding:0 12px 12px;
 }
 .filters input,
 .filters select{
@@ -71,15 +72,16 @@ body{
   font-size:12px;
 }
 
-/* ===== GRID 3 FIXOS ===== */
+/* ================= GRID ================= */
 .grid{
   display:grid;
   grid-template-columns:repeat(3, minmax(0,1fr));
   gap:8px;
+  padding:0 12px 90px;
 }
 
 .item{
-  background:#fff;
+  background:var(--card);
   border-radius:12px;
   box-shadow:0 4px 12px rgba(0,0,0,.06);
   overflow:hidden;
@@ -102,6 +104,7 @@ body{
   gap:2px;
   flex:1;
 }
+
 .item-body h4{
   font-size:10.5px;
   font-weight:700;
@@ -109,22 +112,25 @@ body{
   overflow:hidden;
   text-overflow:ellipsis;
 }
+
 .price{
   font-size:11px;
   font-weight:800;
 }
+
 .actions{
   margin-top:auto;
   font-size:10px;
   color:var(--primary);
   font-weight:700;
+  cursor:pointer;
 }
 
-/* ===== FAB ===== */
+/* ================= FAB ================= */
 .fab{
   position:fixed;
   right:16px;
-  bottom:16px;
+  bottom:calc(16px + env(safe-area-inset-bottom));
   width:56px;
   height:56px;
   border-radius:50%;
@@ -136,18 +142,19 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 10px 30px rgba(0,0,0,.25);
-  z-index:900;
+  box-shadow:0 12px 32px rgba(0,0,0,.28);
+  z-index:9999;
+  transform:translateZ(0);
 }
 
-/* ===== MODAL / BOTTOM SHEET ===== */
+/* ================= MODAL ================= */
 .modal{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.45);
   display:none;
   align-items:flex-end;
-  z-index:1000;
+  z-index:10000;
 }
 .modal.show{display:flex}
 
@@ -193,7 +200,7 @@ body{
   padding:8px;
 }
 
-/* ===== IMAGE CROP ===== */
+/* IMAGE PREVIEW */
 .crop-area{
   width:100%;
   aspect-ratio:1/1;
@@ -201,18 +208,12 @@ body{
   border-radius:12px;
   overflow:hidden;
   position:relative;
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
 .crop-area img{
   width:100%;
   height:100%;
   object-fit:cover;
-}
-.crop-hint{
-  position:absolute;
-  inset:0;
-  border:2px dashed rgba(255,255,255,.7);
-  border-radius:12px;
 }
 
 /* FOOTER */
@@ -281,14 +282,13 @@ body{
         <input type="checkbox" id="promoAtiva"> Promoção
       </label>
 
-      <!-- IMAGE CROP -->
       <div class="crop-area" onclick="imagem.click()">
         <img id="cropPreview" style="display:none">
-        <div class="crop-hint"></div>
         <input type="file" id="imagem" hidden accept="image/*">
       </div>
+
       <small style="font-size:11px;color:#6b7280">
-        Toque para escolher e ajustar a imagem
+        Toque para escolher a imagem
       </small>
     </div>
 
@@ -305,12 +305,12 @@ const sb=supabase.createClient(
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-let itens=[],userId=null,editId=null;
-let croppedBlob=null;
+let itens=[],userId=null,editId=null,blob=null;
 
+/* INIT */
 (async()=>{
   const {data:{session}}=await sb.auth.getSession();
-  if(!session) return location.href="login.html";
+  if(!session) location.href="login.html";
   userId=session.user.id;
   carregar();
 })();
@@ -318,41 +318,28 @@ let croppedBlob=null;
 search.oninput=filtroTipo.onchange=render;
 
 /* MODAL */
-function abrirModal(){
-  modal.classList.add("show");
-}
-function fecharModal(){
-  modal.classList.remove("show");
-  reset();
-}
+function abrirModal(){ modal.classList.add("show"); }
+function fecharModal(){ modal.classList.remove("show"); reset(); }
 
-/* IMAGE + CROP */
+/* IMAGE */
 imagem.onchange=()=>{
-  const file=imagem.files[0];
-  if(!file) return;
-
+  const f=imagem.files[0];
+  if(!f) return;
   const img=new Image();
   img.onload=()=>{
-    const canvas=document.createElement("canvas");
-    const size=Math.min(img.width,img.height);
-    canvas.width=canvas.height=600;
-    const ctx=canvas.getContext("2d");
-
-    ctx.drawImage(
-      img,
-      (img.width-size)/2,
-      (img.height-size)/2,
-      size,size,
-      0,0,600,600
+    const c=document.createElement("canvas");
+    c.width=c.height=600;
+    const s=Math.min(img.width,img.height);
+    c.getContext("2d").drawImage(
+      img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,600,600
     );
-
-    canvas.toBlob(b=>{
-      croppedBlob=b;
+    c.toBlob(b=>{
+      blob=b;
       cropPreview.src=URL.createObjectURL(b);
       cropPreview.style.display="block";
     },"image/jpeg",0.9);
   };
-  img.src=URL.createObjectURL(file);
+  img.src=URL.createObjectURL(f);
 };
 
 /* SAVE */
@@ -375,10 +362,11 @@ async function salvar(){
       .insert(payload).select().single());
   }
 
-  if(croppedBlob){
+  if(blob){
     const path=`${userId}/${data.id}.jpg`;
-    await sb.storage.from("produtos").upload(path,croppedBlob,{upsert:true});
-    const {data:s}=await sb.storage.from("produtos").createSignedUrl(path,31536000);
+    await sb.storage.from("produtos").upload(path,blob,{upsert:true});
+    const {data:s}=await sb.storage.from("produtos")
+      .createSignedUrl(path,31536000);
     await sb.from("produtos_servicos")
       .update({imagem_url:s.signedUrl}).eq("id",data.id);
   }
@@ -431,9 +419,10 @@ function editar(id){
 
 function reset(){
   editId=null;
-  croppedBlob=null;
+  blob=null;
   formTitle.innerText="Novo item";
-  document.querySelectorAll(".sheet-body input,.sheet-body textarea").forEach(e=>e.value="");
+  document.querySelectorAll(".sheet-body input,.sheet-body textarea")
+    .forEach(e=>e.value="");
   cropPreview.style.display="none";
 }
 </script>
