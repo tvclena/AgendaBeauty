@@ -171,132 +171,164 @@ button{
 </div>
 
 <script>
-const sb = supabase.createClient(
+/* =================================================
+   SUPABASE (SEM CONFLITO GLOBAL)
+   ================================================= */
+const sb = window.supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-let userId=null, itens=[], editId=null;
+let userId = null;
+let itens = [];
+let editId = null;
 
-/* INIT */
-(async()=>{
-  const { data:{session} } = await sb.auth.getSession();
-  if(!session) return location.href="login.html";
-  userId=session.user.id;
+/* =================================================
+   INIT / PROTEÇÃO
+   ================================================= */
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    window.location.href = "login.html";
+    return;
+  }
+  userId = session.user.id;
   carregar();
 })();
 
-/* UI */
-tipo.onchange=()=>duracao.style.display = tipo.value==="SERVICO"?"block":"none";
+/* =================================================
+   UI
+   ================================================= */
+tipo.onchange = () => {
+  duracao.style.display = tipo.value === "SERVICO" ? "block" : "none";
+};
 tipo.onchange();
 
-imagem.onchange=()=>{
-  const f=imagem.files[0];
-  if(f){
-    preview.src=URL.createObjectURL(f);
-    preview.style.display="block";
-    uploadText.style.display="none";
+imagem.onchange = () => {
+  const f = imagem.files[0];
+  if (f) {
+    preview.src = URL.createObjectURL(f);
+    preview.style.display = "block";
+    uploadText.style.display = "none";
   }
 };
 
-preco.oninput=e=>{
-  let v=e.target.value.replace(/\D/g,'');
-  v=(v/100).toLocaleString('pt-BR',{minimumFractionDigits:2});
-  e.target.value=v;
+preco.oninput = e => {
+  let v = e.target.value.replace(/\D/g, '');
+  v = (v / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  e.target.value = v;
 };
 
-/* SALVAR */
-async function salvar(){
-  overlay.style.display="flex";
-  const valor=parseFloat(preco.value.replace(/\./g,'').replace(',','.'));
+/* =================================================
+   SALVAR
+   ================================================= */
+async function salvar() {
+  overlay.style.display = "flex";
 
-  let payload={
-    user_id:userId,
-    tipo:tipo.value,
-    nome:nome.value,
-    descricao:descricao.value,
-    preco:valor,
-    duracao_minutos:tipo.value==="SERVICO"?duracao.value:null
+  const valor = parseFloat(preco.value.replace(/\./g, '').replace(',', '.'));
+
+  const payload = {
+    user_id: userId,
+    tipo: tipo.value,
+    nome: nome.value,
+    descricao: descricao.value,
+    preco: valor,
+    duracao_minutos: tipo.value === "SERVICO" ? duracao.value : null
   };
 
   let data;
-  if(editId){
-    ({data}=await sb.from("produtos_servicos").update(payload).eq("id",editId).select().single());
-  }else{
-    ({data}=await sb.from("produtos_servicos").insert(payload).select().single());
+  if (editId) {
+    ({ data } = await sb
+      .from("produtos_servicos")
+      .update(payload)
+      .eq("id", editId)
+      .select()
+      .single());
+  } else {
+    ({ data } = await sb
+      .from("produtos_servicos")
+      .insert(payload)
+      .select()
+      .single());
   }
 
-  if(imagem.files.length){
-    const path=`${userId}/${data.id}.jpg`;
-    await sb.storage.from("produtos").upload(path,imagem.files[0],{upsert:true});
-    const url=sb.storage.from("produtos").getPublicUrl(path).data.publicUrl;
-    await sb.from("produtos_servicos").update({imagem_url:url}).eq("id",data.id);
+  if (imagem.files.length) {
+    const path = `${userId}/${data.id}.jpg`;
+    await sb.storage.from("produtos")
+      .upload(path, imagem.files[0], { upsert: true });
+
+    const url = sb.storage
+      .from("produtos")
+      .getPublicUrl(path).data.publicUrl;
+
+    await sb.from("produtos_servicos")
+      .update({ imagem_url: url })
+      .eq("id", data.id);
   }
 
   reset();
   carregar();
-  overlay.style.display="none";
+  overlay.style.display = "none";
 }
 
-/* LISTAR */
-async function carregar(){
+/* =================================================
+   LISTAR
+   ================================================= */
+async function carregar() {
   const { data } = await sb
     .from("produtos_servicos")
     .select("*")
-    .order("created_at",{ascending:false});
+    .order("created_at", { ascending: false });
 
-  itens=data||[];
-  lista.innerHTML="";
-  itens.forEach(render);
+  itens = data || [];
+  lista.innerHTML = "";
+  itens.forEach(renderItem);
 }
 
-function render(i){
-  lista.innerHTML+=`
+function renderItem(i) {
+  lista.innerHTML += `
     <div class="item">
       <input type="checkbox" class="check" value="${i.id}">
-      ${i.imagem_url?`<img src="${i.imagem_url}">`:""}
+      ${i.imagem_url ? `<img src="${i.imagem_url}">` : ""}
       <div class="item-body">
         <span class="badge">${i.tipo}</span>
         <h4>${i.nome}</h4>
-        <div class="price">R$ ${i.preco.toFixed(2).replace('.',',')}</div>
-        ${i.duracao_minutos?`<small>${i.duracao_minutos} min</small>`:""}
-        <div class="actions"><span onclick="editar('${i.id}')">Editar</span></div>
+        <div class="price">R$ ${i.preco.toFixed(2).replace('.', ',')}</div>
+        ${i.duracao_minutos ? `<small>${i.duracao_minutos} min</small>` : ""}
+        <div class="actions">
+          <span onclick="editar('${i.id}')">Editar</span>
+        </div>
       </div>
-    </div>`;
+    </div>
+  `;
 }
 
-/* EDITAR */
-function editar(id){
-  const i=itens.find(x=>x.id===id);
-  editId=id;
-  tipo.value=i.tipo;
+/* =================================================
+   EDITAR / RESET
+   ================================================= */
+function editar(id) {
+  const i = itens.find(x => x.id === id);
+  editId = id;
+  tipo.value = i.tipo;
   tipo.onchange();
-  nome.value=i.nome;
-  descricao.value=i.descricao;
-  preco.value=i.preco.toFixed(2).replace('.',',');
-  duracao.value=i.duracao_minutos||"";
-  formTitle.innerText="Editar item";
-  scrollTo({top:0,behavior:"smooth"});
+  nome.value = i.nome;
+  descricao.value = i.descricao;
+  preco.value = i.preco.toFixed(2).replace('.', ',');
+  duracao.value = i.duracao_minutos || "";
+  formTitle.innerText = "Editar item";
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-/* EXCLUIR */
-async function excluirSelecionados(){
-  const ids=[...document.querySelectorAll(".check:checked")].map(c=>c.value);
-  if(!ids.length||!confirm("Excluir itens selecionados?"))return;
-  await sb.from("produtos_servicos").delete().in("id",ids);
-  carregar();
-}
-
-/* RESET */
-function reset(){
-  editId=null;
-  formTitle.innerText="Cadastrar item";
-  nome.value=descricao.value=preco.value=duracao.value="";
-  imagem.value="";
-  preview.style.display="none";
-  uploadText.style.display="block";
+function reset() {
+  editId = null;
+  formTitle.innerText = "Cadastrar item";
+  nome.value = descricao.value = preco.value = duracao.value = "";
+  imagem.value = "";
+  preview.style.display = "none";
+  uploadText.style.display = "block";
 }
 </script>
+
 
 </body>
 </html>
