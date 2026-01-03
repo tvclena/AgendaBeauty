@@ -2,19 +2,16 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Agendamento</title>
-
+<title>Perfil da Loja</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ff6a00">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
   --primary:#ff6a00;
-  --primary-dark:#e45f00;
-  --bg:#f3f4f6;
+  --primary-dark:#e85f00;
+  --bg:#f4f6fb;
   --card:#ffffff;
   --text:#111827;
   --muted:#6b7280;
@@ -24,392 +21,326 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
 body{background:var(--bg);color:var(--text)}
 
-/* ===== PERFIL TOPO ===== */
-.profile{
-  background:linear-gradient(135deg,#ff6a00,#ff934a);
-  padding:24px 16px 80px;
-  position:relative;
-}
-
-.profile-card{
-  background:#fff;
-  border-radius:24px;
-  padding:20px;
-  max-width:960px;
-  margin:0 auto;
-  box-shadow:0 25px 60px rgba(0,0,0,.18);
+/* ================= BANNER ================= */
+.banner{
+  height:260px;
+  background:
+    linear-gradient(to right, rgba(255,106,0,.92), rgba(255,106,0,.75)),
+    url("https://images.unsplash.com/photo-1503951914875-452162b0f3f1") center/cover;
+  color:#fff;
+  padding:24px;
   display:flex;
-  gap:18px;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.banner-top{
+  display:flex;
   align-items:center;
+  gap:14px;
 }
 
-.profile-card img{
-  width:92px;
-  height:92px;
-  border-radius:20px;
-  object-fit:cover;
-  background:#f3f4f6;
+.banner-top img{
+  width:68px;
+  height:68px;
+  border-radius:16px;
+  background:#fff;
 }
 
-.profile-info h1{
-  font-size:20px;
+.banner-info h1{
+  font-size:22px;
   font-weight:800;
 }
 
-.profile-info p{
+.banner-info p{
   font-size:14px;
-  color:var(--muted);
-  margin-top:2px;
+  opacity:.95;
 }
 
-.profile-tags{
+.banner-links{
   display:flex;
-  gap:8px;
+  gap:10px;
   flex-wrap:wrap;
-  margin-top:10px;
 }
 
-.profile-tags span{
-  background:#f3f4f6;
-  padding:6px 12px;
+.banner-links span{
+  background:rgba(255,255,255,.2);
+  padding:8px 14px;
   border-radius:999px;
-  font-size:12px;
+  font-size:13px;
 }
 
-/* ===== CONTEÚDO ===== */
-.container{
-  max-width:960px;
-  margin:-50px auto 100px;
-  padding:0 16px;
-}
-
-/* ===== CARD ===== */
-.card{
+/* ================= PERFIL CLIENTE ================= */
+.client-card{
   background:#fff;
   border-radius:22px;
+  margin:-60px auto 24px;
+  max-width:1000px;
   padding:20px;
-  box-shadow:0 18px 40px rgba(0,0,0,.08);
-}
-
-/* ===== TABS ===== */
-.tabs{
   display:flex;
-  gap:12px;
-  margin-bottom:16px;
+  gap:20px;
+  box-shadow:0 25px 60px rgba(0,0,0,.15);
 }
 
-.tabs button{
-  flex:1;
-  padding:12px;
+.client-card img{
+  width:120px;
+  border-radius:20px;
+}
+
+.client-info h2{
+  font-size:22px;
+  font-weight:800;
+}
+
+.client-info p{
+  color:var(--muted);
+  margin:4px 0 8px;
+}
+
+.stars{
+  color:#facc15;
+  font-size:18px;
+}
+
+.client-tags{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+
+.client-tags span{
+  background:#f3f4f6;
+  padding:8px 14px;
   border-radius:999px;
-  border:1px solid var(--border);
-  background:#fff;
-  font-weight:700;
-  cursor:pointer;
+  font-size:13px;
 }
 
-.tabs button.active{
-  background:var(--primary);
-  color:#fff;
-  border-color:var(--primary);
+/* ================= CONTAINER ================= */
+.container{
+  max-width:1000px;
+  margin:auto;
+  padding:0 16px 120px;
 }
 
-/* ===== BUSCA ===== */
+/* ================= BUSCA ================= */
 .search{
-  margin-bottom:18px;
+  margin-bottom:20px;
 }
 
 .search input{
   width:100%;
-  padding:14px;
-  border-radius:14px;
-  border:1px solid var(--border);
-  font-size:14px;
-}
-
-/* ===== GRID ===== */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:18px;
-}
-
-.item{
-  border:1px solid var(--border);
-  border-radius:20px;
-  overflow:hidden;
-  background:#fff;
-  display:flex;
-  flex-direction:column;
-}
-
-.item img{
-  width:100%;
-  height:140px;
-  object-fit:cover;
-  background:#f3f4f6;
-}
-
-.item-body{
   padding:16px;
-  flex:1;
-}
-
-.item-body strong{
+  border-radius:16px;
+  border:1px solid var(--border);
   font-size:15px;
 }
 
-.item-meta{
+/* ================= TABS ================= */
+.tabs{
   display:flex;
-  justify-content:space-between;
-  margin-top:6px;
-  font-size:13px;
-  color:var(--muted);
+  gap:10px;
+  margin-bottom:20px;
 }
 
-.item button{
-  margin:16px;
-  margin-top:0;
-  padding:12px;
-  border-radius:14px;
+.tabs button{
+  padding:12px 18px;
+  border-radius:999px;
   border:none;
-  background:var(--primary);
+  background:#e5e7eb;
+  font-weight:700;
+}
+
+.tabs .active{
+  background:#111;
   color:#fff;
-  font-weight:800;
-  cursor:pointer;
 }
 
-.item button:hover{
-  background:var(--primary-dark);
+/* ================= GRID ================= */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:20px;
 }
 
-/* ===== CTA FIXO ===== */
-.cta{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
+.card{
   background:#fff;
-  border-top:1px solid var(--border);
-  padding:14px;
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 12px 30px rgba(0,0,0,.1);
+  position:relative;
 }
 
-.cta button{
-  width:100%;
-  padding:16px;
-  border-radius:16px;
-  border:none;
+.badge{
+  position:absolute;
+  top:12px;
+  left:12px;
   background:var(--primary);
   color:#fff;
-  font-weight:800;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.discount{
+  background:#111;
+}
+
+.card img{
+  width:100%;
+  height:160px;
+  object-fit:cover;
+}
+
+.card-body{
+  padding:16px;
+}
+
+.card-body strong{
   font-size:16px;
 }
 
-/* ===== CHAT ===== */
-#chatOverlay{
-  position:fixed;
-  inset:0;
-  background:#fff;
-  z-index:9999;
-  display:none;
-  flex-direction:column;
-}
-
-.chat-header{
-  padding:16px;
-  background:var(--primary);
-  color:#fff;
+.meta{
   display:flex;
   justify-content:space-between;
-  align-items:center;
-}
-
-.chat-body{
-  flex:1;
-  padding:16px;
-  overflow-y:auto;
-}
-
-.msg{
-  max-width:80%;
-  padding:12px 16px;
-  border-radius:18px;
-  margin-bottom:10px;
   font-size:14px;
+  color:var(--muted);
+  margin:6px 0 14px;
 }
 
-.bot{
-  background:#fff4ec;
+.price{
+  font-size:20px;
+  font-weight:800;
 }
 
-.user{
-  background:#e5e7eb;
-  margin-left:auto;
+.old{
+  text-decoration:line-through;
+  color:#9ca3af;
+  font-size:14px;
+  margin-right:6px;
 }
 
-.chat-input{
-  display:flex;
-  gap:10px;
+.card button{
+  width:100%;
   padding:14px;
-  border-top:1px solid var(--border);
-}
-
-.chat-input input{
-  flex:1;
-  padding:14px;
-  border-radius:999px;
-  border:1px solid var(--border);
-}
-
-.chat-input button{
-  width:54px;
-  border-radius:50%;
   border:none;
+  border-radius:14px;
   background:var(--primary);
   color:#fff;
   font-weight:800;
+  font-size:15px;
+}
+
+.card button:hover{
+  background:var(--primary-dark);
 }
 </style>
 </head>
 
 <body>
 
-<!-- PERFIL -->
-<section class="profile">
-  <div class="profile-card">
-    <img id="logo">
-    <div class="profile-info">
-      <h1 id="nomeLoja">Carregando…</h1>
-      <p>Agendamento online</p>
-      <div class="profile-tags">
-        <span>⏱ Atendimento rápido</span>
-        <span>📱 WhatsApp</span>
-        <span>💳 Pagamento facilitado</span>
-      </div>
+<!-- BANNER -->
+<section class="banner">
+  <div class="banner-top">
+    <img src="https://placehold.co/100">
+    <div class="banner-info">
+      <h1>Villa Barber Shop</h1>
+      <p>R. das Flores, 123 · Centro</p>
     </div>
+  </div>
+
+  <div class="banner-links">
+    <span>⏱ Seg à Sáb · 8h às 20h</span>
+    <span>📍 Centro, SP</span>
+    <span>📞 WhatsApp</span>
   </div>
 </section>
 
+<!-- PERFIL CLIENTE -->
+<div class="client-card">
+  <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e">
+  <div class="client-info">
+    <h2>Marcos Oliveira</h2>
+    <p>Especialista em corte masculino</p>
+    <div class="stars">★★★★★ <span style="color:#6b7280;font-size:14px">4.9 (120)</span></div>
+
+    <div class="client-tags">
+      <span>⚡ Atendimento rápido</span>
+      <span>📱 Confirmação WhatsApp</span>
+      <span>💳 Pagamento facilitado</span>
+    </div>
+  </div>
+</div>
+
 <!-- CONTEÚDO -->
 <div class="container">
-  <div class="card">
 
-    <div class="tabs">
-      <button class="active" onclick="mostrar('servicos',this)">Serviços</button>
-      <button onclick="mostrar('produtos',this)">Produtos</button>
-    </div>
-
-    <div class="search">
-      <input placeholder="Buscar serviço ou produto">
-    </div>
-
-    <div id="servicos" class="grid"></div>
-    <div id="produtos" class="grid" style="display:none"></div>
-
+  <div class="search">
+    <input placeholder="Buscar serviço ou produto">
   </div>
-</div>
 
-<!-- CTA -->
-<div class="cta">
-  <button onclick="scrollToTop()">Agendar agora</button>
-</div>
-
-<!-- CHAT -->
-<div id="chatOverlay">
-  <div class="chat-header">
-    <strong>Agendamento</strong>
-    <span onclick="fecharChat()">✕</span>
+  <div class="tabs">
+    <button class="active">Serviços</button>
+    <button>Produtos</button>
   </div>
-  <div class="chat-body" id="chat"></div>
-  <div class="chat-input">
-    <input id="input" placeholder="Digite aqui…">
-    <button onclick="enviar()">➤</button>
-  </div>
-</div>
 
-<script>
-const sb = supabase.createClient(
- "https://egxjgmzukjyyxmkukwub.supabase.co",
- "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
-);
+  <div class="grid">
 
-const lojaId = new URLSearchParams(location.search).get("l");
-let etapa="nome", cliente={}, servico=null;
-
-function scrollToTop(){
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-/* CHAT */
-function abrirChat(s){
-  servico=s;
-  chatOverlay.style.display="flex";
-  chat.innerHTML="";
-  etapa="nome";
-  bot(`Você escolheu <b>${s.nome}</b>`);
-  bot("Qual é o seu nome?");
-}
-
-function fecharChat(){
-  chatOverlay.style.display="none";
-}
-
-function bot(t){
-  chat.innerHTML+=`<div class="msg bot">${t}</div>`;
-  chat.scrollTop=chat.scrollHeight;
-}
-
-function userMsg(t){
-  chat.innerHTML+=`<div class="msg user">${t}</div>`;
-}
-
-function enviar(){
-  let v=input.value.trim();
-  if(!v) return;
-  userMsg(v);
-  input.value="";
-  if(etapa==="nome"){
-    cliente.nome=v;
-    etapa="whats";
-    bot("Agora informe seu WhatsApp 📱");
-  }else if(etapa==="whats"){
-    cliente.whats=v;
-    bot("Perfeito! Em breve confirmaremos seu horário.");
-    etapa="fim";
-  }
-}
-
-/* LISTAGEM */
-async function carregar(){
-  const {data:p}=await sb.from("user_profile")
-    .select("negocio,avatar_url")
-    .eq("user_id",lojaId).single();
-
-  nomeLoja.innerText=p.negocio;
-  logo.src=p.avatar_url;
-
-  const {data}=await sb.from("produtos_servicos")
-    .select("*")
-    .eq("user_id",lojaId)
-    .eq("ativo",true);
-
-  servicos.innerHTML=data.filter(i=>i.tipo==="SERVICO").map(i=>`
-    <div class="item">
-      <img src="${i.imagem_url||''}">
-      <div class="item-body">
-        <strong>${i.nome}</strong>
-        <div class="item-meta">
-          <span>⏱ ${i.duracao||60} min</span>
-          <span>💰 R$ ${i.preco}</span>
+    <div class="card">
+      <div class="badge">Mais pedido</div>
+      <img src="https://images.unsplash.com/photo-1517832606299-7ae9b720a186">
+      <div class="card-body">
+        <strong>Corte Masculino</strong>
+        <div class="meta">
+          <span>⏱ 50 min</span>
+          <span class="price">R$ 45</span>
         </div>
+        <button>Agendar</button>
       </div>
-      <button onclick='abrirChat(${JSON.stringify(i)})'>Agendar</button>
     </div>
-  `).join("");
-}
 
-if(lojaId) carregar();
-</script>
+    <div class="card">
+      <div class="badge discount">15% OFF</div>
+      <img src="https://images.unsplash.com/photo-1621605810052-809b48c2c56b">
+      <div class="card-body">
+        <strong>Barba</strong>
+        <div class="meta">
+          <span>⏱ 40 min</span>
+          <span class="price"><span class="old">R$ 48</span>R$ 34</span>
+        </div>
+        <button>Agendar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="badge">Promoção</div>
+      <img src="https://images.unsplash.com/photo-1516826957135-700dedea698c">
+      <div class="card-body">
+        <strong>Corte + Barba</strong>
+        <div class="meta">
+          <span>⏱ 75 min</span>
+          <span class="price">R$ 70</span>
+        </div>
+        <button>Agendar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="badge">Promoção</div>
+      <img src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a">
+      <div class="card-body">
+        <strong>Sobrancelha</strong>
+        <div class="meta">
+          <span>⏱ 30 min</span>
+          <span class="price">R$ 20</span>
+        </div>
+        <button>Agendar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 </body>
 </html>
