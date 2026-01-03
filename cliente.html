@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Bem-vindo</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ff6a00">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --primary:#ff6a00;
+  --bg:#f4f6fb;
+  --border:#e5e7eb;
+  --text:#111827;
+  --muted:#6b7280;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
+
+body{
+  background:var(--bg);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.card{
+  background:#fff;
+  width:100%;
+  max-width:420px;
+  border-radius:22px;
+  padding:26px;
+  box-shadow:0 20px 50px rgba(0,0,0,.12);
+}
+
+.logo{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
+  margin:0 auto 16px;
+}
+
+h1{
+  text-align:center;
+  font-size:22px;
+  font-weight:900;
+}
+p{
+  text-align:center;
+  color:#6b7280;
+  font-size:14px;
+  margin:8px 0 18px;
+}
+
+input{
+  width:100%;
+  height:48px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  padding:0 14px;
+  font-size:14px;
+  margin-bottom:12px;
+}
+
+button{
+  width:100%;
+  height:48px;
+  border:none;
+  border-radius:999px;
+  background:var(--primary);
+  color:#fff;
+  font-weight:900;
+  font-size:15px;
+  cursor:pointer;
+}
+
+small{
+  display:block;
+  text-align:center;
+  margin-top:14px;
+  font-size:12px;
+  color:#9ca3af;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <div class="logo"></div>
+
+  <h1>Seja bem-vindo 👋</h1>
+  <p>Informe seus dados para continuar</p>
+
+  <input id="nome" placeholder="Seu nome completo">
+  <input id="whatsapp" placeholder="WhatsApp" inputmode="numeric">
+
+  <button onclick="continuar()">Continuar</button>
+
+  <small>Seus dados são usados apenas para o agendamento</small>
+</div>
+
+<script>
+const sb = supabase.createClient(
+  "https://egxjgmzukjyyxmkukwub.supabase.co",
+  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+);
+
+const lojaId = new URLSearchParams(location.search).get("l");
+
+/* MASK */
+whatsapp.addEventListener("input", e=>{
+  let v = e.target.value.replace(/\D/g,'').slice(0,11);
+  if(v.length>=2) v=v.replace(/^(\d{2})(\d)/,"($1) $2");
+  if(v.length>=10) v=v.replace(/(\d{5})(\d)/,"$1-$2");
+  e.target.value=v;
+});
+
+/* CONTINUAR */
+async function continuar(){
+  const n = nome.value.trim();
+  const w = whatsapp.value.replace(/\D/g,'');
+
+  if(!n || w.length < 10){
+    alert("Informe nome e WhatsApp corretamente.");
+    return;
+  }
+
+  // Verifica se já existe
+  const {data:existente} = await sb
+    .from("clientes_loja")
+    .select("id")
+    .eq("loja_id", lojaId)
+    .eq("whatsapp", w)
+    .single();
+
+  let clienteId = existente?.id;
+
+  if(!clienteId){
+    const {data} = await sb
+      .from("clientes_loja")
+      .insert({
+        loja_id: lojaId,
+        nome: n,
+        whatsapp: w
+      })
+      .select()
+      .single();
+
+    clienteId = data.id;
+  }
+
+  // Guarda no sessionStorage (cliente logado)
+  sessionStorage.setItem("cliente_id", clienteId);
+  sessionStorage.setItem("cliente_nome", n);
+  sessionStorage.setItem("cliente_whatsapp", w);
+
+  // Vai para agendamento
+  location.href = `agendar.html?l=${lojaId}`;
+}
+</script>
+
+</body>
+</html>
