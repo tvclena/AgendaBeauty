@@ -150,7 +150,7 @@ iframe{
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <strong>Meu Negócio</strong>
+    <strong id="nomeNegocio">Meu Negócio</strong>
   </div>
 
   <div class="content">
@@ -159,7 +159,7 @@ iframe{
 </div>
 
 <script>
-/* ========= MENU FUNCIONAL (PURO) ========= */
+/* ========= MENU FUNCIONAL (SEM BUG) ========= */
 
 const frame = document.getElementById("frame");
 const menuItems = document.querySelectorAll(".menu-item[data-page]");
@@ -198,8 +198,9 @@ submenuItems.forEach(item=>{
 /* página inicial */
 carregar("home.html");
 
-/* logout apenas navegação */
+/* logout (simples por enquanto) */
 function logout(){
+  localStorage.clear();
   location.href = "login.html";
 }
 </script>
