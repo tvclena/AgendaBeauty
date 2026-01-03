@@ -4,12 +4,7 @@
 <meta charset="UTF-8">
 <title>Agendamento</title>
 
-<meta name="viewport"
-  content="width=device-width,
-  initial-scale=1,
-  maximum-scale=1,
-  user-scalable=no">
-
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" id="themeColor">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -23,9 +18,10 @@
   --text:#111827;
   --muted:#6b7280;
   --danger:#dc2626;
+  --success:#16a34a;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-body{background:var(--bg);padding-bottom:90px;color:var(--text)}
+body{background:var(--bg);color:var(--text);padding-bottom:90px}
 
 /* SPLASH */
 #splash{
@@ -35,15 +31,10 @@ body{background:var(--bg);padding-bottom:90px;color:var(--text)}
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  z-index:3000;
+  z-index:999;
 }
-#splash img{
-  width:120px;
-  height:120px;
-  object-fit:contain;
-  margin-bottom:14px;
-}
-#splash strong{font-size:18px}
+#splash img{width:120px;height:120px;object-fit:contain}
+#splash strong{margin-top:10px;font-size:18px}
 
 /* LOGIN */
 #login{
@@ -53,25 +44,37 @@ body{background:var(--bg);padding-bottom:90px;color:var(--text)}
   justify-content:center;
 }
 .login-box{
-  background:#fff;padding:26px;border-radius:22px;
-  width:90%;max-width:340px;
+  background:#fff;
+  padding:26px;
+  border-radius:22px;
+  width:90%;
+  max-width:340px;
 }
-.login-box input,button{
-  width:100%;padding:14px;border-radius:14px;
-  border:1px solid #ddd;margin-bottom:10px;
+.login-box input{
+  width:100%;
+  padding:14px;
+  margin-bottom:10px;
+  border-radius:12px;
+  border:1px solid #ddd;
 }
-button{background:var(--primary);color:#fff;font-weight:800;border:none}
+.login-box button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:999px;
+  background:var(--primary);
+  color:#fff;
+  font-weight:800;
+}
 
 /* APP */
 #app{display:none}
-
-/* TOPO */
 .top{
   background:var(--primary);
   color:#fff;
   padding:16px;
-  font-weight:800;
   text-align:center;
+  font-weight:800;
 }
 
 /* TABS */
@@ -80,14 +83,18 @@ button{background:var(--primary);color:#fff;font-weight:800;border:none}
   margin:12px;
   background:#fff;
   border-radius:999px;
-  overflow:hidden;
 }
 .tabs button{
-  flex:1;padding:12px;border:none;background:none;
-  font-weight:800;color:var(--muted);
+  flex:1;
+  padding:12px;
+  border:none;
+  background:none;
+  font-weight:800;
+  color:var(--muted);
 }
 .tabs button.active{
-  background:var(--primary);color:#fff;
+  background:var(--primary);
+  color:#fff;
 }
 
 /* GRID */
@@ -104,10 +111,21 @@ button{background:var(--primary);color:#fff;font-weight:800;border:none}
   box-shadow:0 10px 28px rgba(0,0,0,.08);
 }
 .card img{
-  width:100%;height:120px;
-  object-fit:cover;border-radius:14px;
+  width:100%;
+  height:120px;
+  object-fit:cover;
+  border-radius:14px;
 }
-.card button{margin-top:8px}
+.card button{
+  margin-top:8px;
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:999px;
+  background:var(--primary);
+  color:#fff;
+  font-weight:800;
+}
 
 /* AGENDA */
 .list{padding:12px}
@@ -117,19 +135,57 @@ button{background:var(--primary);color:#fff;font-weight:800;border:none}
   padding:12px;
   margin-bottom:10px;
 }
-small{color:var(--muted)}
+
+/* CALENDÁRIO */
+.dias{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:12px;
+}
+.dia{
+  min-width:80px;
+  text-align:center;
+  padding:10px;
+  border-radius:12px;
+  background:#e5e7eb;
+  cursor:pointer;
+}
+.dia.active{
+  background:var(--primary);
+  color:#fff;
+}
+
+.horarios{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
+  gap:8px;
+  padding:12px;
+}
+.hora{
+  padding:10px;
+  border-radius:10px;
+  text-align:center;
+}
+.hora.disponivel{
+  background:var(--success);
+  color:#fff;
+  cursor:pointer;
+}
+.hora.ocupado{
+  background:#9ca3af;
+  color:#fff;
+}
 </style>
 </head>
 
 <body>
 
-<!-- SPLASH -->
 <div id="splash">
   <img id="logoLoja">
   <strong id="nomeSplash">Carregando…</strong>
 </div>
 
-<!-- LOGIN -->
 <div id="login">
   <div class="login-box">
     <input id="nome" placeholder="Seu nome">
@@ -138,18 +194,22 @@ small{color:var(--muted)}
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
   <div class="top" id="nomeLoja"></div>
 
   <div class="tabs">
-    <button class="active" onclick="aba('servicos')">Serviços</button>
-    <button onclick="aba('produtos')">Produtos</button>
-    <button onclick="aba('agenda')">Meus horários</button>
+    <button class="active" onclick="aba('servicos',this)">Serviços</button>
+    <button onclick="aba('agendar',this)">Agendar</button>
+    <button onclick="aba('agenda',this)">Meus horários</button>
   </div>
 
   <div id="servicos" class="grid"></div>
-  <div id="produtos" class="grid" style="display:none"></div>
+
+  <div id="agendar" style="display:none">
+    <div class="dias" id="dias"></div>
+    <div class="horarios" id="horarios"></div>
+  </div>
+
   <div id="agenda" class="list" style="display:none"></div>
 </div>
 
@@ -159,12 +219,13 @@ const sb = supabase.createClient(
  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-// 🔐 PERSISTE LOJA
-const urlLoja = new URLSearchParams(location.search).get("l");
-if(urlLoja) localStorage.setItem("loja_id", urlLoja);
+// LOJA
+const ql = new URLSearchParams(location.search).get("l");
+if(ql) localStorage.setItem("loja_id", ql);
 const lojaId = localStorage.getItem("loja_id");
 
-let nomeCliente = localStorage.getItem("cliente_nome");
+let servicoSelecionado = null;
+let dataSelecionada = null;
 
 /* INIT */
 async function iniciar(){
@@ -177,41 +238,36 @@ async function iniciar(){
 
   setTimeout(()=>{
     splash.style.display="none";
-    if(!nomeCliente){
+    if(!localStorage.getItem("cliente_nome")){
       login.style.display="flex";
     }else{
       app.style.display="block";
       carregarTudo();
     }
-  },1200);
+  },1000);
 }
 
 /* LOJA */
 async function carregarLoja(){
   const {data:p} = await sb
     .from("user_profile")
-    .select("negocio")
+    .select("negocio,avatar_url")
     .eq("user_id",lojaId)
     .single();
 
   nomeLoja.innerText = p?.negocio || "Agendamento";
   nomeSplash.innerText = p?.negocio || "Agendamento";
+  if(p?.avatar_url) logoLoja.src = p.avatar_url;
 
   const {data:cfg} = await sb
     .from("config_loja")
-    .select("*")
+    .select("cor_primaria")
     .eq("user_id",lojaId)
     .single();
 
   if(cfg?.cor_primaria){
     document.documentElement.style.setProperty("--primary",cfg.cor_primaria);
     themeColor.content = cfg.cor_primaria;
-  }
-
-  if(cfg?.logo_url){
-    logoLoja.src = cfg.logo_url;
-  }else{
-    logoLoja.style.display="none";
   }
 }
 
@@ -225,19 +281,20 @@ function entrar(){
 }
 
 /* ABAS */
-function aba(a){
-  servicos.style.display = a==="servicos"?"grid":"none";
-  produtos.style.display = a==="produtos"?"grid":"none";
-  agenda.style.display   = a==="agenda"?"block":"none";
+function aba(id,el){
   document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
-  event.target.classList.add("active");
+  el.classList.add("active");
+
+  servicos.style.display = id==="servicos"?"grid":"none";
+  agendar.style.display  = id==="agendar"?"block":"none";
+  agenda.style.display   = id==="agenda"?"block":"none";
 }
 
 /* DADOS */
-async function carregarTudo(){
+function carregarTudo(){
   carregarServicos();
-  carregarProdutos();
-  carregarAgenda();
+  carregarAgendaCliente();
+  montarDias();
 }
 
 /* SERVIÇOS */
@@ -254,32 +311,86 @@ async function carregarServicos(){
       <img src="${s.imagem_url||''}">
       <strong>${s.nome}</strong><br>
       <small>${s.duracao_minutos} min • R$ ${s.preco}</small>
-      <button>Agendar</button>
+      <button onclick='selecionarServico(${JSON.stringify(s)})'>Selecionar</button>
     </div>
   `).join("");
 }
 
-/* PRODUTOS */
-async function carregarProdutos(){
-  const {data} = await sb
-    .from("produtos_servicos")
+function selecionarServico(s){
+  servicoSelecionado = s;
+  aba('agendar',document.querySelectorAll(".tabs button")[1]);
+}
+
+/* DIAS */
+function montarDias(){
+  dias.innerHTML="";
+  for(let i=0;i<7;i++){
+    const d = new Date();
+    d.setDate(d.getDate()+i);
+    const iso = d.toISOString().slice(0,10);
+    dias.innerHTML += `
+      <div class="dia" onclick="selecionarDia('${iso}',this)">
+        ${d.getDate()}/${d.getMonth()+1}
+      </div>`;
+  }
+}
+
+async function selecionarDia(data,el){
+  document.querySelectorAll(".dia").forEach(d=>d.classList.remove("active"));
+  el.classList.add("active");
+  dataSelecionada = data;
+
+  const {data:dia} = await sb
+    .from("agenda_loja")
     .select("*")
     .eq("user_id",lojaId)
-    .eq("tipo","PRODUTO")
-    .eq("ativo",true);
+    .eq("data",data)
+    .single();
 
-  produtos.innerHTML = data.map(p=>`
-    <div class="card">
-      <img src="${p.imagem_url||''}">
-      <strong>${p.nome}</strong><br>
-      <small>R$ ${p.preco}</small>
-      <button>Comprar</button>
-    </div>
-  `).join("");
+  if(!dia || dia.fechado){
+    horarios.innerHTML="<small>Fechado</small>";
+    return;
+  }
+
+  const base = JSON.parse(dia.horarios||"[]");
+
+  const {data:ocupados} = await sb
+    .from("agendamentos")
+    .select("hora_inicio")
+    .eq("user_id",lojaId)
+    .eq("data",data);
+
+  const usados = ocupados.map(o=>o.hora_inicio);
+
+  horarios.innerHTML = base.map(h=>{
+    const ocupado = usados.includes(h.inicio);
+    return `
+      <div class="hora ${ocupado?'ocupado':'disponivel'}"
+           onclick="${ocupado?'':'agendarHora(\''+h.inicio+'\',\''+h.fim+'\')'}">
+        ${h.inicio}
+      </div>`;
+  }).join("");
 }
 
-/* AGENDA */
-async function carregarAgenda(){
+/* AGENDAR */
+async function agendarHora(inicio,fim){
+  await sb.from("agendamentos").insert({
+    user_id:lojaId,
+    cliente_nome:localStorage.getItem("cliente_nome"),
+    cliente_whats:localStorage.getItem("cliente_whats"),
+    servico_nome:servicoSelecionado.nome,
+    data:dataSelecionada,
+    hora_inicio:inicio,
+    hora_fim:fim
+  });
+
+  alert("Agendamento realizado ✅");
+  carregarAgendaCliente();
+  montarDias();
+}
+
+/* MEUS AGENDAMENTOS */
+async function carregarAgendaCliente(){
   const {data} = await sb
     .from("agendamentos")
     .select("*")
@@ -291,9 +402,8 @@ async function carregarAgenda(){
     ? data.map(a=>`
       <div class="item-ag">
         <strong>${a.data} • ${a.hora_inicio}</strong><br>
-        <small>${a.cliente_nome}</small>
-      </div>
-    `).join("")
+        <small>${a.servico_nome}</small>
+      </div>`).join("")
     : "<small>Nenhum agendamento</small>";
 }
 
