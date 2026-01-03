@@ -2,282 +2,239 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Produtos & Serviços • AgendaBeauty</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Produtos & Serviços • Agenda Fácil</title>
+
+<meta name="viewport"
+  content="width=device-width,
+  initial-scale=1,
+  maximum-scale=1,
+  user-scalable=no,
+  viewport-fit=cover">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* ================= DESIGN SYSTEM ================= */
 :root{
   --primary:#ff6a00;
-  --primary-soft:#fff3e8;
   --bg:#f4f6fb;
-  --card:#ffffff;
-  --border:#e6e8ee;
-  --radius:16px;
-
+  --card:#fff;
+  --border:#e5e7eb;
   --text:#111827;
   --muted:#6b7280;
-
-  --success:#16a34a;
-  --warning:#f59e0b;
-  --danger:#dc2626;
-
-  --shadow-sm:0 4px 12px rgba(0,0,0,.06);
-  --shadow-md:0 12px 28px rgba(0,0,0,.10);
-  --shadow-lg:0 20px 45px rgba(0,0,0,.14);
-
-  --transition:.25s ease;
+  --radius:14px;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Inter;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  overflow-x:hidden;
+}
 
 body{
   background:var(--bg);
-  padding:22px;
-  color:var(--text);
+  padding:12px;
+  overflow-y:auto;
+  scrollbar-width:none;
 }
+body::-webkit-scrollbar{display:none}
 
-/* ================= HEADER ================= */
+/* ===== HEADER ===== */
 .header{
-  max-width:1600px;
-  margin:auto;
+  margin-bottom:12px;
 }
 .header h1{
-  font-size:28px;
+  font-size:18px;
   font-weight:800;
 }
 .header span{color:var(--primary)}
 .header p{
-  font-size:13px;
+  font-size:12px;
   color:var(--muted);
-  margin-top:4px;
 }
 
-/* ================= KPIS ================= */
+/* ===== KPIs ===== */
 .kpis{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:16px;
-  margin:18px 0 26px;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin:12px 0;
 }
 .kpi{
   background:var(--card);
   border-radius:var(--radius);
-  padding:16px 18px;
-  box-shadow:var(--shadow-sm);
+  padding:10px;
+  text-align:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.06);
 }
 .kpi small{
-  font-size:12px;
+  font-size:10px;
   color:var(--muted);
 }
 .kpi h2{
-  font-size:24px;
+  font-size:16px;
   font-weight:800;
-  margin-top:4px;
 }
 
-/* ================= TOP ACTIONS ================= */
-.top-bar{
-  max-width:1600px;
-  margin:0 auto 14px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.btn-main{
-  background:linear-gradient(135deg,#ff6a00,#ff9a57);
-  color:#fff;
-  border:none;
-  border-radius:999px;
-  padding:10px 18px;
-  font-weight:800;
-  cursor:pointer;
-  transition:var(--transition);
-}
-.btn-main:hover{
-  transform:translateY(-1px);
-  filter:brightness(.96);
-}
-
-/* ================= FILTERS ================= */
+/* ===== FILTERS ===== */
 .filters{
-  background:#f9fafb;
-  border-radius:14px;
-  padding:12px;
   display:flex;
-  gap:10px;
-  margin-bottom:16px;
+  gap:8px;
+  margin-bottom:12px;
 }
 .filters input,
 .filters select{
-  height:40px;
-  padding:0 12px;
-  border-radius:12px;
+  flex:1;
+  height:36px;
+  border-radius:10px;
   border:1px solid var(--border);
+  padding:0 10px;
+  font-size:12px;
 }
 
-/* ================= GRID ================= */
+/* ===== GRID 3 COL ===== */
 .grid{
   display:grid;
-  grid-template-columns:repeat(6,minmax(180px,1fr));
-  gap:14px;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:8px;
 }
 
-/* ================= ITEM CARD ================= */
+/* ===== ITEM ===== */
 .item{
-  background:#fff;
-  border-radius:16px;
-  box-shadow:var(--shadow-sm);
+  background:var(--card);
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.06);
   overflow:hidden;
   display:flex;
   flex-direction:column;
-  min-height:270px;
-  transition:var(--transition);
-}
-.item:hover{
-  transform:translateY(-4px);
-  box-shadow:var(--shadow-lg);
 }
 
 .item img{
   width:100%;
-  height:120px;
+  height:70px;
   object-fit:cover;
   background:#eee;
 }
 
 .item-body{
-  padding:12px;
+  padding:8px;
   display:flex;
   flex-direction:column;
-  gap:5px;
+  gap:4px;
 }
 
 .badges{
   display:flex;
-  gap:6px;
   flex-wrap:wrap;
+  gap:4px;
 }
 .badge{
-  font-size:9px;
-  padding:3px 8px;
+  font-size:8px;
+  padding:2px 6px;
   border-radius:999px;
   background:#f1f5f9;
 }
-.badge.off{background:#fee2e2;color:var(--danger)}
-.badge.low{background:#fff3cd;color:var(--warning)}
-.badge.ok{background:#dcfce7;color:var(--success)}
-.badge.promo{background:#fdf2f8;color:#be185d}
+.badge.promo{background:#fde68a}
 
 .item-body h4{
-  font-size:13px;
+  font-size:11px;
   font-weight:700;
+  line-height:1.2;
 }
+
 .price{
-  font-size:16px;
+  font-size:12px;
   font-weight:800;
 }
+
 .actions{
   margin-top:auto;
-  font-size:12px;
+  font-size:10px;
   color:var(--primary);
   font-weight:700;
-  cursor:pointer;
-  opacity:0;
-  transition:var(--transition);
 }
-.item:hover .actions{opacity:1}
 
-/* ================= MODAL ================= */
+/* ===== FLOAT BUTTON ===== */
+.fab{
+  position:fixed;
+  bottom:90px;
+  right:16px;
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
+  color:#fff;
+  font-size:26px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:none;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+
+/* ===== MODAL ===== */
 .modal{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.45);
   display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:1000;
+  align-items:flex-end;
+  z-index:999;
 }
 .modal.show{display:flex}
 
 .modal-card{
-  width:540px;
-  max-height:90vh;
-  background:#fff;
-  border-radius:18px;
-  box-shadow:var(--shadow-lg);
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-
-.modal-header{
-  padding:16px 20px;
-  border-bottom:1px solid var(--border);
-  font-weight:800;
-}
-
-.modal-body{
-  padding:16px 20px;
-  overflow:auto;
-}
-
-.modal-footer{
-  padding:14px 20px;
-  border-top:1px solid var(--border);
-  display:flex;
-  gap:10px;
-}
-
-/* ================= FORM ================= */
-input,textarea,select{
   width:100%;
-  height:40px;
-  margin-bottom:10px;
-  padding:0 12px;
-  border-radius:12px;
-  border:1px solid var(--border);
-}
-textarea{height:auto;padding:10px}
-
-.row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
+  background:#fff;
+  border-radius:18px 18px 0 0;
+  padding:16px;
 }
 
-.switch{
-  display:flex;
-  gap:8px;
-  font-size:12px;
+.modal-card input,
+.modal-card textarea,
+.modal-card select{
+  width:100%;
+  height:38px;
   margin-bottom:8px;
+  padding:0 10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  font-size:12px;
+}
+.modal-card textarea{height:auto;padding:8px}
+
+.modal-card button{
+  width:100%;
+  height:42px;
+  border:none;
+  border-radius:999px;
+  background:var(--primary);
+  color:#fff;
+  font-weight:800;
+  margin-top:8px;
 }
 
 .upload{
   border:2px dashed var(--border);
-  border-radius:14px;
-  padding:14px;
+  border-radius:12px;
+  padding:10px;
   text-align:center;
-  cursor:pointer;
-  margin-bottom:10px;
+  font-size:12px;
 }
 .upload img{
   width:100%;
-  height:140px;
+  height:100px;
   object-fit:cover;
-  border-radius:12px;
+  border-radius:10px;
 }
-
-/* ================= BUTTONS ================= */
-.btn-cancel{
-  background:#e5e7eb;
-  color:#111;
-}
-.btn-cancel:hover{filter:brightness(.95)}
 </style>
 </head>
 
@@ -285,19 +242,13 @@ textarea{height:auto;padding:10px}
 
 <div class="header">
   <h1>Produtos & <span>Serviços</span></h1>
-  <p>Gerencie serviços, produtos, estoque, promoções e preços</p>
-
-  <div class="kpis">
-    <div class="kpi"><small>Itens</small><h2 id="kpiTotal">0</h2></div>
-    <div class="kpi"><small>Serviços</small><h2 id="kpiServicos">0</h2></div>
-    <div class="kpi"><small>Estoque baixo</small><h2 id="kpiBaixo">0</h2></div>
-    <div class="kpi"><small>Promoções</small><h2 id="kpiPromo">0</h2></div>
-  </div>
+  <p>Gerencie seus itens</p>
 </div>
 
-<div class="top-bar">
-  <div></div>
-  <button class="btn-main" onclick="abrirModal()">+ Novo item</button>
+<div class="kpis">
+  <div class="kpi"><small>Total</small><h2 id="kpiTotal">0</h2></div>
+  <div class="kpi"><small>Serviços</small><h2 id="kpiServicos">0</h2></div>
+  <div class="kpi"><small>Promo</small><h2 id="kpiPromo">0</h2></div>
 </div>
 
 <div class="filters">
@@ -311,39 +262,28 @@ textarea{height:auto;padding:10px}
 
 <div class="grid" id="lista"></div>
 
+<button class="fab" onclick="abrirModal()">+</button>
+
 <!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-card">
-    <div class="modal-header" id="formTitle">Cadastrar item</div>
+    <select id="tipo">
+      <option value="SERVICO">Serviço</option>
+      <option value="PRODUTO">Produto</option>
+    </select>
+    <input id="nome" placeholder="Nome">
+    <textarea id="descricao" placeholder="Descrição"></textarea>
+    <input id="preco" placeholder="Preço">
+    <label><input type="checkbox" id="promoAtiva"> Promoção</label>
 
-    <div class="modal-body">
-      <select id="tipo">
-        <option value="SERVICO">Serviço</option>
-        <option value="PRODUTO">Produto</option>
-      </select>
-
-      <input id="nome" placeholder="Nome">
-      <textarea id="descricao" placeholder="Descrição"></textarea>
-      <input id="categoria" placeholder="Categoria">
-
-      <div class="row">
-        <input id="preco" placeholder="Preço">
-        <input id="custo" placeholder="Custo">
-      </div>
-
-      <label class="switch"><input type="checkbox" id="promoAtiva"> Promoção ativa</label>
-
-      <div class="upload" onclick="imagem.click()">
-        <img id="preview" style="display:none">
-        <span id="uploadText">Selecionar imagem</span>
-        <input type="file" id="imagem" hidden>
-      </div>
+    <div class="upload" onclick="imagem.click()">
+      <img id="preview" style="display:none">
+      <span id="uploadText">Selecionar imagem</span>
+      <input type="file" id="imagem" hidden>
     </div>
 
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-main" onclick="salvar()">Salvar</button>
-    </div>
+    <button onclick="salvar()">Salvar</button>
+    <button onclick="fecharModal()" style="background:#e5e7eb;color:#111">Cancelar</button>
   </div>
 </div>
 
@@ -353,22 +293,19 @@ const sb = supabase.createClient(
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-let itens=[],editId=null,userId=null;
+let itens=[],userId=null,editId=null;
 
 (async()=>{
   const {data:{session}}=await sb.auth.getSession();
-  if(!session) location.href="login.html";
+  if(!session) return location.href="login.html";
   userId=session.user.id;
   carregar();
 })();
 
-function abrirModal(){
-  reset();
-  modal.classList.add("show");
-}
-function fecharModal(){
-  modal.classList.remove("show");
-}
+search.oninput=filtroTipo.onchange=render;
+
+function abrirModal(){ modal.classList.add("show"); }
+function fecharModal(){ modal.classList.remove("show"); reset(); }
 
 imagem.onchange=()=>{
   const f=imagem.files[0];
@@ -385,9 +322,7 @@ async function salvar(){
     tipo:tipo.value,
     nome:nome.value,
     descricao:descricao.value,
-    categoria:categoria.value,
     preco:Number(preco.value.replace(',','.')),
-    custo:custo.value||null,
     promocao_ativa:promoAtiva.checked
   };
 
@@ -401,8 +336,8 @@ async function salvar(){
   if(imagem.files.length){
     const path=`${userId}/${data.id}.jpg`;
     await sb.storage.from("produtos").upload(path,imagem.files[0],{upsert:true});
-    const {data:signed}=await sb.storage.from("produtos").createSignedUrl(path,31536000);
-    await sb.from("produtos_servicos").update({imagem_url:signed.signedUrl}).eq("id",data.id);
+    const {data:s}=await sb.storage.from("produtos").createSignedUrl(path,31536000);
+    await sb.from("produtos_servicos").update({imagem_url:s.signedUrl}).eq("id",data.id);
   }
 
   fecharModal();
@@ -412,45 +347,42 @@ async function salvar(){
 async function carregar(){
   const {data}=await sb.from("produtos_servicos").select("*");
   itens=data||[];
-  atualizarKPIs();
-  render();
-}
-
-function atualizarKPIs(){
   kpiTotal.innerText=itens.length;
   kpiServicos.innerText=itens.filter(i=>i.tipo==="SERVICO").length;
   kpiPromo.innerText=itens.filter(i=>i.promocao_ativa).length;
+  render();
 }
 
 function render(){
   lista.innerHTML="";
-  itens.forEach(i=>{
+  itens.filter(i=>{
+    if(search.value && !i.nome.toLowerCase().includes(search.value.toLowerCase())) return false;
+    if(filtroTipo.value && i.tipo!==filtroTipo.value) return false;
+    return true;
+  }).forEach(i=>{
     lista.innerHTML+=`
-    <div class="item">
-      ${i.imagem_url?`<img src="${i.imagem_url}">`:""}
-      <div class="item-body">
-        <div class="badges">
-          <span class="badge">${i.tipo}</span>
-          ${i.promocao_ativa?`<span class="badge promo">Promo</span>`:""}
+      <div class="item">
+        ${i.imagem_url?`<img src="${i.imagem_url}">`:""}
+        <div class="item-body">
+          <div class="badges">
+            <span class="badge">${i.tipo}</span>
+            ${i.promocao_ativa?`<span class="badge promo">Promo</span>`:""}
+          </div>
+          <h4>${i.nome}</h4>
+          <div class="price">R$ ${i.preco}</div>
+          <div class="actions" onclick="editar('${i.id}')">Editar</div>
         </div>
-        <h4>${i.nome}</h4>
-        <div class="price">R$ ${i.preco}</div>
-        <div class="actions" onclick="editar('${i.id}')">Editar</div>
-      </div>
-    </div>`;
+      </div>`;
   });
 }
 
 function editar(id){
   const i=itens.find(x=>x.id===id);
   editId=id;
-  formTitle.innerText="Editar item";
   tipo.value=i.tipo;
   nome.value=i.nome;
   descricao.value=i.descricao;
-  categoria.value=i.categoria;
   preco.value=i.preco;
-  custo.value=i.custo||"";
   promoAtiva.checked=i.promocao_ativa;
   if(i.imagem_url){
     preview.src=i.imagem_url;
@@ -462,8 +394,7 @@ function editar(id){
 
 function reset(){
   editId=null;
-  formTitle.innerText="Cadastrar item";
-  document.querySelectorAll(".modal-body input,.modal-body textarea").forEach(e=>e.value="");
+  document.querySelectorAll(".modal-card input,.modal-card textarea").forEach(e=>e.value="");
   preview.style.display="none";
   uploadText.style.display="block";
 }
