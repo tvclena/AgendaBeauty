@@ -368,29 +368,58 @@ async function listarDias(){
   save();scroll();
 }
 
-function selectDia(data,horarios){
-  if(dados.data) return;
-  dados.data=data;
-  agenda=horarios;
 
-  let slots=[];
-  agenda.forEach(h=>{
-    let s=toMin(h.inicio),e=toMin(h.fim);
-    while(s+duracao<=e){
+
+function selectDia(data, horarios){
+  if(dados.data) return;
+
+  dados.data = data;
+
+  // 🔒 GARANTE ARRAY
+  let blocos = [];
+
+  if(Array.isArray(horarios)){
+    blocos = horarios;
+  } else if(typeof horarios === "object"){
+    blocos = Object.values(horarios);
+  }
+
+  if(!blocos.length){
+    bot("⚠️ Nenhum horário disponível neste dia.");
+    return;
+  }
+
+  let slots = [];
+
+  blocos.forEach(h => {
+    if(!h.inicio || !h.fim) return;
+
+    let s = toMin(h.inicio),
+        e = toMin(h.fim);
+
+    while(s + duracao <= e){
       slots.push(toHour(s));
-      s+=duracao;
+      s += duracao;
     }
   });
 
+  if(!slots.length){
+    bot("⚠️ Nenhum horário disponível para este serviço.");
+    return;
+  }
+
   bot("Escolha o horário:");
 
-  chat.innerHTML+=`
+  chat.innerHTML += `
     <div class="times">
-      ${slots.map(h=>`
+      ${slots.map(h => `
         <div class="time" onclick="confirmar('${h}')">${h}</div>
       `).join("")}
-    </div>`;
-  save();scroll();
+    </div>
+  `;
+
+  save();
+  scroll();
 }
 
 /* CONFIRMAR */
