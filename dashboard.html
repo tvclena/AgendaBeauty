@@ -219,16 +219,48 @@ iframe{
 </div>
 
 <script>
-/* 🔐 PROTEÇÃO */
-const negocio = JSON.parse(localStorage.getItem("negocioLogado"));
-if(!negocio){
-  window.location.href = "login.html";
+/* =================================================
+   SUPABASE CLIENT
+   ================================================= */
+if(!window.sb){
+  window.sb = window.supabase.createClient(
+    "https://egxjgmzukjyyxmkukwub.supabase.co",
+    "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+  );
+}
+const sb = window.sb;
+
+/* =================================================
+   PROTEÇÃO DA DASHBOARD
+   ================================================= */
+async function protegerDashboard(){
+  const { data: { session } } = await sb.auth.getSession();
+
+  if(!session){
+    window.location.replace("login.html");
+    return;
+  }
+
+  /* BUSCA PERFIL DO USUÁRIO */
+  const { data: profile, error } = await sb
+    .from("user_profile")
+    .select("negocio")
+    .eq("user_id", session.user.id)
+    .single();
+
+  if(error || !profile){
+    await sb.auth.signOut();
+    window.location.replace("login.html");
+    return;
+  }
+
+  /* NOME NO TOPO */
+  document.getElementById("nomeNegocio").innerText = profile.negocio;
 }
 
-/* NOME */
-document.getElementById("nomeNegocio").innerText = negocio.negocio;
-
-/* MENU */
+/* =================================================
+   MENU
+   ================================================= */
 function toggleMenu(){
   document.getElementById("sidebar").classList.toggle("collapsed");
 }
@@ -238,19 +270,26 @@ function toggleSub(el){
   sub.style.display = sub.style.display === "block" ? "none" : "block";
 }
 
-/* LOAD IFRAME */
 function loadPage(page){
   document.querySelectorAll(".menu-item").forEach(i=>i.classList.remove("active"));
   event.currentTarget.classList.add("active");
   document.getElementById("frame").src = page;
 }
 
-/* LOGOUT */
-function logout(){
-  localStorage.removeItem("negocioLogado");
-  window.location.href = "index.html";
+/* =================================================
+   LOGOUT REAL
+   ================================================= */
+async function logout(){
+  await sb.auth.signOut();
+  window.location.replace("login.html");
 }
+
+/* =================================================
+   INIT
+   ================================================= */
+protegerDashboard();
 </script>
+
 
 </body>
 </html>
