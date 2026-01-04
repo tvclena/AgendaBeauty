@@ -225,7 +225,93 @@ const sbHome = window.supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
+
+async function carregarHome(){
+
+  // 🔐 sessão
+  const { data:{ session } } = await sbHome.auth.getSession();
+  if(!session) return;
+
+  const userId = session.user.id;
+
+  // 📅 data de hoje
+  const hoje = new Date().toISOString().split("T")[0];
+
+  /* ================= KPIs ================= */
+
+  // Agendamentos hoje
+  const { count: qtdHoje } = await sbHome
+    .from("agendamentos")
+    .select("*", { count:"exact", head:true })
+    .eq("user_id", userId)
+    .eq("data", hoje);
+
+  document.getElementById("kpiHoje").innerText = qtdHoje || 0;
+
+  // Clientes
+  const { count: qtdClientes } = await sbHome
+    .from("clientes")
+    .select("*", { count:"exact", head:true })
+    .eq("user_id", userId);
+
+  document.getElementById("kpiClientes").innerText = qtdClientes || 0;
+
+  // Serviços ativos
+  const { count: qtdServicos } = await sbHome
+    .from("servicos")
+    .select("*", { count:"exact", head:true })
+    .eq("user_id", userId)
+    .eq("ativo", true);
+
+  document.getElementById("kpiServicos").innerText = qtdServicos || 0;
+
+  // 💰 Faturamento do mês
+  const inicioMes = new Date();
+  inicioMes.setDate(1);
+  const inicio = inicioMes.toISOString().split("T")[0];
+
+  const { data: faturamento } = await sbHome
+    .from("agendamentos")
+    .select("valor")
+    .eq("user_id", userId)
+    .gte("data", inicio)
+    .eq("status", "concluido");
+
+  const total = faturamento?.reduce((s,v)=>s+(v.valor||0),0) || 0;
+  document.getElementById("kpiFaturamento").innerText =
+    total.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+
+  /* ================= AGENDA DE HOJE ================= */
+
+  const { data: agenda } = await sbHome
+    .from("agendamentos")
+    .select("hora, cliente_nome, servico_nome")
+    .eq("user_id", userId)
+    .eq("data", hoje)
+    .order("hora",{ascending:true});
+
+  const box = document.getElementById("agendaHoje");
+  box.innerHTML = "";
+
+  if(!agenda || agenda.length === 0){
+    box.innerHTML = `<div class="empty">Nenhum horário agendado hoje</div>`;
+    return;
+  }
+
+  agenda.forEach(a=>{
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
+      <span>${a.hora} • ${a.cliente_nome}</span>
+      <span class="badge">${a.servico_nome}</span>
+    `;
+    box.appendChild(div);
+  });
+}
+
+carregarHome();
 </script>
+
 
 </body>
 </html>
