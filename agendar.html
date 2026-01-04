@@ -188,11 +188,14 @@ async function selecionarServico(id, dur, nome){
 
   DIAS_VALIDOS = [];
 
-  for(const d of agenda){
+  for (const d of agenda) {
     let blocos;
-    try{
-      blocos = typeof d.horarios === "string" ? JSON.parse(d.horarios) : d.horarios;
-    }catch{
+
+    try {
+      blocos = typeof d.horarios === "string"
+        ? JSON.parse(d.horarios)
+        : d.horarios;
+    } catch {
       continue;
     }
 
@@ -202,13 +205,19 @@ async function selecionarServico(id, dur, nome){
       .eq("user_id", lojaId)
       .eq("data", d.data);
 
-    const ocupados = ags.map(a=>[toMin(a.hora_inicio), toMin(a.hora_fim)]);
+    const ocupados = ags.map(a => [
+      toMin(a.hora_inicio),
+      toMin(a.hora_fim)
+    ]);
+
     let livre = false;
 
-    blocos.forEach(b=>{
-      let s = toMin(b.inicio), e = toMin(b.fim);
-      while(s + duracao <= e){
-        if(!ocupados.some(o => !(s+duracao<=o[0] || s>=o[1]))){
+    blocos.forEach(b => {
+      let s = toMin(b.inicio);
+      let e = toMin(b.fim);
+
+      while (s + duracao <= e) {
+        if (!ocupados.some(o => !(s + duracao <= o[0] || s >= o[1]))) {
           livre = true;
           break;
         }
@@ -216,10 +225,10 @@ async function selecionarServico(id, dur, nome){
       }
     });
 
-    if(livre) DIAS_VALIDOS.push(d);
+    if (livre) DIAS_VALIDOS.push(d);
   }
 
-  document.getElementById("days").innerHTML = DIAS_VALIDOS.map((d,i)=>`
+  document.getElementById("days").innerHTML = DIAS_VALIDOS.map((d, i) => `
     <div class="item" onclick="selecionarDia(${i})">
       ${new Date(d.data).getDate()}
     </div>
