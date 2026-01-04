@@ -279,15 +279,14 @@ function go(el, page){
 
 /* ================= MODAL ================= */
 function abrirModalCliente(){
-  clienteModal.hidden = false;
+  clienteModal.style.display = "block";
 }
 
 function fecharModalCliente(){
-  if(!clienteValido()){
-    return; // BLOQUEIA fechamento
-  }
-  clienteModal.hidden = true;
+  if(!clienteValido()) return;
+  clienteModal.style.display = "none";
 }
+
 
 
 
