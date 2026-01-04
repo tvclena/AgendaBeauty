@@ -162,12 +162,13 @@ async function carregar(){
     return;
   }
 
-  /* 1️⃣ BUSCA AGENDAMENTOS */
+  /* 1️⃣ BUSCA AGENDAMENTOS (SEM CANCELADOS) */
   const { data: ags, error } = await sb
     .from("agendamentos")
-    .select("id, data, hora_inicio, hora_fim, servico_id")
+    .select("id, data, hora_inicio, hora_fim, servico_id, status")
     .eq("loja_id", lojaId)
     .eq("cliente_whatsapp", clienteWhats)
+    .neq("status", "cancelado") // 🔥 AQUI
     .order("data", { ascending:true });
 
   if(error){
@@ -176,7 +177,7 @@ async function carregar(){
     return;
   }
 
-  if(!ags.length){
+  if(!ags || ags.length === 0){
     lista.innerHTML = `<div class="empty">Você não possui agendamentos.</div>`;
     return;
   }
@@ -242,7 +243,7 @@ async function cancelar(id){
 
   const { error } = await sb
     .from("agendamentos")
-    .delete()
+    .update({ status: "cancelado" }) // ✅ NÃO APAGA
     .eq("id", id);
 
   if(error){
@@ -250,7 +251,7 @@ async function cancelar(id){
     return;
   }
 
-  carregar();
+  carregar(); // some da tela
 }
 
 function alterar(id){
@@ -260,6 +261,7 @@ function alterar(id){
 /* ================= INIT ================= */
 carregar();
 </script>
+
 
 </body>
 </html>
