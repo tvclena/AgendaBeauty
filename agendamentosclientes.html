@@ -4,39 +4,27 @@
 <meta charset="UTF-8">
 <title>Meus Agendamentos</title>
 
-<meta name="viewport"
-  content="width=device-width,
-  initial-scale=1,
-  maximum-scale=1,
-  user-scalable=no,
-  viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
   --primary:#ff6a00;
+  --primary-soft:rgba(255,106,0,.14);
   --bg:#f4f6fb;
   --card:#fff;
   --border:#e5e7eb;
   --text:#111827;
+  --muted:#6b7280;
   --danger:#ef4444;
 }
 
-*{
-  box-sizing:border-box;
-  font-family:Inter,system-ui;
-}
+*{box-sizing:border-box;font-family:Inter}
+html,body{margin:0;background:var(--bg)}
 
-html,body{
-  margin:0;
-  height:100%;
-  background:var(--bg);
-}
-
-/* TOPO */
-.top{
+.header{
   height:56px;
   background:#fff;
   border-bottom:1px solid var(--border);
@@ -44,213 +32,225 @@ html,body{
   align-items:center;
   justify-content:center;
   font-weight:800;
-  position:fixed;
-  top:0;left:0;right:0;
+  position:sticky;
+  top:0;
+  z-index:10;
 }
 
-/* CONTEÚDO */
-.wrapper{
-  padding:72px 14px 20px;
-}
-
-/* CARD */
-.card{
-  background:#fff;
-  border-radius:18px;
+.container{
   padding:16px;
-  box-shadow:0 12px 30px rgba(0,0,0,.12);
-  margin-bottom:16px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
 }
 
-.card h3{
-  margin:0 0 8px;
-  font-size:16px;
+.card{
+  background:var(--card);
+  border-radius:22px;
+  padding:16px;
+  box-shadow:0 14px 40px rgba(0,0,0,.12);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.title{
+  font-weight:800;
+  font-size:17px;
+}
+
+.badge{
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  background:var(--primary-soft);
+  color:var(--primary);
 }
 
 .info{
   font-size:14px;
-  color:#444;
-  margin-bottom:12px;
+  color:var(--muted);
 }
 
-/* AÇÕES */
+.price{
+  font-weight:800;
+  font-size:16px;
+  color:var(--primary);
+}
+
 .actions{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
 }
 
-.actions button{
+button{
   flex:1;
-  padding:10px;
-  border-radius:999px;
+  padding:12px;
+  border-radius:14px;
   border:none;
-  font-size:13px;
-  font-weight:700;
+  font-weight:800;
   cursor:pointer;
+  font-size:14px;
 }
 
-.edit{background:#fde68a}
-.whats{background:#22c55e;color:#fff}
-.cancel{background:#fee2e2;color:#b91c1c}
-
-.disabled{
-  opacity:.5;
-  pointer-events:none;
+.btn-primary{
+  background:var(--primary);
+  color:#fff;
 }
 
-/* INPUT WHATS */
-.ask-whats{
-  margin-top:20px;
+.btn-outline{
   background:#fff;
-  padding:16px;
-  border-radius:16px;
-  box-shadow:0 12px 30px rgba(0,0,0,.12);
+  border:1px solid var(--border);
 }
 
-.ask-whats input{
-  width:100%;
-  padding:14px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  font-size:15px;
-  margin-top:10px;
+.btn-danger{
+  background:#fee2e2;
+  color:var(--danger);
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+.empty{
+  text-align:center;
+  color:var(--muted);
+  margin-top:40px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="top">Meus Agendamentos</div>
+<div class="header">Meus Agendamentos</div>
 
-<div class="wrapper" id="lista"></div>
+<div class="container" id="lista"></div>
 
 <script>
+/* ================= SUPABASE ================= */
 const sb = supabase.createClient(
- "https://egxjgmzukjyyxmkukwub.supabase.co",
- "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+  "https://egxjgmzukjyyxmkukwub.supabase.co",
+  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
+/* ================= CONTEXTO ================= */
 const lojaId = new URLSearchParams(location.search).get("l");
-const container = document.getElementById("lista");
+const clienteNome  = localStorage.getItem("NOME_CLIENTE");
+const clienteWhats = localStorage.getItem("WHATS_CLIENTE");
 
-/* ===== IDENTIFICAÇÃO INTELIGENTE ===== */
+const lista = document.getElementById("lista");
 
-let clienteWhats = localStorage.getItem("CLIENTE_WHATS");
-
-/* inicia */
-init();
-
-async function init(){
-  if(clienteWhats){
-    const achou = await carregarAgendamentos(clienteWhats);
-    if(achou) return;
-    // se não achou nada, limpa e pede
-    localStorage.removeItem("CLIENTE_WHATS");
-    clienteWhats = null;
-  }
-
-  pedirWhats();
+/* ================= UTILS ================= */
+function minutosAte(data, hora){
+  const [h,m] = hora.split(":").map(Number);
+  const d = new Date(data);
+  d.setHours(h,m,0,0);
+  return Math.floor((d - new Date()) / 60000);
 }
 
-/* ===== PEDE WHATS APENAS SE NECESSÁRIO ===== */
-function pedirWhats(){
-  container.innerHTML = `
-    <div class="ask-whats">
-      <strong>Para localizar seus agendamentos</strong>
-      <p>Informe o WhatsApp usado no agendamento:</p>
-      <input id="whats" placeholder="(77) 99999-9999" inputmode="numeric">
-    </div>
-  `;
-
-  const input = document.getElementById("whats");
-  input.oninput = () => {
-    input.value = input.value
-      .replace(/\D/g,'')
-      .slice(0,11)
-      .replace(/^(\d{2})(\d)/,"($1) $2")
-      .replace(/(\d{5})(\d)/,"$1-$2");
-  };
-
-  input.addEventListener("keydown", async e=>{
-    if(e.key==="Enter"){
-      const v = input.value.replace(/\D/g,'');
-      if(v.length<10) return;
-      localStorage.setItem("CLIENTE_WHATS", v);
-      clienteWhats = v;
-      await carregarAgendamentos(v);
-    }
-  });
-}
-
-/* ===== CARREGA AGENDAMENTOS ===== */
-async function carregarAgendamentos(whats){
-  const {data} = await sb.from("agendamentos")
-    .select("*")
-    .eq("user_id", lojaId)
-    .eq("cliente_whatsapp", whats)
-    .order("data",{ascending:true});
-
-  if(!data || !data.length){
-    return false;
+/* ================= LOAD ================= */
+async function carregar(){
+  if(!clienteNome || !clienteWhats){
+    lista.innerHTML = `<div class="empty">Cliente não identificado.</div>`;
+    return;
   }
 
-  container.innerHTML = data.map(a=>{
-    const inicio = new Date(`${a.data}T${a.hora_inicio}`);
-    const diffMin = (inicio - new Date())/60000;
-    const podeCancelar = diffMin >= 40 && a.status === "ativo";
+  const { data, error } = await sb
+    .from("agendamentos")
+    .select(`
+      id,
+      data,
+      hora_inicio,
+      hora_fim,
+      produtos_servicos ( nome, preco )
+    `)
+    .eq("loja_id", lojaId)
+    .eq("cliente_whatsapp", clienteWhats)
+    .order("data", { ascending: true });
+
+  if(error){
+    console.error(error);
+    lista.innerHTML = `<div class="empty">Erro ao carregar agendamentos.</div>`;
+    return;
+  }
+
+  if(!data.length){
+    lista.innerHTML = `<div class="empty">Você não possui agendamentos.</div>`;
+    return;
+  }
+
+  lista.innerHTML = data.map(a=>{
+    const mins = minutosAte(a.data, a.hora_inicio);
+    const podeAlterar = mins >= 40;
 
     return `
       <div class="card">
-        <h3>${a.data} às ${a.hora_inicio}</h3>
+        <div class="row">
+          <div class="title">${a.produtos_servicos?.nome || "Serviço"}</div>
+          <div class="badge">${new Date(a.data).toLocaleDateString()}</div>
+        </div>
+
         <div class="info">
-          Status: <b>${a.status}</b>
+          ⏰ ${a.hora_inicio} - ${a.hora_fim}
+        </div>
+
+        <div class="row">
+          <div class="price">R$ ${a.produtos_servicos?.preco || "0,00"}</div>
+          <div class="info">${podeAlterar ? "Alterável" : "Bloqueado (menos de 40 min)"}</div>
         </div>
 
         <div class="actions">
-          <button class="edit" onclick="alterar('${a.id}')">Alterar</button>
-          <button class="whats" onclick="whats('${a.id}')">WhatsApp</button>
-          <button class="cancel ${!podeCancelar?'disabled':''}"
+          <button class="btn-outline" ${!podeAlterar ? "disabled" : ""}
+            onclick="alterar('${a.id}')">
+            Alterar horário
+          </button>
+
+          <button class="btn-danger" ${!podeAlterar ? "disabled" : ""}
             onclick="cancelar('${a.id}')">
             Cancelar
           </button>
-        </div>
 
-        ${!podeCancelar && a.status==="ativo"
-          ?"<small>Cancelamento permitido até 40 min antes.</small>"
-          :""
-        }
+          <button class="btn-primary">
+            Realizar pagamento
+          </button>
+        </div>
       </div>
     `;
   }).join("");
-
-  return true;
 }
 
-/* ===== AÇÕES ===== */
-function alterar(id){
-  const msg = encodeURIComponent(
-    "Olá! Gostaria de solicitar alteração do meu agendamento. Código: "+id
-  );
-  window.open(`https://wa.me/55${clienteWhats}?text=${msg}`);
-}
-
-function whats(id){
-  const msg = encodeURIComponent(
-    "Olá! Tenho dúvidas sobre meu agendamento. Código: "+id
-  );
-  window.open(`https://wa.me/55${clienteWhats}?text=${msg}`);
-}
-
+/* ================= AÇÕES ================= */
 async function cancelar(id){
   if(!confirm("Deseja cancelar este agendamento?")) return;
 
-  await sb.from("agendamentos")
-    .update({status:"cancelado"})
-    .eq("id",id);
+  const { error } = await sb
+    .from("agendamentos")
+    .delete()
+    .eq("id", id);
 
-  carregarAgendamentos(clienteWhats);
+  if(error){
+    alert("Erro ao cancelar");
+    return;
+  }
+
+  carregar();
 }
+
+function alterar(id){
+  alert("Alteração de horário será implementada na próxima etapa.");
+}
+
+/* ================= INIT ================= */
+carregar();
 </script>
 
 </body>
