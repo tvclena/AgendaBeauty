@@ -48,6 +48,7 @@
   padding:0;
   box-sizing:border-box;
   font-family:Inter, system-ui, -apple-system;
+  -webkit-tap-highlight-color:transparent;
 }
 
 html,body{
@@ -57,7 +58,7 @@ html,body{
   background:var(--bg);
 }
 
-/* TOPBAR */
+/* ================= TOPBAR ================= */
 .topbar{
   position:fixed;
   top:0;
@@ -68,21 +69,25 @@ html,body{
   background:#fff;
   border-bottom:1px solid var(--border);
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
   z-index:100;
 }
 
 .topbar h1{
   font-size:17px;
   font-weight:800;
+  color:var(--text);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .avatar{
   width:38px;
   height:38px;
   border-radius:50%;
-  background:#ff6a00;
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -90,7 +95,7 @@ html,body{
   color:#fff;
 }
 
-/* CONTENT */
+/* ================= CONTENT ================= */
 .content{
   position:fixed;
   top:var(--topbar-h);
@@ -98,6 +103,7 @@ html,body{
   left:0;
   right:0;
   background:#fff;
+  overflow:hidden;
 }
 
 iframe{
@@ -106,7 +112,7 @@ iframe{
   border:none;
 }
 
-/* NAVBAR */
+/* ================= NAVBAR ================= */
 .navbar{
   position:fixed;
   bottom:0;
@@ -119,6 +125,7 @@ iframe{
   display:flex;
   justify-content:space-around;
   align-items:center;
+  z-index:100;
 }
 
 .nav-item{
@@ -130,6 +137,9 @@ iframe{
   flex-direction:column;
   align-items:center;
   cursor:pointer;
+  padding:6px 0;
+  border-radius:14px;
+  transition:.2s;
 }
 
 .nav-item i{
@@ -144,9 +154,10 @@ iframe{
 
 .nav-item.active i{
   background:var(--primary-soft);
+  color:var(--primary);
 }
 
-/* MODAL CLIENTE */
+/* ================= MODAL CLIENTE ================= */
 #clienteModal{
   position:fixed;
   inset:0;
@@ -158,12 +169,13 @@ iframe{
   position:absolute;
   inset:0;
   background:rgba(0,0,0,.45);
+  backdrop-filter: blur(4px);
 }
 
 .modal-box{
   position:absolute;
-  top:50%;
   left:50%;
+  top:50%;
   transform:translate(-50%,-50%);
   width:90%;
   max-width:360px;
@@ -176,12 +188,23 @@ iframe{
   gap:14px;
 }
 
-.modal-box h2{font-size:20px;font-weight:800;}
+.modal-box h2{
+  font-size:20px;
+  font-weight:800;
+}
+
+.modal-box p{
+  font-size:14px;
+  color:#6b7280;
+}
+
 .modal-box input{
   padding:14px;
   border-radius:14px;
   border:1px solid #e5e7eb;
+  font-size:15px;
 }
+
 .modal-box button{
   padding:14px;
   border-radius:16px;
@@ -189,41 +212,50 @@ iframe{
   background:#ff6a00;
   color:#fff;
   font-weight:800;
+  font-size:16px;
 }
 </style>
 </head>
 
 <body>
 
+<!-- TOPBAR -->
 <div class="topbar">
   <h1 id="nomeLoja">Agenda Fácil</h1>
   <div class="avatar" id="logo">A</div>
 </div>
 
+<!-- CONTENT -->
 <div class="content">
   <iframe id="frame"></iframe>
 </div>
 
+<!-- NAVBAR -->
 <nav class="navbar">
   <div class="nav-item active" onclick="go(this,'homeclientes.html')">
-    <i class="ri-home-5-line"></i>Início
+    <i class="ri-home-5-line"></i>
+    Início
   </div>
   <div class="nav-item" onclick="go(this,'agendar.html')">
-    <i class="ri-calendar-check-line"></i>Agendar
+    <i class="ri-calendar-check-line"></i>
+    Agendar
   </div>
   <div class="nav-item" onclick="go(this,'servicos.html')">
-    <i class="ri-scissors-line"></i>Serviços
+    <i class="ri-scissors-line"></i>
+    Serviços
   </div>
   <div class="nav-item" onclick="go(this,'agendamentosclientes.html')">
-    <i class="ri-store-2-line"></i>Meu espaço
+    <i class="ri-store-2-line"></i>
+    Meu espaço
   </div>
 </nav>
 
-<!-- MODAL -->
+<!-- MODAL CLIENTE -->
 <div id="clienteModal">
   <div class="modal-backdrop"></div>
   <div class="modal-box">
     <h2>Identifique-se</h2>
+    <p>Para continuar, informe seus dados</p>
     <input id="clienteNomeInput" placeholder="Nome completo">
     <input id="clienteWhatsInput" placeholder="WhatsApp (DDD + número)">
     <button onclick="salvarCliente()">Continuar</button>
@@ -231,6 +263,7 @@ iframe{
 </div>
 
 <script>
+/* ================= SUPABASE ================= */
 const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
@@ -238,36 +271,41 @@ const sb = supabase.createClient(
 
 const frame = document.getElementById("frame");
 
+/* ================= LOJA ID ================= */
 function getLojaId(){
-  const id = new URLSearchParams(location.search).get("l");
-  if(id) localStorage.setItem("LOJA_ID", id);
-  return id || localStorage.getItem("LOJA_ID");
+  const urlId = new URLSearchParams(location.search).get("l");
+  if(urlId){
+    localStorage.setItem("LOJA_ID", urlId);
+    return urlId;
+  }
+  return localStorage.getItem("LOJA_ID");
 }
-
 const lojaId = getLojaId();
 
+/* ================= NAV ================= */
 function go(el,page){
   document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
   el.classList.add("active");
   frame.src = `${page}?l=${lojaId}`;
 }
 
+/* ================= MODAL ================= */
 function abrirModalCliente(){
   document.body.style.overflow="hidden";
   frame.style.pointerEvents="none";
   clienteModal.style.display="block";
 }
-
 function fecharModalCliente(){
   document.body.style.overflow="auto";
   frame.style.pointerEvents="auto";
   clienteModal.style.display="none";
 }
 
+/* ================= CLIENTE ================= */
 function verificarCliente(){
-  if(!localStorage.getItem("NOME_CLIENTE") || !localStorage.getItem("WHATS_CLIENTE")){
-    abrirModalCliente();
-  }
+  const nome = localStorage.getItem("NOME_CLIENTE");
+  const whats = localStorage.getItem("WHATS_CLIENTE");
+  if(!nome || !whats) abrirModalCliente();
 }
 
 async function salvarCliente(){
@@ -275,7 +313,7 @@ async function salvarCliente(){
   const whats = clienteWhatsInput.value.replace(/\D/g,"");
 
   if(!nome || !whats){
-    alert("Preencha os dados corretamente");
+    alert("Preencha corretamente");
     return;
   }
 
@@ -300,7 +338,13 @@ async function salvarCliente(){
   fecharModalCliente();
 }
 
+/* ================= LOAD ================= */
 async function load(){
+  if(!lojaId){
+    alert("Loja não informada");
+    return;
+  }
+
   const { data } = await sb
     .from("user_profile")
     .select("negocio,avatar_url")
@@ -309,6 +353,7 @@ async function load(){
 
   nomeLoja.innerText = data?.negocio || "Agenda Fácil";
   frame.src = `homeclientes.html?l=${lojaId}`;
+
   verificarCliente();
 }
 
