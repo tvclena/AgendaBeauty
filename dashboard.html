@@ -511,19 +511,12 @@ async function carregarPerfil(){
   pCidade.value = p.cidade || "";
   pUf.value = (p.uf || "").toUpperCase();
 
-  if(p.avatar_url){
-    try{
-      const signed = await getSigned(p.avatar_url);
-      if(signed){
-        profileImg.style.backgroundImage = `url(${signed})`;
-        avatar.style.backgroundImage = `url(${signed})`;
-        avatar.textContent = "";
-      }
-    }catch(e){
-      console.warn("Erro ao carregar avatar", e);
-    }
-  }
+ if (p.avatar_url) {
+  profileImg.style.backgroundImage = `url(${p.avatar_url})`;
+  avatar.style.backgroundImage = `url(${p.avatar_url})`;
+  avatar.textContent = "";
 }
+
 
 
 /* ================= NAV ================= */
@@ -599,20 +592,6 @@ pFoto.addEventListener("change", ()=>{
   img.src = tempUrl;
 });
 
-/* ================= SIGNED URL (PRIVATE BUCKET) ================= */
-async function getSigned(path){
-  try{
-    // ✅ use 7 dias para evitar 400
-    const { data, error } = await sb.storage
-      .from("produtos")
-      .createSignedUrl(path, 60*60*24*7);
-
-    if(error) return null;
-    return data?.signedUrl || null;
-  }catch(e){
-    return null;
-  }
-}
 
 /* ================= SAVE PROFILE ================= */
 async function salvarPerfil(){
@@ -624,22 +603,25 @@ async function salvarPerfil(){
   btn.classList.add("loading");
   btn.innerText = "Salvando...";
 
-  let avatarPath = null;
+ let avatarPath = profile?.avatar_url || null;
 
-  try{
-    if(pFoto.files.length){
-      const file = pFoto.files[0];
-      const path = `perfil/${user.id}.jpg`;
+if (pFoto.files.length) {
+  const file = pFoto.files[0];
+  const path = `perfil/${user.id}.jpg`;
 
-      const { error: uploadError } = await sb
-        .storage
-        .from("produtos")
-        .upload(path, file, { upsert:true });
+  const { error: uploadError } = await sb.storage
+    .from("produtos")
+    .upload(path, file, { upsert: true });
 
-      if(uploadError) throw new Error("Erro ao enviar imagem");
+  if (uploadError) throw uploadError;
 
-      avatarPath = path;
-    }
+  const { data } = sb
+    .storage
+    .from("produtos")
+    .getPublicUrl(path);
+
+  avatarPath = data.publicUrl; // ✅ URL COMPLETA
+}
 
     const { error } = await sb
       .from("user_profile")
@@ -647,7 +629,7 @@ async function salvarPerfil(){
         negocio: pNegocio.value || null,
         whatsapp: pWhatsapp.value || null,
         email_contato: pEmailContato.value || null,
-        avatar_url: avatarPath,
+        avatar_url: avatarPath || profile.avatar_url,
         cep: pCep.value || null,
         rua: pRua.value || null,
         numero: pNumero.value || null,
