@@ -2,14 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Agendar</title>
+<title>Agenda Fácil</title>
 
-<meta name="viewport"
-  content="width=device-width,
-  initial-scale=1,
-  maximum-scale=1,
-  user-scalable=no,
-  viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
@@ -19,23 +14,14 @@
 :root{
   --primary:#ff6a00;
   --bg:#f4f6fb;
-  --card:#ffffff;
+  --card:#fff;
   --border:#e5e7eb;
   --text:#111827;
   --muted:#6b7280;
 }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Inter;
-}
-
-body{
-  background:var(--bg);
-  padding:16px;
-}
+*{box-sizing:border-box;font-family:Inter}
+body{margin:0;background:var(--bg);padding:16px}
 
 /* ================= BANNER ================= */
 .banner{
@@ -43,7 +29,6 @@ body{
   border-radius:22px;
   padding:18px;
   color:#fff;
-  margin-bottom:16px;
 }
 
 .banner-top{
@@ -61,15 +46,8 @@ body{
   background-position:center;
 }
 
-.banner h1{
-  font-size:18px;
-  font-weight:800;
-}
-
-.banner p{
-  font-size:13px;
-  opacity:.9;
-}
+.banner h1{font-size:18px;font-weight:800}
+.banner p{font-size:13px;opacity:.9}
 
 .banner-chips{
   display:flex;
@@ -86,16 +64,12 @@ body{
 }
 
 /* ================= SEARCH ================= */
-.search{
-  margin:16px 0;
-}
-
+.search{margin:16px 0}
 .search input{
   width:100%;
   padding:14px 16px;
   border-radius:14px;
   border:1px solid var(--border);
-  font-size:14px;
 }
 
 /* ================= TABS ================= */
@@ -110,7 +84,8 @@ body{
   border-radius:999px;
   border:1px solid var(--border);
   background:#fff;
-  font-weight:700;
+  font-weight:800;
+  cursor:pointer;
 }
 
 .tabs button.active{
@@ -151,9 +126,7 @@ body{
   font-weight:800;
 }
 
-.card-body{
-  padding:12px;
-}
+.card-body{padding:12px}
 
 .card-body strong{
   display:block;
@@ -168,10 +141,7 @@ body{
   margin-bottom:10px;
 }
 
-.price{
-  font-weight:900;
-  color:var(--text);
-}
+.price{font-weight:900}
 
 .old{
   text-decoration:line-through;
@@ -187,6 +157,7 @@ body{
   background:var(--primary);
   color:#fff;
   font-weight:900;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -212,12 +183,13 @@ body{
 
 <!-- SEARCH -->
 <div class="search">
-  <input id="busca" placeholder="Buscar serviço">
+  <input id="busca" placeholder="Buscar produto ou serviço">
 </div>
 
 <!-- TABS -->
 <div class="tabs">
-  <button class="active">Serviços</button>
+  <button id="tabServicos" class="active" onclick="setTab('SERVICO')">Serviços</button>
+  <button id="tabProdutos" onclick="setTab('PRODUTO')">Produtos</button>
 </div>
 
 <!-- GRID -->
@@ -230,7 +202,8 @@ const sb = supabase.createClient(
 );
 
 const lojaId = new URLSearchParams(location.search).get("l");
-let servicos = [];
+let todos = [];
+let tipoAtual = "SERVICO";
 
 /* ================= LOAD ================= */
 async function load(){
@@ -252,50 +225,65 @@ async function load(){
     .from("produtos_servicos")
     .select("*")
     .eq("user_id", lojaId)
-    .eq("tipo", "SERVICO")
     .eq("ativo", true)
-    .eq("pode_agendar", true)
     .order("ordem_exibicao");
 
-  servicos = data || [];
+  todos = data || [];
   render();
 }
 
+/* ================= RENDER ================= */
 function render(){
   const q = busca.value.toLowerCase();
 
-  grid.innerHTML = servicos
-    .filter(s => s.nome.toLowerCase().includes(q))
-    .map(s => `
+  grid.innerHTML = todos
+    .filter(i => i.tipo === tipoAtual)
+    .filter(i => i.nome.toLowerCase().includes(q))
+    .map(i => `
       <div class="card">
         <div style="position:relative">
-          ${s.promocao_ativa ? `<div class="badge">Promoção</div>` : ``}
-          <img src="${s.imagem_url || ''}">
+          ${i.promocao_ativa ? `<div class="badge">Promoção</div>` : ``}
+          <img src="${i.imagem_url || ''}">
         </div>
         <div class="card-body">
-          <strong>${s.nome}</strong>
+          <strong>${i.nome}</strong>
           <div class="meta">
-            <span>⏱ ${s.duracao_minutos || 0} min</span>
+            <span>${i.tipo === "SERVICO" ? `⏱ ${i.duracao_minutos || 0} min` : "📦 Produto"}</span>
             <span class="price">
               ${
-                s.promocao_ativa
-                  ? `<span class="old">R$ ${Number(s.preco).toFixed(0)}</span> R$ ${Number(s.preco_promocional).toFixed(0)}`
-                  : `R$ ${Number(s.preco).toFixed(0)}`
+                i.promocao_ativa
+                  ? `<span class="old">R$ ${Number(i.preco).toFixed(0)}</span> R$ ${Number(i.preco_promocional).toFixed(0)}`
+                  : `R$ ${Number(i.preco).toFixed(0)}`
               }
             </span>
           </div>
-          <button onclick="agendar('${s.id}')">Agendar</button>
+          ${
+            i.tipo === "SERVICO"
+              ? `<button onclick="agendar('${i.id}')">Agendar</button>`
+              : `<button onclick="comprar('${i.id}')">Comprar</button>`
+          }
         </div>
       </div>
     `).join("");
 }
 
-busca.addEventListener("input", render);
-
-function agendar(id){
-  alert("Serviço selecionado: " + id + "\n(próxima tela: calendário)");
+/* ================= AÇÕES ================= */
+function setTab(tipo){
+  tipoAtual = tipo;
+  tabServicos.classList.toggle("active", tipo === "SERVICO");
+  tabProdutos.classList.toggle("active", tipo === "PRODUTO");
+  render();
 }
 
+function agendar(id){
+  location.href = `agendar.html?l=${lojaId}&servico=${id}`;
+}
+
+function comprar(id){
+  alert("Checkout será configurado na próxima etapa.");
+}
+
+busca.addEventListener("input", render);
 load();
 </script>
 
