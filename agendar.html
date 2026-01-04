@@ -192,7 +192,15 @@ async function selecionarServico(id, dur, nome){
   document.getElementById("times").innerHTML = "";
   document.getElementById("final").innerHTML = "";
 
-  const hoje = new Date().toISOString().split("T")[0];
+function hojeLocal(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+const hoje = hojeLocal();
 
   const { data: agenda } = await sb
     .from("agenda_loja")
