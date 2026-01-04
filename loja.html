@@ -48,7 +48,6 @@
   padding:0;
   box-sizing:border-box;
   font-family:Inter, system-ui, -apple-system;
-  -webkit-tap-highlight-color:transparent;
 }
 
 html,body{
@@ -58,56 +57,40 @@ html,body{
   background:var(--bg);
 }
 
-/* ================= TOPBAR ================= */
+/* TOPBAR */
 .topbar{
   position:fixed;
   top:0;
   left:0;
   right:0;
   height:var(--topbar-h);
-  padding:
-    calc(10px + var(--safe-top))
-    18px
-    10px;
-  background:linear-gradient(
-    to bottom,
-    rgba(255,255,255,.96),
-    rgba(255,255,255,.88)
-  );
-  backdrop-filter: blur(12px);
+  padding:calc(10px + var(--safe-top)) 18px 10px;
+  background:#fff;
   border-bottom:1px solid var(--border);
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
   z-index:100;
 }
 
 .topbar h1{
   font-size:17px;
   font-weight:800;
-  color:var(--text);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
 }
 
-/* Avatar */
 .avatar{
   width:38px;
   height:38px;
   border-radius:50%;
-  background:#eee;
-  background-size:cover;
-  background-position:center;
+  background:#ff6a00;
   display:flex;
   align-items:center;
   justify-content:center;
   font-weight:800;
   color:#fff;
-  box-shadow:0 6px 14px rgba(0,0,0,.18);
 }
 
-/* ================= CONTENT ================= */
+/* CONTENT */
 .content{
   position:fixed;
   top:var(--topbar-h);
@@ -115,7 +98,6 @@ html,body{
   left:0;
   right:0;
   background:#fff;
-  overflow:hidden;
 }
 
 iframe{
@@ -124,28 +106,19 @@ iframe{
   border:none;
 }
 
-/* ================= NAVBAR ================= */
+/* NAVBAR */
 .navbar{
   position:fixed;
   bottom:0;
   left:0;
   right:0;
   height:var(--navbar-h);
-  padding:
-    10px
-    8px
-    calc(10px + var(--safe-bottom));
-  background:linear-gradient(
-    to top,
-    rgba(255,255,255,.98),
-    rgba(255,255,255,.9)
-  );
-  backdrop-filter: blur(14px);
+  padding:10px 8px calc(10px + var(--safe-bottom));
+  background:#fff;
   border-top:1px solid var(--border);
   display:flex;
   justify-content:space-around;
   align-items:center;
-  z-index:100;
 }
 
 .nav-item{
@@ -156,18 +129,13 @@ iframe{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:4px;
   cursor:pointer;
-  padding:6px 0;
-  border-radius:14px;
-  transition:.25s ease;
 }
 
 .nav-item i{
   font-size:22px;
   padding:8px;
   border-radius:12px;
-  transition:.25s ease;
 }
 
 .nav-item.active{
@@ -176,48 +144,91 @@ iframe{
 
 .nav-item.active i{
   background:var(--primary-soft);
-  color:var(--primary);
-  transform:translateY(-2px);
 }
 
-.nav-item:hover i{
-  background:#f1f1f1;
+/* MODAL CLIENTE */
+#clienteModal{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:none;
+}
+
+.modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.45);
+}
+
+.modal-box{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:90%;
+  max-width:360px;
+  background:#fff;
+  border-radius:22px;
+  padding:22px;
+  box-shadow:0 30px 80px rgba(0,0,0,.35);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.modal-box h2{font-size:20px;font-weight:800;}
+.modal-box input{
+  padding:14px;
+  border-radius:14px;
+  border:1px solid #e5e7eb;
+}
+.modal-box button{
+  padding:14px;
+  border-radius:16px;
+  border:none;
+  background:#ff6a00;
+  color:#fff;
+  font-weight:800;
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <h1 id="nomeLoja">Agenda Fácil</h1>
   <div class="avatar" id="logo">A</div>
 </div>
 
-<!-- CONTENT -->
 <div class="content">
   <iframe id="frame"></iframe>
 </div>
 
-<!-- NAVBAR -->
 <nav class="navbar">
   <div class="nav-item active" onclick="go(this,'homeclientes.html')">
-    <i class="ri-home-5-line"></i>
-    Início
+    <i class="ri-home-5-line"></i>Início
   </div>
   <div class="nav-item" onclick="go(this,'agendar.html')">
-    <i class="ri-calendar-check-line"></i>
-    Agendar
+    <i class="ri-calendar-check-line"></i>Agendar
   </div>
   <div class="nav-item" onclick="go(this,'servicos.html')">
-    <i class="ri-scissors-line"></i>
-    Serviços
+    <i class="ri-scissors-line"></i>Serviços
   </div>
   <div class="nav-item" onclick="go(this,'agendamentosclientes.html')">
-    <i class="ri-store-2-line"></i>
-    Meus espaço
+    <i class="ri-store-2-line"></i>Meu espaço
   </div>
 </nav>
+
+<!-- MODAL -->
+<div id="clienteModal">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box">
+    <h2>Identifique-se</h2>
+    <input id="clienteNomeInput" placeholder="Nome completo">
+    <input id="clienteWhatsInput" placeholder="WhatsApp (DDD + número)">
+    <button onclick="salvarCliente()">Continuar</button>
+  </div>
+</div>
 
 <script>
 const sb = supabase.createClient(
@@ -227,65 +238,81 @@ const sb = supabase.createClient(
 
 const frame = document.getElementById("frame");
 
-/* ================= LOJA ID ================= */
 function getLojaId(){
-  const urlId = new URLSearchParams(location.search).get("l");
-  if(urlId){
-    localStorage.setItem("LOJA_ID", urlId);
-    return urlId;
-  }
-  return localStorage.getItem("LOJA_ID");
+  const id = new URLSearchParams(location.search).get("l");
+  if(id) localStorage.setItem("LOJA_ID", id);
+  return id || localStorage.getItem("LOJA_ID");
 }
 
 const lojaId = getLojaId();
 
-/* ================= NAV ================= */
 function go(el,page){
   document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
   el.classList.add("active");
   frame.src = `${page}?l=${lojaId}`;
 }
 
-/* ================= LOAD LOJA ================= */
-async function load(){
-  if(!lojaId){
-    alert("Loja não informada. Acesse pelo link da loja.");
+function abrirModalCliente(){
+  document.body.style.overflow="hidden";
+  frame.style.pointerEvents="none";
+  clienteModal.style.display="block";
+}
+
+function fecharModalCliente(){
+  document.body.style.overflow="auto";
+  frame.style.pointerEvents="auto";
+  clienteModal.style.display="none";
+}
+
+function verificarCliente(){
+  if(!localStorage.getItem("NOME_CLIENTE") || !localStorage.getItem("WHATS_CLIENTE")){
+    abrirModalCliente();
+  }
+}
+
+async function salvarCliente(){
+  const nome = clienteNomeInput.value.trim();
+  const whats = clienteWhatsInput.value.replace(/\D/g,"");
+
+  if(!nome || !whats){
+    alert("Preencha os dados corretamente");
     return;
   }
 
-  const { data, error } = await sb
+  localStorage.setItem("NOME_CLIENTE", nome);
+  localStorage.setItem("WHATS_CLIENTE", whats);
+
+  const { data } = await sb
+    .from("clientes_loja")
+    .select("id")
+    .eq("loja_id", lojaId)
+    .eq("whatsapp", whats)
+    .maybeSingle();
+
+  if(!data){
+    await sb.from("clientes_loja").insert({
+      loja_id: lojaId,
+      nome_completo: nome,
+      whatsapp: whats
+    });
+  }
+
+  fecharModalCliente();
+}
+
+async function load(){
+  const { data } = await sb
     .from("user_profile")
     .select("negocio,avatar_url")
     .eq("user_id", lojaId)
     .single();
 
-  if(error || !data){
-    alert("Loja não encontrada");
-    return;
-  }
-
-  nomeLoja.innerText = data.negocio || "Agenda Fácil";
-
-  if(data.avatar_url){
-    logo.style.backgroundImage = `url(${data.avatar_url})`;
-    logo.textContent = "";
-  }else{
-    logo.textContent = (data.negocio?.[0] || "A").toUpperCase();
-    logo.style.background = "linear-gradient(135deg,#ff6a00,#ff9a57)";
-  }
-
+  nomeLoja.innerText = data?.negocio || "Agenda Fácil";
   frame.src = `homeclientes.html?l=${lojaId}`;
+  verificarCliente();
 }
 
 load();
-</script>
-
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(()=>{});
-  });
-}
 </script>
 
 </body>
