@@ -596,31 +596,32 @@ pFoto.addEventListener("change", ()=>{
 async function salvarPerfil(){
   const btn = document.getElementById("btnSalvar");
 
-  // 🔒 ATIVA OVERLAY + BOTÃO
   overlayText.innerText = "Salvando alterações…";
   overlay.style.display = "flex";
   btn.classList.add("loading");
   btn.innerText = "Salvando...";
 
- let avatarPath = profile?.avatar_url || null;
+  try{
 
-if (pFoto.files.length) {
-  const file = pFoto.files[0];
-  const path = `perfil/${user.id}.jpg`;
+    let avatarPath = profile?.avatar_url || null;
 
-  const { error: uploadError } = await sb.storage
-    .from("produtos")
-    .upload(path, file, { upsert: true });
+    if (pFoto.files.length) {
+      const file = pFoto.files[0];
+      const path = `perfil/${user.id}.jpg`;
 
-  if (uploadError) throw uploadError;
+      const { error: uploadError } = await sb.storage
+        .from("produtos")
+        .upload(path, file, { upsert: true });
 
-  const { data } = sb
-    .storage
-    .from("produtos")
-    .getPublicUrl(path);
+      if (uploadError) throw uploadError;
 
-  avatarPath = data.publicUrl; // ✅ URL COMPLETA
-}
+      const { data } = sb
+        .storage
+        .from("produtos")
+        .getPublicUrl(path);
+
+      avatarPath = data.publicUrl;
+    }
 
     const { error } = await sb
       .from("user_profile")
@@ -628,7 +629,7 @@ if (pFoto.files.length) {
         negocio: pNegocio.value || null,
         whatsapp: pWhatsapp.value || null,
         email_contato: pEmailContato.value || null,
-        avatar_url: avatarPath || profile.avatar_url,
+        avatar_url: avatarPath,
         cep: pCep.value || null,
         rua: pRua.value || null,
         numero: pNumero.value || null,
@@ -638,14 +639,13 @@ if (pFoto.files.length) {
       })
       .eq("user_id", user.id);
 
-    if(error) throw new Error("Erro ao salvar perfil");
+    if(error) throw error;
 
     profileModal.style.display = "none";
 
   }catch(err){
-    alert(err.message);
+    alert(err.message || "Erro ao salvar perfil");
   }finally{
-    // 🔓 DESATIVA OVERLAY + BOTÃO
     overlay.style.display = "none";
     btn.classList.remove("loading");
     btn.innerText = "Salvar alterações";
