@@ -257,9 +257,14 @@ DIAS_VALIDOS.sort((a, b) => {
 });
 
 document.getElementById("days").innerHTML = DIAS_VALIDOS.map((d, i) => `
-  <div class="item" onclick="selecionarDia(${i})">
-    ${formatarDia(d.data)}
+
+
+<div class="item" onclick="selecionarDia(${i})">
+  <div style="font-size:18px">${formatarDia(d.data)}</div>
+  <div style="font-size:12px;color:#6b7280;margin-top:4px">
+    ${diaSemana(d.data)}
   </div>
+</div>
 `).join("");
 }
 
@@ -301,6 +306,12 @@ async function selecionarDia(index){
 function formatarDia(dataISO){
   const [ano, mes, dia] = dataISO.split("-");
   return Number(dia);
+}
+function diaSemana(dataISO){
+  const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+  const [ano, mes, dia] = dataISO.split("-");
+  const d = new Date(ano, mes - 1, dia); // mês começa em 0
+  return dias[d.getDay()];
 }
 
 /* ================= CONFIRMAR ================= */
