@@ -214,7 +214,7 @@ body::-webkit-scrollbar{
 
   <!-- AGENDA -->
   <div class="list">
-    <h3>Agenda de hoje</h3>
+<h3 id="tituloAgenda"></h3>
     <div id="agendaHoje">
       <div class="empty">Nenhum horário agendado hoje</div>
     </div>
@@ -238,12 +238,21 @@ body::-webkit-scrollbar{
 </div>
 
 <script>
+let dataAtual = new Date();
+
+function dataISO(d){
+  return d.toLocaleDateString("en-CA");
+}
+
+
+
 const sbHome = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
 async function carregarHome(){
+
 
   // 🔐 sessão
   const { data:{ session } } = await sbHome.auth.getSession();
@@ -309,36 +318,7 @@ document.getElementById("kpiFaturamento").innerText =
   });
 
 
-  /* ================= AGENDA DE HOJE ================= */
-
- const { data: agenda, error } = await sbHome
-  .from("agenda_loja")
-.select("hora_inicio, cliente_nome, status")
-   .eq("loja_id", lojaId)
-  .eq("data", hoje)
-  .neq("status", "CANCELADO")
-  .order("hora_inicio", { ascending: true });
-
-console.log("Agenda hoje:", agenda, error);
-
-const box = document.getElementById("agendaHoje");
-box.innerHTML = "";
-
-if (!agenda || agenda.length === 0) {
-  box.innerHTML = `<div class="empty">Nenhum horário agendado hoje</div>`;
-} else {
-
-  
-agenda.forEach(a => {
-  const div = document.createElement("div");
-  div.className = "item";
-  div.innerHTML = `
-    <span>${a.hora_inicio} • ${a.cliente_nome}</span>
-    <span class="badge ${a.status.toLowerCase()}">${a.status}</span>
-  `;
-  box.appendChild(div);
-});
-
+ 
 
   /* ================= CANCELAMENTOS (NOVO) ================= */
 
@@ -348,11 +328,81 @@ agenda.forEach(a => {
     .eq("loja_id", lojaId)
     .eq("status", "cancelado");
 
-  // Se quiser exibir depois:
-  // document.getElementById("kpiCancelados").innerText = qtdCancelados || 0;
+  // 📅 carregar agenda do dia atual (INICIAL)
+  await carregarAgendaDia(lojaId);
 }
 
 carregarHome();
+
+let startX = 0;
+
+document.addEventListener("touchstart", e=>{
+  startX = e.touches[0].clientX;
+});
+
+document.addEventListener("touchend", e=>{
+  const endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
+
+  if(Math.abs(diff) < 60) return;
+
+  if(diff < 0){
+    // 👉 próximo dia
+    dataAtual.setDate(dataAtual.getDate() + 1);
+  }else{
+    // 👈 dia anterior
+    dataAtual.setDate(dataAtual.getDate() - 1);
+  }
+
+  sbHome.auth.getSession().then(({ data:{ session } })=>{
+    if(session){
+      carregarAgendaDia(session.user.id);
+    }
+  });
+});
+
+
+
+  
+async function carregarAgendaDia(lojaId){
+
+  const data = dataISO(dataAtual);
+
+  // 🏷️ título
+  document.getElementById("tituloAgenda").innerText =
+    "Agenda • " + dataAtual.toLocaleDateString("pt-BR");
+
+  const { data: agenda } = await sbHome
+    .from("agenda_loja")
+    .select("hora_inicio, cliente_nome, status")
+    .eq("loja_id", lojaId)
+    .eq("data", data)
+    .neq("status", "CANCELADO")
+    .order("hora_inicio");
+
+  const box = document.getElementById("agendaHoje");
+  box.innerHTML = "";
+
+  if(!agenda || agenda.length === 0){
+    box.innerHTML = `<div class="empty">Nenhum horário</div>`;
+    document.getElementById("kpiHoje").innerText = 0;
+    return;
+  }
+
+  agenda.forEach(a=>{
+    box.innerHTML += `
+      <div class="item">
+        <span>${a.hora_inicio} • ${a.cliente_nome}</span>
+        <span class="badge ${a.status.toLowerCase()}">${a.status}</span>
+      </div>
+    `;
+  });
+
+  // KPI acompanha o dia exibido
+  document.getElementById("kpiHoje").innerText = agenda.length;
+}
+
+  
 </script>
 
 
