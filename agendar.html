@@ -248,14 +248,19 @@ const hoje = hojeLocal();
       }
     });
 
-    if (livre) DIAS_VALIDOS.push(d);
-  }
+if (livre) DIAS_VALIDOS.push(d);
+}
 
-  document.getElementById("days").innerHTML = DIAS_VALIDOS.map((d, i) => `
-    <div class="item" onclick="selecionarDia(${i})">
-     ${formatarDia(d.data)}
-    </div>
-  `).join("");
+// ✅ ORDENA OS DIAS (3, 4, 5, 6...)
+DIAS_VALIDOS.sort((a, b) => {
+  return a.data.localeCompare(b.data);
+});
+
+document.getElementById("days").innerHTML = DIAS_VALIDOS.map((d, i) => `
+  <div class="item" onclick="selecionarDia(${i})">
+    ${formatarDia(d.data)}
+  </div>
+`).join("");
 }
 
 /* ================= DIA → HORÁRIOS ================= */
@@ -293,14 +298,10 @@ async function selecionarDia(index){
     <div class="item" onclick="confirmar('${h}')">${h}</div>
   `).join("");
 }
-function formatarDiaCompleto(dataISO){
-  const d = new Date(dataISO + "T00:00:00");
-  return d.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    weekday: "short"
-  });
+function formatarDia(dataISO){
+  const [ano, mes, dia] = dataISO.split("-");
+  return Number(dia);
 }
-
 
 /* ================= CONFIRMAR ================= */
 async function confirmar(h){
