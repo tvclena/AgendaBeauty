@@ -150,7 +150,24 @@ body::-webkit-scrollbar{
   font-weight:700;
   white-space:nowrap;
 }
+.badge.confirmado{
+  background:#ecfeff;
+  color:#0891b2;
+}
 
+.badge.concluido{
+  background:#ecfdf5;
+  color:#16a34a;
+}
+
+.badge.cancelado{
+  background:#fef2f2;
+  color:#dc2626;
+}
+
+
+
+  
 .empty{
   color:var(--muted);
   text-align:center;
@@ -235,10 +252,12 @@ async function carregarHome(){
   const lojaId = session.user.id;
 
   // 📅 datas
-  const hoje = new Date().toISOString().split("T")[0];
-  const inicioMes = new Date();
-  inicioMes.setDate(1);
-  const inicio = inicioMes.toISOString().split("T")[0];
+const hoje = new Date().toLocaleDateString("en-CA");
+
+const inicioMes = new Date();
+inicioMes.setDate(1);
+const inicio = inicioMes.toLocaleDateString("en-CA");
+
 
   /* ================= KPIs ================= */
 
@@ -276,10 +295,11 @@ const { data: faturamento } = await sbHome
   .select("valor_servico")
   .eq("loja_id", lojaId)
   .gte("data", inicio)
-  .eq("status", "CONCLUIDO");
+  .in("status", ["CONFIRMADO", "CONCLUIDO"]);
 
 const total = faturamento?.reduce(
-  (s, v) => s + (v.valor_servico || 0), 0
+  (s, v) => s + Number(v.valor_servico || 0),
+  0
 ) || 0;
 
 document.getElementById("kpiFaturamento").innerText =
@@ -293,8 +313,8 @@ document.getElementById("kpiFaturamento").innerText =
 
  const { data: agenda, error } = await sbHome
   .from("agenda_loja")
-  .select("hora_inicio, cliente_nome")
-  .eq("loja_id", lojaId)
+.select("hora_inicio, cliente_nome, status")
+   .eq("loja_id", lojaId)
   .eq("data", hoje)
   .neq("status", "CANCELADO")
   .order("hora_inicio", { ascending: true });
@@ -307,16 +327,18 @@ box.innerHTML = "";
 if (!agenda || agenda.length === 0) {
   box.innerHTML = `<div class="empty">Nenhum horário agendado hoje</div>`;
 } else {
-  agenda.forEach(a => {
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `
-      <span>${a.hora_inicio} • ${a.cliente_nome}</span>
-      <span class="badge">Confirmado</span>
-    `;
-    box.appendChild(div);
-  });
-}
+
+  
+agenda.forEach(a => {
+  const div = document.createElement("div");
+  div.className = "item";
+  div.innerHTML = `
+    <span>${a.hora_inicio} • ${a.cliente_nome}</span>
+    <span class="badge ${a.status.toLowerCase()}">${a.status}</span>
+  `;
+  box.appendChild(div);
+});
+
 
   /* ================= CANCELAMENTOS (NOVO) ================= */
 
