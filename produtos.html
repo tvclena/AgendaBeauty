@@ -351,17 +351,17 @@ body{
       <input id="categoria">
 
       <label>Preço</label>
-      <input id="preco">
+<input id="preco" oninput="formatarMoedaInput(this)">
 
       <label>Custo</label>
-      <input id="custo">
+<input id="preco" oninput="formatarMoedaInput(this)">
 
       <label>
         <input type="checkbox" id="promoAtiva"> Promoção ativa
       </label>
 
       <label>Preço promocional</label>
-      <input id="precoPromo">
+<input id="preco" oninput="formatarMoedaInput(this)">
 
       <!-- SERVIÇO -->
       <div id="boxServico">
@@ -439,6 +439,29 @@ imagem.onchange=()=>{
  blob=f;
 };
 
+
+
+
+
+
+  function formatarMoedaInput(input){
+  let valor = input.value.replace(/\D/g,'');
+  valor = (Number(valor) / 100).toLocaleString('pt-BR',{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+  input.value = valor;
+}
+
+function moedaParaNumero(valor){
+  if(!valor) return 0;
+  return Number(
+    valor
+      .replace(/\./g,'')
+      .replace(',','.')
+  );
+}
+
 async function salvar(){
  loading.style.display="flex";
 
@@ -448,9 +471,15 @@ async function salvar(){
   nome:nome.value,
   descricao:descricao.value,
   categoria:categoria.value,
-  preco:Number(preco.value.replace(/[^\d]/g,''))/100,
-  custo:Number(custo.value.replace(/[^\d]/g,''))/100,
-  preco_promocional:Number(precoPromo.value.replace(/[^\d]/g,''))/100||null,
+
+
+   
+preco: moedaParaNumero(preco.value),
+custo: moedaParaNumero(custo.value),
+preco_promocional: precoPromo.value ? moedaParaNumero(precoPromo.value) : null,
+
+
+   
   promocao_ativa:promoAtiva.checked,
   duracao_minutos:tipo.value==="SERVICO"?Number(duracao.value||0):null,
   pode_agendar:podeAgendar.checked,
