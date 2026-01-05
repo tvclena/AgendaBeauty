@@ -126,6 +126,22 @@ button:disabled{
   color:var(--muted);
   margin-top:40px;
 }
+#overlayAlterar .services{
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  margin-bottom:12px;
+}
+
+#overlayAlterar .service{
+  min-width:180px;
+}
+
+#overlayAlterar .service.selected,
+#overlayAlterar .item.selected{
+  border:2px solid #2563eb;
+}
+
 </style>
 </head>
 
@@ -254,13 +270,188 @@ async function cancelar(id){
   carregar(); // some da tela
 }
 
-function alterar(id){
-  alert("Alteração de horário será implementada na próxima etapa.");
+let agendamentoAtual = null;
+
+async function alterar(id){
+  agendamentoAtual = id;
+
+  document.getElementById("overlayAlterar").classList.remove("hidden");
+
+  // limpa estados
+  document.getElementById("altDays").classList.add("hidden");
+  document.getElementById("altTimes").classList.add("hidden");
+  document.getElementById("altServices").innerHTML = "Carregando serviços...";
+
+  const { data: servicos } = await sb
+    .from("produtos_servicos")
+    .select("id,nome,preco,imagem_url,duracao_minutos")
+    .eq("user_id", lojaId)
+    .eq("ativo", true)
+    .order("ordem_exibicao",{ascending:true,nullsLast:true});
+
+  document.getElementById("altServices").innerHTML = servicos.map(s=>`
+    <div class="service" onclick="altSelecionarServico(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+      <img src="${s.imagem_url || 'https://via.placeholder.com/300'}">
+      <div class="service-info">
+        <div class="service-name">${s.nome}</div>
+        <div class="service-price">R$ ${s.preco}</div>
+      </div>
+    </div>
+  `).join("");
+}
+let altServico = null;
+let altDuracao = 0;
+let altData = null;
+
+async function altSelecionarServico(s){
+  altServico = s.id;
+  altDuracao = s.duracao_minutos;
+
+  document.querySelectorAll("#altServices .service")
+    .forEach(el => el.classList.remove("selected"));
+
+  event.currentTarget.classList.add("selected");
+
+  document.getElementById("altDays").classList.remove("hidden");
+  document.getElementById("altDaysGrid").innerHTML = "Buscando dias...";
+
+  const hoje = new Date().toISOString().slice(0,10);
+
+  const { data: agenda } = await sb
+    .from("agenda_loja")
+    .select("*")
+    .eq("user_id", lojaId)
+    .gte("data", hoje)
+    .eq("fechado", false);
+
+  const dias = [];
+
+  for(const d of agenda){
+    const blocos = typeof d.horarios==="string" ? JSON.parse(d.horarios) : d.horarios;
+
+    const { data: ags } = await sb
+      .from("agendamentos")
+      .select("hora_inicio,hora_fim")
+      .eq("user_id", lojaId)
+      .eq("data", d.data)
+      .neq("id", agendamentoAtual); // 🔥 ignora o próprio
+
+    const ocupados = ags.map(a=>[
+      toMin(a.hora_inicio),
+      toMin(a.hora_fim)
+    ]);
+
+    let livre=false;
+
+    blocos.forEach(b=>{
+      let s=toMin(b.inicio), e=toMin(b.fim);
+      while(s+altDuracao<=e){
+        if(!ocupados.some(o=>!(s+altDuracao<=o[0]||s>=o[1]))){
+          livre=true; break;
+        }
+        s+=altDuracao;
+      }
+    });
+
+    if(livre) dias.push(d);
+  }
+
+  document.getElementById("altDaysGrid").innerHTML = dias.map(d=>`
+    <div class="item" onclick="altSelecionarDia('${d.data}', ${JSON.stringify(d.horarios).replace(/"/g,'&quot;')})">
+      ${new Date(d.data).toLocaleDateString()}
+    </div>
+  `).join("");
+}
+
+async function altSelecionarDia(data, horarios){
+  altData = data;
+  document.getElementById("altTimes").classList.remove("hidden");
+  document.getElementById("altTimesGrid").innerHTML = "Buscando horários...";
+
+  const blocos = typeof horarios==="string"?JSON.parse(horarios):horarios;
+
+  const { data: ags } = await sb
+    .from("agendamentos")
+    .select("hora_inicio,hora_fim")
+    .eq("user_id", lojaId)
+    .eq("data", data)
+    .neq("id", agendamentoAtual);
+
+  const ocupados = ags.map(a=>[
+    toMin(a.hora_inicio),
+    toMin(a.hora_fim)
+  ]);
+
+  const slots=[];
+
+  blocos.forEach(b=>{
+    let s=toMin(b.inicio), e=toMin(b.fim);
+    while(s+altDuracao<=e){
+      if(!ocupados.some(o=>!(s+altDuracao<=o[0]||s>=o[1]))){
+        slots.push(toHour(s));
+      }
+      s+=altDuracao;
+    }
+  });
+
+  document.getElementById("altTimesGrid").innerHTML = slots.map(h=>`
+    <div class="item" onclick="confirmarAlteracao('${h}')">${h}</div>
+  `).join("");
+}
+async function confirmarAlteracao(h){
+  const fim = toHour(toMin(h)+altDuracao);
+
+  const { error } = await sb
+    .from("agendamentos")
+    .update({
+      data: altData,
+      hora_inicio: h,
+      hora_fim: fim,
+      servico_id: altServico
+    })
+    .eq("id", agendamentoAtual);
+
+  if(error){
+    alert("Erro ao alterar agendamento");
+    return;
+  }
+
+  fecharAlteracao();
+  carregar();
+}
+function fecharAlteracao(){
+  document.getElementById("overlayAlterar").classList.add("hidden");
 }
 
 /* ================= INIT ================= */
 carregar();
 </script>
+<div class="overlay hidden" id="overlayAlterar">
+  <div class="msg-final" style="max-width:420px;width:100%">
+    <div style="font-weight:800;margin-bottom:12px">
+      Alterar agendamento
+    </div>
+
+    <!-- SERVIÇO -->
+    <div class="services" id="altServices"></div>
+
+    <!-- DIAS -->
+    <div class="section hidden" id="altDays">
+      <div class="title">Escolha a data</div>
+      <div class="grid" id="altDaysGrid"></div>
+    </div>
+
+    <!-- HORÁRIOS -->
+    <div class="section hidden" id="altTimes">
+      <div class="title">Escolha o horário</div>
+      <div class="grid" id="altTimesGrid"></div>
+    </div>
+
+    <button class="btn-outline" onclick="fecharAlteracao()">
+      Fechar
+    </button>
+  </div>
+</div>
 
 
 </body>
