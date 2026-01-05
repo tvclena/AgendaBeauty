@@ -517,12 +517,6 @@ setTimeout(() => {
   }
 }, 800);
   
-if (Notification.permission !== "granted") {
-  setTimeout(() => {
-    pedirNotificacao();
-  }, 1000);
-}
-
   
 async function carregarPerfil(){
   const { data:p, error } = await sb
