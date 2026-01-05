@@ -122,7 +122,7 @@ const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
-
+const BASE_PATH = "/AgendaBeauty";
 let linkFinal = "";
 
 async function carregarLink(){
@@ -150,12 +150,27 @@ async function carregarLink(){
   const slug = data.slug;
 
   // ✅ rota limpa
-  linkFinal = `${location.origin}/${slug}`;
-
+linkFinal = `${location.origin}${BASE_PATH}/${slug}`;
   document.getElementById("linkLoja").innerText = linkFinal;
 }
 
 carregarLink();
+
+function copiar(){
+  navigator.clipboard.writeText(linkFinal);
+  const msg = document.getElementById("msg");
+  msg.style.display = "block";
+  setTimeout(() => msg.style.display = "none", 2500);
+}
+
+function compartilhar(){
+  const texto = `Agende seu horário online 👇\n\n${linkFinal}`;
+  const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+  window.open(url, "_blank");
+}
+
+
+  
 </script>
 
 </body>
