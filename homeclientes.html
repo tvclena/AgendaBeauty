@@ -216,8 +216,17 @@ const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
+/* ================= SLUG ================= */
+const BASE_PATH = "/AgendaBeauty";
 
-const lojaId = new URLSearchParams(location.search).get("l");
+const slug = location.pathname
+  .replace(BASE_PATH, "")
+  .replace(/\/lojacliente\.html$/, "")
+  .replace(/^\/+/, "")
+  .trim();
+
+let lojaId = null;
+
 let todos = [];
 let tipoAtual = null;
 
@@ -232,6 +241,84 @@ const whatsLoja = document.getElementById("whatsLoja");
   
 /* ================= LOAD ================= */
 async function load(){
+
+  if(!slug){
+    document.body.innerHTML = "Loja não encontrada";
+    return;
+  }
+
+  /* ===== RESOLVE SLUG → LOJA ===== */
+  const { data: loja, error } = await sb
+    .from("user_profile")
+    .select(`
+      user_id,
+      negocio,
+      avatar_url,
+      rua,
+      numero,
+      bairro,
+      cep,
+      cidade,
+      uf,
+      whatsapp
+    `)
+    .eq("slug", slug)
+    .single();
+
+  if(error || !loja){
+    document.body.innerHTML = "Loja não encontrada";
+    return;
+  }
+
+  lojaId = loja.user_id;
+
+  /* ===== BANNER ===== */
+  nomeLoja.innerText = loja.negocio || "Agenda Fácil";
+  cidadeLoja.innerText = `${loja.cidade || ""} • ${loja.uf || ""}`;
+  enderecoLoja.innerText = `
+    ${loja.rua || ""}, ${loja.numero || ""}
+    • ${loja.bairro || ""}
+    • CEP ${loja.cep || ""}
+  `;
+
+  if(loja.whatsapp){
+    whatsLoja.innerText = `📲 ${loja.whatsapp}`;
+  }
+
+  if(loja.avatar_url){
+    logo.src = loja.avatar_url;
+  }
+
+  /* ===== PRODUTOS / SERVIÇOS ===== */
+  const { data } = await sb
+    .from("produtos_servicos")
+    .select("*")
+    .eq("user_id", lojaId)
+    .eq("ativo", true)
+    .order("ordem_exibicao");
+
+  todos = data || [];
+
+  const temServicos = todos.some(i => i.tipo === "SERVICO");
+  const temProdutos = todos.some(i => i.tipo === "PRODUTO");
+
+  tabServicos.style.display = temServicos ? "inline-block" : "none";
+  tabProdutos.style.display = temProdutos ? "inline-block" : "none";
+
+  if(temServicos){
+    tipoAtual = "SERVICO";
+    tabServicos.classList.add("active");
+    tabProdutos.classList.remove("active");
+  } else if(temProdutos){
+    tipoAtual = "PRODUTO";
+    tabProdutos.classList.add("active");
+    tabServicos.classList.remove("active");
+  } else {
+    tipoAtual = null;
+  }
+
+  render();
+}
 
   /* ===== LOJA ===== */
   const { data: loja } = await sb
@@ -364,7 +451,7 @@ function setTab(tipo){
 }
 
 function agendar(id){
-  location.href = `agendar.html?l=${lojaId}&servico=${id}`;
+  location.href = `../${slug}/agendar.html?servico=${id}`;
 }
 
 function comprar(id){
