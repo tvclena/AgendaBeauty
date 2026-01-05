@@ -251,6 +251,8 @@ const sbHome = supabase.createClient(
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
+
+  
 async function carregarHome(){
 
 
@@ -274,7 +276,7 @@ const inicio = inicioMes.toLocaleDateString("en-CA");
 const { count: qtdHoje } = await sbHome
   .from("agenda_loja")
   .select("*", { count: "exact", head: true })
-  .eq("loja_id", lojaId)
+  .eq("user_id", lojaId)
   .eq("data", hoje)
   .neq("status", "CANCELADO");
 
@@ -284,7 +286,7 @@ document.getElementById("kpiHoje").innerText = qtdHoje || 0;
   const { count: qtdClientes } = await sbHome
     .from("clientes_loja")
     .select("*", { count:"exact", head:true })
-    .eq("loja_id", lojaId);
+    .eq("user_id", lojaId);
 
   document.getElementById("kpiClientes").innerText = qtdClientes || 0;
 
@@ -302,7 +304,7 @@ document.getElementById("kpiHoje").innerText = qtdHoje || 0;
 const { data: faturamento } = await sbHome
   .from("agenda_loja")
   .select("valor_servico")
-  .eq("loja_id", lojaId)
+  .eq("user_id", lojaId)
   .gte("data", inicio)
   .in("status", ["CONFIRMADO", "CONCLUIDO"]);
 
@@ -325,7 +327,7 @@ document.getElementById("kpiFaturamento").innerText =
   const { count: qtdCancelados } = await sbHome
     .from("agenda_loja")
     .select("*", { count:"exact", head:true })
-    .eq("loja_id", lojaId)
+    .eq("user_id", lojaId)
     .eq("status", "cancelado");
 
   // 📅 carregar agenda do dia atual (INICIAL)
@@ -375,7 +377,7 @@ async function carregarAgendaDia(lojaId){
   const { data: agenda } = await sbHome
     .from("agenda_loja")
     .select("hora_inicio, cliente_nome, status")
-    .eq("loja_id", lojaId)
+    .eq("user_id", lojaId)
     .eq("data", data)
     .neq("status", "CANCELADO")
     .order("hora_inicio");
