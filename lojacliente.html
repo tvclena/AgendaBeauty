@@ -183,6 +183,7 @@ const sb = supabase.createClient(
 const lojaId = new URLSearchParams(location.search).get("l");
 let banners=[], bannerIndex=0, timer=null;
 let produtos=[], categoriaAtual="Todos";
+const produtosEl = document.getElementById("produtos");
 
 /* ===== BANNERS ===== */
 async function carregarBanners(){
@@ -240,16 +241,21 @@ function abrirLink(link){
 
 /* ===== PRODUTOS ===== */
 async function carregarProdutos(){
- const {data}=await sb
+ const { data, error } = await sb
   .from("produtos_servicos")
   .select("*")
-  .eq("loja_id",lojaId)
-  .eq("ativo",true);
+  .eq("user_id", lojaId)   // ✅ AQUI É O AJUSTE
+  .eq("ativo", true);
 
- produtos=data||[];
+ if(error){
+   console.error("Erro ao buscar produtos:", error);
+ }
+
+ produtos = data || [];
  renderCategorias();
  renderProdutos();
 }
+
 
 function renderCategorias(){
  const cats=["Todos",...new Set(produtos.map(p=>p.categoria).filter(Boolean))];
