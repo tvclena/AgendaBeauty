@@ -153,11 +153,27 @@ const toHour = m => String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).pa
 
 /* ================= SERVIÇOS ================= */
 async function carregarServicos(){
-  const { data } = await sb
-    .from("produtos_servicos")
-    .select("id,nome,preco,imagem_url,duracao_minutos")
-    .eq("user_id", lojaId)
-    .eq("ativo", true);
+const { data } = await sb
+  .from("produtos_servicos")
+  .select(`
+    id,
+    nome,
+    preco,
+    imagem_url,
+    duracao_minutos,
+    ordem_exibicao,
+    created_at,
+    updated_at
+  `)
+  .eq("user_id", lojaId)
+  .eq("ativo", true)
+  // 1️⃣ quem tem ordem_exibicao vem primeiro
+  .order("ordem_exibicao", { ascending: true, nullsLast: true })
+  // 2️⃣ se empatar, o atualizado mais recente vem primeiro
+  .order("updated_at", { ascending: false })
+  // 3️⃣ para os sem ordem, respeita a ordem de cadastro
+  .order("created_at", { ascending: true });
+
 
   const container = document.getElementById("services");
 
