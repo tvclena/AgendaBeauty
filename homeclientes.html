@@ -270,8 +270,8 @@ async function load(){
     if(loja.whatsapp){
       whatsLoja.innerText = `📲 ${loja.whatsapp}`;
     }
-if (loja.avatar_url) {
-  logo.style.backgroundImage = `url('${loja.avatar_url}')`;
+if(loja.avatar_url){
+  logo.src = loja.avatar_url;
 
     }
   }
