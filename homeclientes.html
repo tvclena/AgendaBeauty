@@ -266,13 +266,15 @@ async function load(){
       uf,
       whatsapp
     `)
-    .eq("slug", slug)
-    .single();
+  .eq("slug", slug)
+.maybeSingle();
 
-  if(error || !loja){
-    document.body.innerHTML = "Loja não encontrada";
-    return;
-  }
+  
+if(error || !loja){
+  document.body.innerHTML = "Loja não encontrada";
+  return;
+}
+
 
   lojaId = loja.user_id;
 
