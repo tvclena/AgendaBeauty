@@ -174,6 +174,81 @@ body::-webkit-scrollbar{
   padding:16px;
   font-size:13px;
 }
+.agenda-item{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap:12px;
+  padding:12px;
+  border-radius:14px;
+  background:#f9fafb;
+  margin-bottom:10px;
+  align-items:center;
+}
+
+.agenda-info{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.agenda-top{
+  display:flex;
+  gap:8px;
+  font-size:13px;
+  font-weight:600;
+}
+
+.agenda-time{
+  color:var(--primary);
+  font-weight:800;
+}
+
+.agenda-client{
+  color:#111;
+}
+
+.produto-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:8px 10px;
+  width:fit-content;
+}
+
+.produto-card strong{
+  font-size:12px;
+  display:block;
+}
+
+.produto-card small{
+  font-size:11px;
+  color:var(--muted);
+}
+
+.status-select{
+  border:none;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:11px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.status-select.confirmado{
+  background:#ecfeff;
+  color:#0891b2;
+}
+
+.status-select.concluido{
+  background:#ecfdf5;
+  color:#16a34a;
+}
+
+.status-select.cancelado{
+  background:#fef2f2;
+  color:#dc2626;
+}
+
 </style>
 </head>
 
@@ -376,7 +451,14 @@ async function carregarAgendaDia(lojaId){
 
   const { data: agenda } = await sbHome
     .from("agendamentos")
-    .select("hora_inicio, cliente_nome, status")
+.select(`
+  id,
+  hora_inicio,
+  cliente_nome,
+  status,
+  nome_servico,
+  valor_servico
+`)
     .eq("user_id", lojaId)
     .eq("data", data)
     .neq("status", "CANCELADO")
@@ -391,17 +473,56 @@ async function carregarAgendaDia(lojaId){
     return;
   }
 
-  agenda.forEach(a=>{
-    box.innerHTML += `
-      <div class="item">
-        <span>${a.hora_inicio} • ${a.cliente_nome}</span>
-        <span class="badge ${a.status.toLowerCase()}">${a.status}</span>
-      </div>
-    `;
+agenda.forEach(a=>{
+  const hora = a.hora_inicio?.slice(0,5);
+  const valor = Number(a.valor_servico || 0).toLocaleString("pt-BR", {
+    style:"currency",
+    currency:"BRL"
   });
+
+  box.innerHTML += `
+    <div class="agenda-item">
+
+      <div class="agenda-info">
+        <div class="agenda-top">
+          <span class="agenda-time">${hora}</span>
+          <span class="agenda-client">• ${a.cliente_nome}</span>
+        </div>
+
+        <div class="produto-card">
+          <strong>${a.nome_servico || "Serviço"}</strong>
+          <small>${valor}</small>
+        </div>
+      </div>
+
+      <select
+        class="status-select ${a.status.toLowerCase()}"
+        onchange="alterarStatus('${a.id}', this.value)"
+      >
+        <option value="CONFIRMADO" ${a.status==="CONFIRMADO"?"selected":""}>CONFIRMADO</option>
+        <option value="CONCLUIDO" ${a.status==="CONCLUIDO"?"selected":""}>CONCLUÍDO</option>
+        <option value="CANCELADO" ${a.status==="CANCELADO"?"selected":""}>CANCELADO</option>
+      </select>
+
+    </div>
+  `;
+});
+
 
   // KPI acompanha o dia exibido
   document.getElementById("kpiHoje").innerText = agenda.length;
+}
+async function alterarStatus(id, status){
+  await sbHome
+    .from("agendamentos")
+    .update({ status })
+    .eq("id", id);
+
+  // atualiza agenda do dia
+  const { data:{ session } } = await sbHome.auth.getSession();
+  if(session){
+    carregarAgendaDia(session.user.id);
+  }
 }
 
   
