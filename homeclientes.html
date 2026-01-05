@@ -38,15 +38,23 @@ body{margin:0;background:var(--bg);padding:16px}
 }
 
 .banner-logo{
-  width:120px;          /* largura maior */
-  height:120px;         /* altura maior */
+  width:120px;
+  height:120px;
+  min-width:120px;
   border-radius:18px;
-  background-color:#fff;
-  background-size:contain;   /* mantém proporção */
-  background-repeat:no-repeat;
-  background-position:center;
-  flex-shrink:0;
+  background:#fff;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
+
+.banner-logo img{
+  width:100%;
+  height:100%;
+  object-fit:cover; /* preenche mantendo proporção */
+}
+
 
 
 .banner h1{font-size:18px;font-weight:800}
@@ -170,7 +178,9 @@ body{margin:0;background:var(--bg);padding:16px}
 <!-- BANNER -->
 <div class="banner">
   <div class="banner-top">
-    <div class="banner-logo" id="logo"></div>
+<div class="banner-logo">
+  <img id="logo" alt="Logo da loja">
+</div>
  <div>
   <h1 id="nomeLoja">Carregando…</h1>
   <p id="cidadeLoja"></p>
@@ -252,8 +262,7 @@ async function load(){
       whatsLoja.innerText = `📲 ${loja.whatsapp}`;
     }
 if (loja.avatar_url) {
-  logo.style.backgroundImage = `url('${loja.avatar_url}')`;
-
+  logo.src = loja.avatar_url;
     }
   }
 
