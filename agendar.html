@@ -269,9 +269,18 @@ function diaSemana(dataISO){
 /* ================= SERVIÇO → DIAS ================= */
 async function selecionarServico(id, dur, nome, preco){
 
-  // 🔵 marca visualmente
-  document.querySelectorAll(".service").forEach(el => el.classList.remove("selected"));
-  document.querySelector(`[data-id="${id}"]`)?.classList.add("selected");
+  document.querySelectorAll(".service")
+    .forEach(el => el.classList.remove("selected"));
+
+  const card = document.querySelector(`[data-id="${id}"]`);
+  card?.classList.add("selected");
+
+  // 🔥 AQUI A ROLAGEM AUTOMÁTICA
+  card?.scrollIntoView({
+    behavior: "smooth",
+    inline: "center",
+    block: "nearest"
+  });
 
   dados.servico = id;
   dados.servico_nome = nome;
