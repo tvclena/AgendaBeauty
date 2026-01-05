@@ -602,32 +602,25 @@ async function salvarPerfil(){
   btn.innerText = "Salvando...";
 
   try{
+let avatarPath = profile?.avatar_url || null;
 
-    let avatarPath = profile?.avatar_url || null;
+if (pFoto.files.length) {
+  const file = pFoto.files[0];
+  const path = `perfil/${user.id}.jpg`; // ✅ AGORA DEFINIDO
 
-    if (pFoto.files.length) {
+  const { error: uploadError } = await sb.storage
+    .from("produtos")
+    .upload(path, file, { upsert: true });
 
+  if (uploadError) throw uploadError;
 
-      
-const blobToUpload = fotoBlob || pFoto.files[0];
+  const { data } = sb.storage
+    .from("produtos")
+    .getPublicUrl(path);
 
-const { error: uploadError } = await sb.storage
-  .from("produtos")
-  .upload(path, blobToUpload, {
-    upsert: true,
-    contentType: "image/jpeg",
-    cacheControl: "3600"
-  });
+  avatarPath = data.publicUrl;
+}
 
-      if (uploadError) throw uploadError;
-
-      const { data } = sb
-        .storage
-        .from("produtos")
-        .getPublicUrl(path);
-
-      avatarPath = data.publicUrl;
-    }
 
     const { error } = await sb
       .from("user_profile")
