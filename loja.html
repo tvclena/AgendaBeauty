@@ -269,26 +269,15 @@ const navLoja = document.getElementById("navLoja");
   
 async function verificarProdutosDaLoja(){
 
-  // 🔹 1. Buscar dono da loja
-  const { data: loja, error: lojaError } = await sb
-    .from("user_profile")
-    .select("user_id")
-    .eq("id", lojaId)
-    .single();
-
-  if (lojaError || !loja) {
-    console.error("Erro ao buscar loja:", lojaError);
+  if(!lojaId){
     navLoja.style.display = "none";
     return;
   }
 
-  const donoId = loja.user_id;
-
-  // 🔹 2. Verificar produtos do dono da loja
   const { count, error } = await sb
     .from("produtos_servicos")
     .select("id", { count: "exact", head: true })
-    .eq("user_id", donoId)      // ✅ CORRETO
+    .eq("user_id", lojaId)
     .eq("tipo", "PRODUTO")
     .eq("ativo", true);
 
@@ -301,9 +290,13 @@ async function verificarProdutosDaLoja(){
   navLoja.style.display = count > 0 ? "flex" : "none";
 }
 
+
   
 /* ================= LOJA ================= */
-const lojaId = new URLSearchParams(location.search).get("l");
+// 🔹 slug vindo da rota limpa: /barbearia-mendes
+const slug = location.pathname.replace("/", "").trim();
+
+let lojaId = null; // será resolvido depois
 
 /* ================= NAV ================= */
 function go(el, page){
@@ -317,8 +310,7 @@ function go(el, page){
     .forEach(i => i.classList.remove("active"));
 
   el.classList.add("active");
-  frame.src = `${page}?l=${lojaId}`;
-}
+frame.src = page;}
 
 
 /* ================= MODAL ================= */
@@ -387,24 +379,38 @@ function clienteValido(){
 /* ================= LOAD ================= */
 async function load(){
 
-  const { data } = await sb
+  if(!slug){
+    nomeLoja.innerText = "Agenda Fácil";
+    return;
+  }
+
+  // 🔹 1. Resolver slug → loja
+  const { data: loja, error } = await sb
     .from("user_profile")
-    .select("negocio")
-    .eq("user_id", lojaId)
+    .select("user_id, negocio")
+    .eq("slug", slug)
     .single();
 
-  nomeLoja.innerText = data?.negocio || "Agenda Fácil";
+  if(error || !loja){
+    document.body.innerHTML = "Loja não encontrada";
+    return;
+  }
+
+  // 🔹 2. user_id REAL da loja
+  lojaId = loja.user_id;
+
+  nomeLoja.innerText = loja.negocio;
+
+  // 🔹 3. verificar produtos
   verificarProdutosDaLoja();
 
+  // 🔹 4. fluxo do cliente
   if(clienteValido()){
     const nome = localStorage.getItem("NOME_CLIENTE");
     atualizarAvatar(nome);
-    frame.src = `homeclientes.html?l=${lojaId}`;
-    
-  }
-  
-  else {
-    frame.src = ""; // BLOQUEIA APP
+    frame.src = `homeclientes.html`;
+  } else {
+    frame.src = "";
     abrirModalCliente();
   }
 }
