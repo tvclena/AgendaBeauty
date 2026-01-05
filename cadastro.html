@@ -308,11 +308,12 @@ const sb = supabase.createClient(
 async function cadastrar(e){
   e.preventDefault();
   overlay.style.display = "flex";
+  errorBox.style.display = "none";
 
   const emailValue = email.value.trim().toLowerCase();
   const senhaValue = senha.value.trim();
 
-  /* 1️⃣ CRIA USUÁRIO */
+  /* 1️⃣ CRIA USUÁRIO (AUTH) */
   const { data, error } = await sb.auth.signUp({
     email: emailValue,
     password: senhaValue
@@ -327,25 +328,26 @@ async function cadastrar(e){
 
   const userId = data.user.id;
 
-  /* 2️⃣ CRIA NEGÓCIO */
-  const { error: erroNegocio } = await sb
-    .from("negocios")
+  /* 2️⃣ CRIA PERFIL */
+  const { error: erroPerfil } = await sb
+    .from("user_profile")
     .insert({
       user_id: userId,
       responsavel: responsavel.value.trim(),
       whatsapp: whatsapp.value.replace(/\D/g,''),
-      nome: negocio.value.trim(),
+      negocio: negocio.value.trim(),
       tipo: tipo.value,
       cidade: cidade.value.trim(),
-      uf: uf.value.trim().toUpperCase()
+      uf: uf.value.trim().toUpperCase(),
+      email: emailValue
     });
 
   overlay.style.display = "none";
 
-  if(erroNegocio){
+  if(erroPerfil){
     errorBox.style.display = "block";
-    errorBox.innerText = "Conta criada, mas erro ao salvar o negócio.";
-    console.error(erroNegocio);
+    errorBox.innerText = "Conta criada, mas erro ao salvar o perfil.";
+    console.error(erroPerfil);
     return;
   }
 
@@ -357,7 +359,6 @@ function irLogin(){
   location.href = "login.html";
 }
 </script>
-
 
 </body>
 </html>
