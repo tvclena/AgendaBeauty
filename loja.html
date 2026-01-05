@@ -14,7 +14,7 @@
 <meta name="theme-color" content="#ff6a00">
 
 <!-- PWA -->
-<link rel="manifest" href="/AgendaBeauty/manifest.json">
+<link rel="manifest" href="/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Agenda Fácil">
@@ -268,17 +268,11 @@ const navLoja = document.getElementById("navLoja");
 
   
 async function verificarProdutosDaLoja(){
-
-  if(!lojaId){
-    navLoja.style.display = "none";
-    return;
-  }
-
   const { count, error } = await sb
     .from("produtos_servicos")
     .select("id", { count: "exact", head: true })
-    .eq("user_id", lojaId)
-    .eq("tipo", "PRODUTO")
+    .eq("loja_id", lojaId)
+    .eq("tipo", "PRODUTO")   // ✅ SOMENTE PRODUTO
     .eq("ativo", true);
 
   if (error) {
@@ -287,20 +281,13 @@ async function verificarProdutosDaLoja(){
     return;
   }
 
+  // ✅ só mostra se existir ao menos 1 PRODUTO
   navLoja.style.display = count > 0 ? "flex" : "none";
 }
 
-
   
-// 🔹 slug vindo da rota limpa no GitHub Pages
-const BASE_PATH = "/AgendaBeauty";
-
-const slug = location.pathname
-  .replace(BASE_PATH, "") // remove /AgendaBeauty
-  .replace(/^\/+/, "")    // remove / inicial
-  .trim();
-
-let lojaId = null; // será resolvido depois
+/* ================= LOJA ================= */
+const lojaId = new URLSearchParams(location.search).get("l");
 
 /* ================= NAV ================= */
 function go(el, page){
@@ -314,7 +301,8 @@ function go(el, page){
     .forEach(i => i.classList.remove("active"));
 
   el.classList.add("active");
-frame.src = page;}
+  frame.src = `${page}?l=${lojaId}`;
+}
 
 
 /* ================= MODAL ================= */
@@ -369,7 +357,7 @@ await sb.from("clientes_loja").insert({
   }
 
 fecharModalCliente();
-frame.src = `homeclientes.html`;
+frame.src = `homeclientes.html?l=${lojaId}`;
 }
 
 function clienteValido(){
@@ -383,38 +371,24 @@ function clienteValido(){
 /* ================= LOAD ================= */
 async function load(){
 
-  if(!slug){
-    nomeLoja.innerText = "Agenda Fácil";
-    return;
-  }
-
-  // 🔹 1. Resolver slug → loja
-  const { data: loja, error } = await sb
+  const { data } = await sb
     .from("user_profile")
-    .select("user_id, negocio")
-    .eq("slug", slug)
+    .select("negocio")
+    .eq("user_id", lojaId)
     .single();
 
-  if(error || !loja){
-    document.body.innerHTML = "Loja não encontrada";
-    return;
-  }
-
-  // 🔹 2. user_id REAL da loja
-  lojaId = loja.user_id;
-
-  nomeLoja.innerText = loja.negocio;
-
-  // 🔹 3. verificar produtos
+  nomeLoja.innerText = data?.negocio || "Agenda Fácil";
   verificarProdutosDaLoja();
 
-  // 🔹 4. fluxo do cliente
   if(clienteValido()){
     const nome = localStorage.getItem("NOME_CLIENTE");
     atualizarAvatar(nome);
-    frame.src = `homeclientes.html`;
-  } else {
-    frame.src = "";
+    frame.src = `homeclientes.html?l=${lojaId}`;
+    
+  }
+  
+  else {
+    frame.src = ""; // BLOQUEIA APP
     abrirModalCliente();
   }
 }
