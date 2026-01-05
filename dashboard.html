@@ -337,6 +337,39 @@ iframe{
 </head>
 
 <body>
+<div id="notifyModal" style="
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+">
+  <div style="
+    background:#fff;
+    padding:20px;
+    border-radius:18px;
+    max-width:320px;
+    text-align:center;
+  ">
+    <h3 style="margin-bottom:8px">Ativar notificações?</h3>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:14px">
+      Receba alertas de novos agendamentos, compras e alterações.
+    </p>
+    <button onclick="ativarNotificacoes()" style="
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:999px;
+      background:#ff6a00;
+      color:#fff;
+      font-weight:800;
+    ">
+      Ativar notificações
+    </button>
+  </div>
+</div>
 
 <div id="overlay"><div class="box" id="overlayText">Validando sessão…</div></div>
 
@@ -478,12 +511,17 @@ async function proteger(){
 
 
 proteger();
+setTimeout(() => {
+  if ("Notification" in window && Notification.permission === "default") {
+    document.getElementById("notifyModal").style.display = "flex";
+  }
+}, 800);
+  
 if (Notification.permission !== "granted") {
   setTimeout(() => {
     pedirNotificacao();
   }, 1000);
 }
-
 
   
 async function carregarPerfil(){
@@ -671,23 +709,30 @@ async function sair(){
 
 
 
-async function pedirNotificacao() {
+async function ativarNotificacoes(){
+  const modal = document.getElementById("notifyModal");
+
   if (!("Notification" in window)) return;
 
   const perm = await Notification.requestPermission();
-  if (perm !== "granted") return;
+  if (perm !== "granted") {
+    modal.style.display = "none";
+    return;
+  }
 
   const reg = await navigator.serviceWorker.ready;
+
   const sub = await reg.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: "BFhPEOPNlTlGO4rcw-ZcZAPNByDk1uZA2KJIAm4K4wLwp0TTTtQjtDZi-5YGt7LzwhGun-DU_dXpKwQcHWPruVw"
   });
 
-  // salva subscription no Supabase
   await sb.from("push_subscriptions").insert({
     user_id: user.id,
     subscription: sub
   });
+
+  modal.style.display = "none";
 }
 
 
