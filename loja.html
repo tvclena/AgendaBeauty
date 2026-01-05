@@ -225,9 +225,13 @@ iframe{
   <div class="nav-item" onclick="go(this,'agendar.html')">
     <i class="ri-calendar-check-line"></i>Agendar
   </div>
-  <div class="nav-item" onclick="go(this,'lojacliente.html')">
-    <i class="ri-scissors-line"></i>Loja
-  </div>
+
+
+  
+<div class="nav-item" id="navLoja" onclick="go(this,'lojacliente.html')">
+  <i class="ri-scissors-line"></i>Loja
+</div>
+
   <div class="nav-item" onclick="go(this,'agendamentosclientes.html')">
     <i class="ri-store-2-line"></i>Meu espaço
   </div>
@@ -258,6 +262,25 @@ const sb = supabase.createClient(
 const frame = document.getElementById("frame");
 const avatar = document.getElementById("avatarCliente");
 
+const navLoja = document.getElementById("navLoja");
+
+async function verificarProdutosDaLoja(){
+  const { data, error } = await sb
+    .from("produtos_servicos")
+    .select("id", { count: "exact", head: true })
+    .eq("loja_id", lojaId)
+    .eq("ativo", true);
+
+  // Se não tiver produtos, esconde a aba Loja
+  if(!data || error){
+    navLoja.style.display = "none";
+    return;
+  }
+
+  // Se existir pelo menos 1 produto
+  navLoja.style.display = "flex";
+}
+  
 /* ================= LOJA ================= */
 const lojaId = new URLSearchParams(location.search).get("l");
 
@@ -350,12 +373,16 @@ async function load(){
     .single();
 
   nomeLoja.innerText = data?.negocio || "Agenda Fácil";
+  verificarProdutosDaLoja();
 
   if(clienteValido()){
     const nome = localStorage.getItem("NOME_CLIENTE");
     atualizarAvatar(nome);
     frame.src = `homeclientes.html?l=${lojaId}`;
-  } else {
+    
+  }
+  
+  else {
     frame.src = ""; // BLOQUEIA APP
     abrirModalCliente();
   }
