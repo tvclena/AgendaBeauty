@@ -216,10 +216,8 @@ const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
-let lojaId = sessionStorage.getItem("LOJA_ID");
 
-
-
+const lojaId = new URLSearchParams(location.search).get("l");
 let todos = [];
 let tipoAtual = null;
 
@@ -228,10 +226,6 @@ const nomeLoja = document.getElementById("nomeLoja");
 const cidadeLoja = document.getElementById("cidadeLoja");
 const enderecoLoja = document.getElementById("enderecoLoja");
 const whatsLoja = document.getElementById("whatsLoja");
-const busca = document.getElementById("busca");
-const grid = document.getElementById("grid");
-const tabServicos = document.getElementById("tabServicos");
-const tabProdutos = document.getElementById("tabProdutos");
 
 
 
@@ -239,12 +233,8 @@ const tabProdutos = document.getElementById("tabProdutos");
 /* ================= LOAD ================= */
 async function load(){
 
-  if(!lojaId){
-    document.body.innerHTML = "Loja não encontrada";
-    return;
-  }
-
-  const { data: loja, error } = await sb
+  /* ===== LOJA ===== */
+  const { data: loja } = await sb
     .from("user_profile")
     .select(`
       negocio,
@@ -260,30 +250,20 @@ async function load(){
     .eq("user_id", lojaId)
     .single();
 
-  if(error || !loja){
-    document.body.innerHTML = "Loja não encontrada";
-    return;
-  }
-
-
-
-
-
-  /* ===== BANNER ===== */
-  nomeLoja.innerText = loja.negocio || "Agenda Fácil";
-  cidadeLoja.innerText = `${loja.cidade || ""} • ${loja.uf || ""}`;
-  enderecoLoja.innerText = `
-    ${loja.rua || ""}, ${loja.numero || ""}
-    • ${loja.bairro || ""}
-    • CEP ${loja.cep || ""}
-  `;
-
-  if(loja.whatsapp){
-    whatsLoja.innerText = `📲 ${loja.whatsapp}`;
-  }
-
-  if(loja.avatar_url){
-    logo.src = loja.avatar_url;
+  if(loja){
+    nomeLoja.innerText = loja.negocio || "Agenda Fácil";
+    cidadeLoja.innerText = `${loja.cidade || ""} • ${loja.uf || ""}`;
+    enderecoLoja.innerText = `
+      ${loja.rua || ""}, ${loja.numero || ""}
+      • ${loja.bairro || ""}
+      • CEP ${loja.cep || ""}
+    `;
+    if(loja.whatsapp){
+      whatsLoja.innerText = `📲 ${loja.whatsapp}`;
+    }
+if (loja.avatar_url) {
+  logo.src = loja.avatar_url;
+    }
   }
 
   /* ===== PRODUTOS / SERVIÇOS ===== */
@@ -296,12 +276,15 @@ async function load(){
 
   todos = data || [];
 
+  // 👉 VERIFICA EXISTÊNCIA
   const temServicos = todos.some(i => i.tipo === "SERVICO");
   const temProdutos = todos.some(i => i.tipo === "PRODUTO");
 
+  // 👉 CONTROLA VISIBILIDADE DAS TABS
   tabServicos.style.display = temServicos ? "inline-block" : "none";
   tabProdutos.style.display = temProdutos ? "inline-block" : "none";
 
+  // 👉 DEFINE TAB INICIAL
   if(temServicos){
     tipoAtual = "SERVICO";
     tabServicos.classList.add("active");
@@ -316,8 +299,6 @@ async function load(){
 
   render();
 }
-
-
 
 /* ================= RENDER ================= */
 function render(){
@@ -350,7 +331,7 @@ function render(){
     <div class="card">
       <div style="position:relative">
         ${i.promocao_ativa ? `<div class="badge">Promoção</div>` : ``}
-        <img src="${i.imagem_url || 'https://via.placeholder.com/300x200?text=Sem+imagem'}">
+        <img src="${i.imagem_url || ''}">
       </div>
       <div class="card-body">
         <strong>${i.nome}</strong>
@@ -383,7 +364,7 @@ function setTab(tipo){
 }
 
 function agendar(id){
-location.href = `agendar.html?servico=${id}`;
+  location.href = `agendar.html?l=${lojaId}&servico=${id}`;
 }
 
 function comprar(id){
