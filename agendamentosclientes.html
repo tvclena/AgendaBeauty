@@ -141,6 +141,15 @@ button:disabled{
 #overlayAlterar .item.selected{
   border:2px solid #2563eb;
 }
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
 
 </style>
 </head>
@@ -162,6 +171,23 @@ const sb = supabase.createClient(
 const lojaId = new URLSearchParams(location.search).get("l");
 const clienteWhats = localStorage.getItem("WHATS_CLIENTE");
 const lista = document.getElementById("lista");
+
+
+
+
+function toMin(h){
+  const [a,b] = h.split(":").map(Number);
+  return a * 60 + b;
+}
+
+function toHour(m){
+  return String(Math.floor(m/60)).padStart(2,"0") + ":" +
+         String(m%60).padStart(2,"0");
+}
+
+
+
+  
 
 /* ================= UTILS ================= */
 function minutosAte(data, hora){
@@ -290,7 +316,7 @@ async function alterar(id){
     .order("ordem_exibicao",{ascending:true,nullsLast:true});
 
   document.getElementById("altServices").innerHTML = servicos.map(s=>`
-    <div class="service" onclick="altSelecionarServico(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+<div class="service" onclick="altSelecionarServico(this, ${JSON.stringify(s).replace(/"/g,'&quot;')})">
       <img src="${s.imagem_url || 'https://via.placeholder.com/300'}">
       <div class="service-info">
         <div class="service-name">${s.nome}</div>
@@ -303,15 +329,14 @@ let altServico = null;
 let altDuracao = 0;
 let altData = null;
 
-async function altSelecionarServico(s){
+async function altSelecionarServico(el, s){
   altServico = s.id;
   altDuracao = s.duracao_minutos;
 
   document.querySelectorAll("#altServices .service")
     .forEach(el => el.classList.remove("selected"));
 
-  event.currentTarget.classList.add("selected");
-
+el.classList.add("selected");
   document.getElementById("altDays").classList.remove("hidden");
   document.getElementById("altDaysGrid").innerHTML = "Buscando dias...";
 
