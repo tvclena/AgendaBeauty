@@ -242,10 +242,20 @@ function abrirLink(link){
 /* ===== PRODUTOS ===== */
 async function carregarProdutos(){
  const { data, error } = await sb
-  .from("produtos_servicos")
-  .select("*")
-  .eq("user_id", lojaId)   // ✅ AQUI É O AJUSTE
-  .eq("ativo", true);
+
+.from("produtos_servicos")
+.select(`
+  id,
+  nome,
+  preco,
+  imagem_url,
+  categoria,
+  descricao,
+  caracteristicas
+`)
+.eq("user_id", lojaId)
+.eq("ativo", true)
+.eq("tipo", "produto"); // 🔥 ESSENCIAL
 
  if(error){
    console.error("Erro ao buscar produtos:", error);
@@ -273,21 +283,41 @@ function selecionarCategoria(c){
 }
 
 function renderProdutos(){
- produtosEl.innerHTML=produtos
-  .filter(p=>categoriaAtual==="Todos"||p.categoria===categoriaAtual)
-  .map(p=>`
+ produtosEl.innerHTML = produtos
+  .filter(p => categoriaAtual === "Todos" || p.categoria === categoriaAtual)
+  .map(p => `
    <div class="card">
-    <img src="${p.imagem_url||'https://via.placeholder.com/400'}">
+    <img src="${p.imagem_url || 'https://via.placeholder.com/400'}">
+
     <div class="card-body">
      <div class="card-title">${p.nome}</div>
+
+     ${
+       p.descricao
+       ? `<div style="font-size:12px;color:#6b7280;margin-top:4px;">
+            ${p.descricao}
+          </div>`
+       : ""
+     }
+
+     ${
+       p.caracteristicas
+       ? `<div style="font-size:11px;color:#9ca3af;margin-top:4px;">
+            ${p.caracteristicas}
+          </div>`
+       : ""
+     }
+
      <div class="card-price">
       R$ ${Number(p.preco).toFixed(2).replace('.',',')}
      </div>
+
      <button class="card-btn">Adicionar</button>
     </div>
    </div>
  `).join("");
 }
+
 
 /* INIT */
 carregarBanners();
