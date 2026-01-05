@@ -491,18 +491,18 @@ async function carregarAgendaDia(lojaId){
   document.getElementById("kpiHoje").innerText = agenda.length;
 }
 
-async function alterarStatus(id, status){
+async function alterarStatus(id, status) {
 
   const { data:{ session } } = await sbHome.auth.getSession();
-  if(!session) return;
+  if (!session) return;
 
   const { error } = await sbHome
     .from("agendamentos")
     .update({ status })
     .eq("id", id)
-    .eq("loja_id", session.user.id); // ✅ COLUNA CERTA
+    .eq("user_id", session.user.id); // ✅ COLUNA CERTA
 
-  if(error){
+  if (error) {
     alert("Erro ao alterar status");
     console.error(error);
     return;
@@ -510,6 +510,7 @@ async function alterarStatus(id, status){
 
   carregarAgendaDia(session.user.id);
 }
+
 
 
 </script>
