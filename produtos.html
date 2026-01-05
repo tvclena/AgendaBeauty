@@ -425,10 +425,28 @@ body{
       </div>
     </div>
 
-    <div class="sheet-footer">
-      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-save" onclick="salvar()">Salvar</button>
-    </div>
+<div class="sheet-footer">
+
+  <!-- BOTÃO EXCLUIR (somente edição) -->
+  <button
+    id="btnExcluir"
+    onclick="confirmarExclusao()"
+    style="
+      background:transparent;
+      color:#dc2626;
+      font-size:12px;
+      font-weight:700;
+      border:none;
+      padding:0 6px;
+      display:none;
+    ">
+    Excluir item
+  </button>
+
+  <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+  <button class="btn-save" onclick="salvar()">Salvar</button>
+</div>
+
   </div>
 </div>
 
@@ -622,6 +640,7 @@ precoPromo.value = i.preco_promocional
  obs.value=i.observacoes_internas||"";
  if(i.imagem_url){preview.src=i.imagem_url;preview.style.display="block"}
 abrirModalEditar();
+document.getElementById("btnExcluir").style.display = "block";
 }
 
 
@@ -661,7 +680,7 @@ function abrirModalNovo(){
   preview.style.display = "none";
   preview.src = "";
   blob = null;
-
+document.getElementById("btnExcluir").style.display = "none";
   modal.classList.add("show");
 }
 function abrirModalEditar(){
@@ -683,6 +702,43 @@ filtroTipo.addEventListener("change", () => {
   render();
 });
 
+async function confirmarExclusao(){
+  if(!editId) return;
+
+  const ok = confirm(
+    "Tem certeza que deseja excluir este item?\n\nEssa ação não poderá ser desfeita."
+  );
+
+  if(!ok) return;
+
+  loading.style.display = "flex";
+
+  // pega item atual
+  const item = itens.find(i => i.id === editId);
+
+  // remove registro do banco
+  await sb
+    .from("produtos_servicos")
+    .delete()
+    .eq("id", editId);
+
+  // remove imagem do storage (se existir)
+  if(item?.imagem_url){
+    const path = item.imagem_url
+      .split("/produtos/")[1]
+      ?.split("?")[0];
+
+    if(path){
+      await sb.storage
+        .from("produtos")
+        .remove([path]);
+    }
+  }
+
+  loading.style.display = "none";
+  fecharModal();
+  carregar();
+}
 
 
   
