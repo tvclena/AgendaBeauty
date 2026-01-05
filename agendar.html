@@ -120,6 +120,22 @@ html,body{margin:0;background:var(--bg)}
   justify-content: center;
   z-index: 9999;
 }
+.msg-final button{
+  border:none;
+  border-radius:12px;
+  padding:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.msg-final button:first-child{
+  background:#2563eb;
+  color:#fff;
+}
+
+.msg-final button:last-child{
+  background:#e5e7eb;
+}
 
 </style>
 </head>
@@ -456,24 +472,45 @@ async function confirmar(h){
   }
 
   document.body.insertAdjacentHTML("beforeend", `
-    <div class="overlay">
-      <div class="msg-final">
-        ✅ <strong>Agendamento confirmado!</strong><br><br>
 
-        Serviço: <b>${dados.servico_nome}</b><br>
-        Data: <b>${dados.data}</b><br>
-        Horário: <b>${h}</b><br><br>
+  
+   <div class="overlay" id="overlayConfirm">
+  <div class="msg-final">
+    ✅ <strong>Agendamento confirmado!</strong><br><br>
 
-        ⚠️ Caso precise cancelar ou alterar,<br>
-        acesse o painel <b>Meus Agendamentos</b><br>
-        com no mínimo <b>40 minutos</b> de antecedência.
-      </div>
+    Serviço: <b>${dados.servico_nome}</b><br>
+    Data: <b>${dados.data}</b><br>
+    Horário: <b>${h}</b><br><br>
+
+    ⚠️ Caso precise cancelar ou alterar,<br>
+    acesse o painel <b>Meus Agendamentos</b><br>
+    com no mínimo <b>40 minutos</b> de antecedência.<br><br>
+
+    <div style="display:flex;gap:10px">
+      <button onclick="irParaAgendamentos()" style="flex:1">
+        📋 Meus Agendamentos
+      </button>
+
+      <button onclick="fecharOverlay()" style="flex:1">
+        ✖ Fechar
+      </button>
     </div>
+  </div>
+</div>
+
   `);
 }
 
 /* ✅ CHAMA UMA ÚNICA VEZ */
 carregarServicos();
+function fecharOverlay(){
+  document.getElementById("overlayConfirm")?.remove();
+}
+
+function irParaAgendamentos(){
+  // ajuste a rota se necessário
+  window.location.href = "meus-agendamentos.html?l=" + lojaId;
+}
 
 </script>
 
