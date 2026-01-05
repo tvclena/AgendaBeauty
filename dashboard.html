@@ -661,7 +661,36 @@ async function sair(){
   await sb.auth.signOut();
   location.href="login.html";
 }
-</script>
+
+
+
+async function pedirNotificacao() {
+  if (!("Notification" in window)) return;
+
+  const perm = await Notification.requestPermission();
+  if (perm !== "granted") return;
+
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: "SUA_CHAVE_VAPID_PUBLICA"
+  });
+
+  // salva subscription no Supabase
+  await sb.from("push_subscriptions").insert({
+    user_id: user.id,
+    subscription: sub
+  });
+}
+
+
   
+</script>
+  <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js");
+}
+</script>
+
 </body>
 </html>
