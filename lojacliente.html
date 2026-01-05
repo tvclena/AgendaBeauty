@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Loja</title>
+
+<meta name="viewport"
+  content="width=device-width,
+  initial-scale=1,
+  maximum-scale=1,
+  user-scalable=no,
+  viewport-fit=cover">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --primary:#ff6a00;
+  --bg:#f4f6fb;
+  --card:#fff;
+  --border:#e5e7eb;
+  --text:#111827;
+  --muted:#6b7280;
+}
+
+*{box-sizing:border-box;font-family:Inter}
+body{margin:0;background:var(--bg)}
+
+/* HEADER */
+.header{
+  padding:16px;
+  font-weight:800;
+  font-size:18px;
+}
+
+/* ===== BANNER ===== */
+.banner-wrapper{
+  margin:0 16px 12px;
+  border-radius:20px;
+  overflow:hidden;
+  position:relative;
+}
+.banner-track{
+  display:flex;
+  transition:transform .4s ease;
+}
+.banner{
+  min-width:100%;
+}
+.banner img{
+  width:100%;
+  height:160px;
+  object-fit:cover;
+  display:block;
+}
+
+/* dots */
+.dots{
+  position:absolute;
+  bottom:8px;
+  width:100%;
+  display:flex;
+  justify-content:center;
+  gap:6px;
+}
+.dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:rgba(255,255,255,.5);
+}
+.dot.active{
+  background:#fff;
+}
+
+/* ===== CATEGORIAS ===== */
+.categorias{
+  display:flex;
+  gap:10px;
+  padding:8px 16px 12px;
+  overflow-x:auto;
+}
+.categorias::-webkit-scrollbar{display:none}
+
+.categoria{
+  padding:8px 14px;
+  background:#fff;
+  border-radius:999px;
+  font-weight:700;
+  font-size:13px;
+  border:1px solid var(--border);
+  white-space:nowrap;
+  cursor:pointer;
+}
+.categoria.active{
+  background:var(--primary);
+  color:#fff;
+  border-color:var(--primary);
+}
+
+/* ===== GRID ===== */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+  padding:0 16px 120px;
+}
+
+/* CARD */
+.card{
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 8px 22px rgba(0,0,0,.08);
+  overflow:hidden;
+}
+.card img{
+  width:100%;
+  height:120px;
+  object-fit:cover;
+}
+.card-body{
+  padding:10px;
+}
+.card-title{
+  font-weight:800;
+  font-size:14px;
+}
+.card-price{
+  color:var(--primary);
+  font-weight:800;
+  margin-top:4px;
+  font-size:14px;
+}
+.card-btn{
+  margin-top:8px;
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  width:100%;
+  padding:10px;
+  border-radius:12px;
+  font-weight:800;
+}
+
+/* CARRINHO (placeholder) */
+.cart{
+  position:fixed;
+  bottom:16px;
+  right:16px;
+  background:var(--primary);
+  color:#fff;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  box-shadow:0 12px 28px rgba(0,0,0,.3);
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Loja</div>
+
+<div id="bannerArea"></div>
+
+<div class="categorias" id="categorias"></div>
+
+<div class="grid" id="produtos"></div>
+
+<div class="cart">🛒</div>
+
+<script>
+const sb = supabase.createClient(
+ "https://egxjgmzukjyyxmkukwub.supabase.co",
+ "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+);
+
+const lojaId = new URLSearchParams(location.search).get("l");
+let banners=[], bannerIndex=0, timer=null;
+let produtos=[], categoriaAtual="Todos";
+
+/* ===== BANNERS ===== */
+async function carregarBanners(){
+ const {data} = await sb
+  .from("config_loja")
+  .select("banners")
+  .eq("loja_id",lojaId)
+  .single();
+
+ if(!data?.banners?.length) return;
+
+ banners=data.banners;
+
+ const html=`
+  <div class="banner-wrapper">
+    <div class="banner-track" id="track">
+      ${banners.map(b=>`
+        <div class="banner" onclick="abrirLink('${b.link}')">
+          <img src="${b.imagem}">
+        </div>
+      `).join("")}
+    </div>
+    <div class="dots" id="dots"></div>
+  </div>
+ `;
+ bannerArea.innerHTML=html;
+
+ renderDots();
+ autoSlide();
+}
+
+function renderDots(){
+ dots.innerHTML=banners.map((_,i)=>`
+  <div class="dot ${i===0?'active':''}"></div>
+ `).join("");
+}
+
+function slide(){
+ bannerIndex=(bannerIndex+1)%banners.length;
+ track.style.transform=`translateX(-${bannerIndex*100}%)`;
+ document.querySelectorAll(".dot").forEach((d,i)=>{
+  d.classList.toggle("active",i===bannerIndex);
+ });
+}
+
+function autoSlide(){
+ clearInterval(timer);
+ timer=setInterval(slide,3000);
+}
+
+function abrirLink(link){
+ // depois você decide se é produto, serviço ou URL
+ console.log("abrir:",link);
+}
+
+/* ===== PRODUTOS ===== */
+async function carregarProdutos(){
+ const {data}=await sb
+  .from("produtos_servicos")
+  .select("*")
+  .eq("loja_id",lojaId)
+  .eq("ativo",true);
+
+ produtos=data||[];
+ renderCategorias();
+ renderProdutos();
+}
+
+function renderCategorias(){
+ const cats=["Todos",...new Set(produtos.map(p=>p.categoria).filter(Boolean))];
+
+ categorias.innerHTML=cats.map(c=>`
+  <div class="categoria ${c===categoriaAtual?'active':''}"
+       onclick="selecionarCategoria('${c}')">${c}</div>
+ `).join("");
+}
+
+function selecionarCategoria(c){
+ categoriaAtual=c;
+ renderCategorias();
+ renderProdutos();
+}
+
+function renderProdutos(){
+ produtosEl.innerHTML=produtos
+  .filter(p=>categoriaAtual==="Todos"||p.categoria===categoriaAtual)
+  .map(p=>`
+   <div class="card">
+    <img src="${p.imagem_url||'https://via.placeholder.com/400'}">
+    <div class="card-body">
+     <div class="card-title">${p.nome}</div>
+     <div class="card-price">
+      R$ ${Number(p.preco).toFixed(2).replace('.',',')}
+     </div>
+     <button class="card-btn">Adicionar</button>
+    </div>
+   </div>
+ `).join("");
+}
+
+/* INIT */
+carregarBanners();
+carregarProdutos();
+</script>
+
+</body>
+</html>
