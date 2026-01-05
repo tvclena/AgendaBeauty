@@ -136,6 +136,18 @@ html,body{margin:0;background:var(--bg)}
 .msg-final button:last-child{
   background:#e5e7eb;
 }
+.days-scroll{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  padding-bottom:6px;
+}
+.days-scroll::-webkit-scrollbar{display:none}
+
+.days-scroll .item{
+  min-width:70px;
+}
+
 
 </style>
 </head>
@@ -151,8 +163,9 @@ html,body{margin:0;background:var(--bg)}
 
 <div class="section hidden" id="secDays">
   <div class="title">Escolha a data</div>
-  <div class="grid" id="days"></div>
+  <div class="days-scroll" id="days"></div>
 </div>
+
 
 <div class="section hidden" id="secTimes">
   <div class="title">Escolha o horário</div>
@@ -182,9 +195,22 @@ let duracao = 0;
 let dados = {};
 let DIAS_VALIDOS = [];
 
+let cursorData = null;
+let carregandoDias = false;
+const BLOCO_DIAS = 7;
+
+
 /* UTILS */
 const toMin = h => { const [a,b]=h.split(":").map(Number); return a*60+b; }
 const toHour = m => String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
+function hojeLocal(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 
 /* ================= SERVIÇOS ================= */
 async function carregarServicos(){
@@ -255,7 +281,84 @@ function diaSemana(dataISO){
   const d = new Date(ano, mes - 1, dia);
   return dias[d.getDay()];
 }
+function addDias(data, qtd){
+  const d = new Date(data);
+  d.setDate(d.getDate() + qtd);
+  return d.toISOString().split("T")[0];
+}
 
+async function carregarDiasLazy(){
+
+  if(carregandoDias) return;
+  carregandoDias = true;
+
+  const inicio = cursorData || hojeLocal();
+  const fim = addDias(inicio, BLOCO_DIAS);
+
+  const { data: agenda } = await sb
+    .from("agenda_loja")
+    .select("*")
+    .eq("user_id", lojaId)
+    .eq("fechado", false)
+    .gte("data", inicio)
+    .lte("data", fim)
+    .order("data");
+
+  for(const d of agenda){
+
+    let blocos;
+    try{
+      blocos = typeof d.horarios === "string"
+        ? JSON.parse(d.horarios)
+        : d.horarios;
+    }catch{ continue }
+
+    const { data: ags } = await sb
+      .from("agendamentos")
+      .select("hora_inicio,hora_fim")
+      .eq("user_id", lojaId)
+      .eq("data", d.data);
+
+    const ocupados = ags.map(a => [
+      toMin(a.hora_inicio),
+      toMin(a.hora_fim)
+    ]);
+
+    let livre = false;
+
+    blocos.forEach(b=>{
+      let s = toMin(b.inicio);
+      let e = toMin(b.fim);
+
+      while(s + duracao <= e){
+        if(!ocupados.some(o => !(s + duracao <= o[0] || s >= o[1]))){
+          livre = true;
+          break;
+        }
+        s += duracao;
+      }
+    });
+
+    if(livre){
+      DIAS_VALIDOS.push(d);
+      renderizarDia(d, DIAS_VALIDOS.length - 1);
+    }
+  }
+
+  cursorData = addDias(fim, 1);
+  carregandoDias = false;
+}
+function renderizarDia(d, index){
+  document.getElementById("days")
+    .insertAdjacentHTML("beforeend", `
+      <div class="item" onclick="selecionarDia(${index})">
+        <div style="font-size:18px">${formatarDia(d.data)}</div>
+        <div style="font-size:12px;color:#6b7280">
+          ${diaSemana(d.data)}
+        </div>
+      </div>
+    `);
+}
 
 
 
@@ -291,91 +394,21 @@ async function selecionarServico(id, dur, nome, preco){
   document.getElementById("secDays").classList.remove("hidden");
   document.getElementById("secTimes").classList.add("hidden");
 
-  document.getElementById("days").innerHTML = `
-    <div style="grid-column:1/-1;text-align:center;color:#6b7280">
-      🔄 Buscando dias disponíveis...
-    </div>
-  `;
 
   document.getElementById("times").innerHTML = "";
   document.getElementById("final").innerHTML = "";
 
+DIAS_VALIDOS = [];
+cursorData = null;
+carregandoDias = false;
 
-function hojeLocal(){
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+document.getElementById("days").innerHTML = "";
+
+carregarDiasLazy();
 }
 
-const hoje = hojeLocal();
-
-  const { data: agenda } = await sb
-    .from("agenda_loja")
-    .select("*")
-    .eq("user_id", lojaId)
-    .gte("data", hoje)
-    .eq("fechado", false);
-
-  DIAS_VALIDOS = [];
-
-  for (const d of agenda) {
-    let blocos;
-
-    try {
-      blocos = typeof d.horarios === "string"
-        ? JSON.parse(d.horarios)
-        : d.horarios;
-    } catch {
-      continue;
-    }
-
-    const { data: ags } = await sb
-      .from("agendamentos")
-      .select("hora_inicio,hora_fim")
-      .eq("user_id", lojaId)
-      .eq("data", d.data);
-
-    const ocupados = ags.map(a => [
-      toMin(a.hora_inicio),
-      toMin(a.hora_fim)
-    ]);
-
-    let livre = false;
-
-    blocos.forEach(b => {
-      let s = toMin(b.inicio);
-      let e = toMin(b.fim);
-
-      while (s + duracao <= e) {
-        if (!ocupados.some(o => !(s + duracao <= o[0] || s >= o[1]))) {
-          livre = true;
-          break;
-        }
-        s += duracao;
-      }
-    });
-
-if (livre) DIAS_VALIDOS.push(d);
-}
-
-// ✅ ORDENA OS DIAS (3, 4, 5, 6...)
-DIAS_VALIDOS.sort((a, b) => {
-  return a.data.localeCompare(b.data);
-});
-
-document.getElementById("days").innerHTML = DIAS_VALIDOS.map((d, i) => `
 
 
-<div class="item" onclick="selecionarDia(${i})">
-  <div style="font-size:18px">${formatarDia(d.data)}</div>
-  <div style="font-size:12px;color:#6b7280;margin-top:4px">
-    ${diaSemana(d.data)}
-  </div>
-</div>
-`).join("");
-}
 
 /* ================= DIA → HORÁRIOS ================= */
 async function selecionarDia(index){
@@ -520,6 +553,12 @@ function irParaAgendamentos(){
   // ajuste a rota se necessário
   window.location.href = "agendamentosclientes.html?l=" + lojaId;
 }
+document.getElementById("days").addEventListener("scroll", e=>{
+  const el = e.target;
+  if(el.scrollLeft + el.clientWidth >= el.scrollWidth - 50){
+    carregarDiasLazy();
+  }
+});
 
 </script>
 
