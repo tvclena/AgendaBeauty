@@ -177,22 +177,25 @@ const { data } = await sb
 
   const container = document.getElementById("services");
 
-  container.innerHTML = data.map(s=>`
-    <div class="service"
-         data-id="${s.id}"
-onclick="selecionarServico(
-  '${s.id}',
-  ${s.duracao_minutos},
-  '${s.nome}',
-  ${Number(s.preco)}
-)"
-      <img src="${s.imagem_url || 'https://via.placeholder.com/400'}">
-      <div class="service-info">
-        <div class="service-name">${s.nome}</div>
-        <div class="service-price">R$ ${s.preco}</div>
-      </div>
+ container.innerHTML = data.map(s=>`
+  <div class="service"
+       data-id="${s.id}"
+       onclick="selecionarServico(
+         '${s.id}',
+         ${s.duracao_minutos},
+         '${s.nome}',
+         ${Number(s.preco)}
+       )">
+       
+    <img src="${s.imagem_url || 'https://via.placeholder.com/400'}">
+
+    <div class="service-info">
+      <div class="service-name">${s.nome}</div>
+      <div class="service-price">R$ ${s.preco}</div>
     </div>
-  `).join("");
+  </div>
+`).join("");
+
 
   // ✅ SE VEIO SERVIÇO PELA URL, JÁ SELECIONA AUTOMATICAMENTE
   if(servicoPreSelecionado){
