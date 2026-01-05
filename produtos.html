@@ -614,48 +614,47 @@ precoPromo.value = i.preco_promocional
  abrirModal();
 }
 
-function abrirModal(){
-  // 🔹 MODO CRIAÇÃO (zera edição)
+
+
+
+
+
+  
+function abrirModalNovo(){
   editId = null;
   formTitle.innerText = "Novo item";
 
-  // 🔹 LIMPA CAMPOS DE TEXTO
   nome.value = "";
   descricao.value = "";
   categoria.value = "";
   obs.value = "";
 
-  // 🔹 ZERA VALORES MONETÁRIOS
   preco.value = "";
   custo.value = "";
   precoPromo.value = "";
 
-  // 🔹 FLAGS – DEFINIÇÕES PADRÃO
   promoAtiva.checked = false;
   precoPromo.disabled = true;
 
-  ativo.checked = true;            // ✅ ativo por padrão
+  ativo.checked = true;
   podeAgendar.checked = false;
   controlaEstoque.checked = false;
 
-  // 🔹 NUMÉRICOS
   duracao.value = "";
   estoqueAtual.value = "";
   estoqueMinimo.value = "";
   ordem.value = "";
 
-  // 🔹 TIPO PADRÃO
   tipo.value = "SERVICO";
   toggleTipo();
 
-  // 🔹 IMAGEM
   preview.style.display = "none";
   preview.src = "";
   blob = null;
 
-  // 🔹 ABRE MODAL
   modal.classList.add("show");
 }
+
 
 
   
