@@ -274,7 +274,7 @@ const inicio = inicioMes.toLocaleDateString("en-CA");
 
   // 📅 Agendamentos hoje (não cancelados)
 const { count: qtdHoje } = await sbHome
-  .from("agenda_loja")
+.from("agendamentos")
   .select("*", { count: "exact", head: true })
   .eq("user_id", lojaId)
   .eq("data", hoje)
