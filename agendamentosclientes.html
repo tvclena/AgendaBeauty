@@ -184,10 +184,25 @@ const lista = document.getElementById("lista");
 const toMin = h => { const [a,b]=h.split(":").map(Number); return a*60+b; }
 const toHour = m => String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
 
-function diaSemana(data){
-  return ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][new Date(data).getDay()];
+function dateLocal(dataISO){
+  const [y,m,d] = dataISO.split("-");
+  return new Date(Number(y), Number(m)-1, Number(d));
 }
-function diaNumero(data){ return new Date(data).getDate(); }
+
+function diaSemana(data){
+  return ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][dateLocal(data).getDay()];
+}
+
+function diaNumero(data){
+  return dateLocal(data).getDate();
+}
+
+function minutosAte(data, hora){
+  const [h,m] = hora.split(":").map(Number);
+  const d = dateLocal(data);
+  d.setHours(h, m, 0, 0);
+  return Math.floor((d - new Date()) / 60000);
+}
 
 /* ================= LOAD ================= */
 async function carregar(){
@@ -205,22 +220,42 @@ async function carregar(){
   const mapa = {};
   servs.forEach(s=>mapa[s.id]=s);
 
-  lista.innerHTML = ags.map(a=>`
+ lista.innerHTML = ags.map(a=>{
+  const mins = minutosAte(a.data, a.hora_inicio);
+  const bloqueado = mins < 40;
+
+  return `
     <div class="card">
       <div class="row">
         <div class="title">${mapa[a.servico_id]?.nome}</div>
-        <div class="badge">${new Date(a.data).toLocaleDateString()}</div>
+        <div class="badge">${dateLocal(a.data).toLocaleDateString()}</div>
       </div>
+
       <div class="info">⏰ ${a.hora_inicio} - ${a.hora_fim}</div>
-      <div class="row">
-        <div class="price">R$ ${mapa[a.servico_id]?.preco}</div>
-      </div>
+
       <div class="actions">
-        <button class="btn-outline" onclick="alterar('${a.id}','${a.servico_id}')">Alterar</button>
-        <button class="btn-danger" onclick="cancelar('${a.id}')">Cancelar</button>
+        <button class="btn-outline"
+          ${bloqueado ? "disabled" : ""}
+          onclick="alterar('${a.id}','${a.servico_id}')">
+          Alterar
+        </button>
+
+        <button class="btn-danger"
+          ${bloqueado ? "disabled" : ""}
+          onclick="cancelar('${a.id}')">
+          Cancelar
+        </button>
       </div>
+
+      ${bloqueado ? `
+        <div class="info" style="color:#ef4444">
+          🔒 Bloqueado (menos de 40 minutos)
+        </div>
+      ` : ""}
     </div>
-  `).join("");
+  `;
+}).join("");
+
 }
 
 /* ================= CANCELAR ================= */
