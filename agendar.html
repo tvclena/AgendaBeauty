@@ -491,9 +491,19 @@ async function selecionarDia(index){
   `).join("");
 }
 
-/* ================= CONFIRMAR ================= */
-/* ================= CONFIRMAR ================= */
 async function confirmar(h){
+
+  const clienteNome  = localStorage.getItem("NOME_CLIENTE");
+  const clienteWhats = localStorage.getItem("WHATS_CLIENTE");
+
+  console.log("DEBUG NOME:", clienteNome);
+  console.log("DEBUG WHATS:", clienteWhats);
+
+  if (!clienteNome || !clienteWhats || clienteNome === "undefined") {
+    alert("❌ Identifique-se antes de agendar.");
+    return;
+  }
+
   const fim = toHour(toMin(h) + duracao);
 
   const { error } = await sb.from("agendamentos").insert({
@@ -504,8 +514,8 @@ async function confirmar(h){
     data: dados.data,
     hora_inicio: h,
     hora_fim: fim,
-    cliente_nome: clienteNome,
-    cliente_whatsapp: clienteWhats
+    cliente_nome: clienteNome.trim(),
+    cliente_whatsapp: clienteWhats.trim()
   });
 
   if(error){
@@ -514,33 +524,31 @@ async function confirmar(h){
     return;
   }
 
+  // ✅ OVERLAY DE CONFIRMAÇÃO (AGORA NO LUGAR CERTO)
   document.body.insertAdjacentHTML("beforeend", `
+    <div class="overlay" id="overlayConfirm">
+      <div class="msg-final">
+        ✅ <strong>Agendamento confirmado!</strong><br><br>
 
-  
-   <div class="overlay" id="overlayConfirm">
-  <div class="msg-final">
-    ✅ <strong>Agendamento confirmado!</strong><br><br>
+        Serviço: <b>${dados.servico_nome}</b><br>
+        Data: <b>${dados.data}</b><br>
+        Horário: <b>${h}</b><br><br>
 
-    Serviço: <b>${dados.servico_nome}</b><br>
-    Data: <b>${dados.data}</b><br>
-    Horário: <b>${h}</b><br><br>
+        ⚠️ Caso precise cancelar ou alterar,<br>
+        acesse o painel <b>Meus Agendamentos</b><br>
+        com no mínimo <b>40 minutos</b> de antecedência.<br><br>
 
-    ⚠️ Caso precise cancelar ou alterar,<br>
-    acesse o painel <b>Meus Agendamentos</b><br>
-    com no mínimo <b>40 minutos</b> de antecedência.<br><br>
+        <div style="display:flex;gap:10px">
+          <button onclick="irParaAgendamentos()" style="flex:1">
+            📋 Meus Agendamentos
+          </button>
 
-    <div style="display:flex;gap:10px">
-      <button onclick="irParaAgendamentos()" style="flex:1">
-        📋 Meus Agendamentos
-      </button>
-
-      <button onclick="fecharOverlay()" style="flex:1">
-        ✖ Fechar
-      </button>
+          <button onclick="fecharOverlay()" style="flex:1">
+            ✖ Fechar
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-
   `);
 }
 
