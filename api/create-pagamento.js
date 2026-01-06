@@ -12,13 +12,25 @@ export default async function handler(req, res) {
   }
 
   try {
+    /* ================= SEGURANÇA BÁSICA ================= */
+    const origin = req.headers.origin || "";
+    if (!origin.includes(process.env.APP_DOMAIN)) {
+      return res.status(403).json({ error: "Origem não autorizada" });
+    }
+
     const { loja_id, cliente, itens } = req.body;
 
-    if (!loja_id || !cliente || !itens?.length) {
+    if (
+      !loja_id ||
+      !cliente?.nome ||
+      !cliente?.whatsapp ||
+      !Array.isArray(itens) ||
+      itens.length === 0
+    ) {
       return res.status(400).json({ error: "Payload inválido" });
     }
 
-    /* 1️⃣ BUSCA TOKEN MP DA LOJA */
+    /* ================= TOKEN MP DA LOJA ================= */
     const { data: cred, error: credErr } = await supabase
       .from("credenciais_pagamento")
       .select("mp_access_token")
@@ -26,25 +38,66 @@ export default async function handler(req, res) {
       .single();
 
     if (credErr || !cred?.mp_access_token) {
-      return res
-        .status(400)
-        .json({ error: "Pagamento online não configurado para esta loja" });
+      return res.status(400).json({
+        error: "Pagamento online não configurado para esta loja"
+      });
     }
 
-    /* 2️⃣ CONFIGURA MERCADO PAGO */
+    /* ================= PRODUTOS REAIS ================= */
+    const produtoIds = itens.map(i => i.id);
+
+    const { data: produtos, error: prodErr } = await supabase
+      .from("produtos_servicos")
+      .select("id, nome, preco")
+      .in("id", produtoIds)
+      .eq("user_id", loja_id)
+      .eq("pg_online", true)
+      .eq("ativo", true);
+
+    if (prodErr || !produtos?.length) {
+      return res.status(400).json({
+        error: "Itens inválidos ou não disponíveis para pagamento online"
+      });
+    }
+
+    /* ================= CALCULA ITENS ================= */
+    const items = produtos.map(p => {
+      const qtd = itens.find(i => i.id === p.id)?.quantidade || 1;
+      return {
+        title: p.nome,
+        quantity: Number(qtd),
+        unit_price: Number(p.preco),
+        currency_id: "BRL"
+      };
+    });
+
+    const valorTotal = items.reduce(
+      (t, i) => t + i.unit_price * i.quantity,
+      0
+    );
+
+    /* ================= CRIA PEDIDO INTERNO ================= */
+    const { data: pedido, error: pedidoErr } = await supabase
+      .from("movimentacoes_pagamento")
+      .insert({
+        loja_id,
+        status: "CRIADO",
+        valor_total: valorTotal,
+        cliente_nome: cliente.nome,
+        cliente_whatsapp: cliente.whatsapp
+      })
+      .select()
+      .single();
+
+    if (pedidoErr) {
+      return res.status(500).json({ error: "Erro ao criar pedido interno" });
+    }
+
+    /* ================= MERCADO PAGO ================= */
     mercadopago.configure({
       access_token: cred.mp_access_token
     });
 
-    /* 3️⃣ MONTA ITENS */
-    const items = itens.map(i => ({
-      title: i.nome,
-      quantity: Number(i.quantidade),
-      unit_price: Number(i.preco),
-      currency_id: "BRL"
-    }));
-
-    /* 4️⃣ CRIA PREFERÊNCIA */
     const preference = {
       items,
       payer: {
@@ -52,40 +105,36 @@ export default async function handler(req, res) {
       },
       metadata: {
         loja_id,
-        cliente_whatsapp: cliente.whatsapp
+        pedido_id: pedido.id
       },
       back_urls: {
-        success: `${req.headers.origin}/sucesso.html`,
-        failure: `${req.headers.origin}/erro.html`,
-        pending: `${req.headers.origin}/pendente.html`
+        success: `${process.env.APP_URL}/sucesso.html`,
+        failure: `${process.env.APP_URL}/erro.html`,
+        pending: `${process.env.APP_URL}/pendente.html`
       },
       auto_return: "approved",
-      notification_url: `${req.headers.origin}/api/webhook-mercadopago`
+      notification_url: `${process.env.APP_URL}/api/webhook-mercadopago`
     };
 
     const response = await mercadopago.preferences.create(preference);
 
-    /* 5️⃣ SALVA MOVIMENTAÇÃO */
-    await supabase.from("movimentacoes_pagamento").insert({
-      loja_id,
-      status: "CRIADO",
-      mp_preference_id: response.body.id,
-      valor_total: itens.reduce(
-        (t, i) => t + i.preco * i.quantidade,
-        0
-      ),
-      cliente_nome: cliente.nome,
-      cliente_whatsapp: cliente.whatsapp,
-      payload: preference
-    });
+    /* ================= ATUALIZA PEDIDO ================= */
+    await supabase
+      .from("movimentacoes_pagamento")
+      .update({
+        mp_preference_id: response.body.id,
+        payload: preference
+      })
+      .eq("id", pedido.id);
 
-    /* 6️⃣ RETORNA LINK */
+    /* ================= RETORNO ================= */
     return res.status(200).json({
-      init_point: response.body.init_point
+      init_point: response.body.init_point,
+      pedido_id: pedido.id
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("CREATE PAGAMENTO ERROR:", err);
     return res.status(500).json({ error: "Erro ao criar pagamento" });
   }
 }
