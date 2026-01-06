@@ -390,10 +390,13 @@ body{
         <label>Duração (minutos)</label>
 <input id="duracao" type="number" inputmode="numeric">
 
-<label>
-  <input type="checkbox" id="pgOnline">
-  Aceita pagamento online
-</label>
+<div id="boxPagamentoOnline" style="display:none">
+  <label>
+    <input type="checkbox" id="pgOnline">
+    Aceita pagamento online
+  </label>
+</div>
+
 
       </div>
 
@@ -457,7 +460,7 @@ const sb=supabase.createClient(
  "https://egxjgmzukjyyxmkukwub.supabase.co",
  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
-
+let pagamentoOnlineAtivo = false;
 let userId,itens=[],editId=null,blob=null;
 const TIPO_LABEL = {
   SERVICO: "SERVIÇO",
@@ -465,33 +468,37 @@ const TIPO_LABEL = {
 };
 
 (async()=>{
- const {data:{session}}=await sb.auth.getSession();
- if(!session) location.href="login.html";
- userId=session.user.id;
- carregar();
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session) location.href="login.html";
+
+  userId = session.user.id;
+
+  // 🔐 VERIFICA SE A LOJA TEM PAGAMENTO ONLINE ATIVO
+  const { data: perfil } = await sb
+    .from("user_profile")
+    .select("pagamento_online_ativo")
+    .eq("user_id", userId)
+    .single();
+
+  pagamentoOnlineAtivo = !!perfil?.pagamento_online_ativo;
+
+  carregar();
 })();
 
 function toggleTipo(){
- const isServico=tipo.value==="SERVICO";
- boxServico.style.display=isServico?"block":"none";
- boxProduto.style.display=isServico?"none":"block";
-}
+  const isServico = tipo.value === "SERVICO";
 
-imagem.onchange=()=>{
- const f=imagem.files[0];
- if(!f) return;
- preview.src=URL.createObjectURL(f);
- preview.style.display="block";
- blob=f;
-};
+  boxServico.style.display = isServico ? "block" : "none";
+  boxProduto.style.display = isServico ? "none" : "block";
 
-promoAtiva.onchange = () => {
-  precoPromo.disabled = !promoAtiva.checked;
-  if(!promoAtiva.checked){
-    precoPromo.value = "";
+  // 🔐 pagamento online só se a loja permitir
+  if(isServico && pagamentoOnlineAtivo){
+    boxPagamentoOnline.style.display = "block";
+  }else{
+    boxPagamentoOnline.style.display = "none";
+    pgOnline.checked = false; // força desligado
   }
-};
-
+}
 
 
 
@@ -536,8 +543,8 @@ preco_promocional: promoAtiva.checked
    
   promocao_ativa:promoAtiva.checked,
   duracao_minutos:tipo.value==="SERVICO"?Number(duracao.value||0):null,
-  pg_online: pgOnline.checked,
-  controla_estoque:controlaEstoque.checked,
+   pg_online: pagamentoOnlineAtivo ? pgOnline.checked : false,
+   controla_estoque:controlaEstoque.checked,
   estoque_atual:Number(estoqueAtual.value||0),
   estoque_minimo:Number(estoqueMinimo.value||0),
   ordem_exibicao:Number(ordem.value||0),
@@ -635,7 +642,7 @@ precoPromo.value = i.preco_promocional
  promoAtiva.checked=i.promocao_ativa;
  precoPromo.disabled = !i.promocao_ativa;
  duracao.value=i.duracao_minutos||"";
- pgOnline.checked = i.pg_online;
+pgOnline.checked = pagamentoOnlineAtivo ? i.pg_online : false;
  controlaEstoque.checked=i.controla_estoque;
  estoqueAtual.value=i.estoque_atual||"";
  estoqueMinimo.value=i.estoque_minimo||"";
