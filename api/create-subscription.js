@@ -10,6 +10,7 @@ mercadopago.configure({
   access_token: process.env.MP_ACCESS_TOKEN_DONO
 })
 
+
 export default async function handler(req, res) {
   try {
     if (req.method !== 'POST') {
