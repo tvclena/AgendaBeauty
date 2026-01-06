@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Agenda Clena • Planos e Assinatura</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --primary:#ff6a00;
+  --primary-dark:#e55d00;
+  --accent:#b8ff65;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --border:#e5e7eb;
+  --radius:22px;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Inter, sans-serif;
+}
+
+body{
+  background:#fff;
+  color:var(--text);
+}
+
+/* ================= HEADER ================= */
+header{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:#fff;
+  border-bottom:1px solid var(--border);
+}
+
+.header{
+  max-width:1200px;
+  margin:auto;
+  padding:16px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:800;
+  color:var(--primary);
+}
+
+nav{
+  display:flex;
+  gap:26px;
+}
+
+nav a{
+  text-decoration:none;
+  color:#111;
+  font-weight:500;
+}
+
+.actions{
+  display:flex;
+  gap:12px;
+}
+
+.btn{
+  padding:12px 22px;
+  border-radius:999px;
+  font-weight:700;
+  border:none;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.btn-primary{
+  background:var(--accent);
+}
+
+.btn-outline{
+  background:#fff;
+  border:1px solid var(--border);
+}
+
+/* ================= HERO ================= */
+.hero{
+  max-width:1200px;
+  margin:auto;
+  padding:90px 20px 70px;
+  text-align:center;
+}
+
+.hero h1{
+  font-size:48px;
+  margin-bottom:18px;
+}
+
+.hero h1 span{
+  color:var(--primary);
+}
+
+.hero p{
+  font-size:18px;
+  color:var(--muted);
+  max-width:760px;
+  margin:0 auto;
+}
+
+/* ================= PLANOS ================= */
+.section{
+  background:var(--bg);
+  padding:90px 20px;
+}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+}
+
+.plans{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+  gap:40px;
+  margin-top:60px;
+  justify-content:center;
+}
+
+.plan{
+  background:var(--card);
+  border-radius:32px;
+  border:1px solid var(--border);
+  padding:44px;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+
+.plan.featured{
+  border:2px solid var(--primary);
+  box-shadow:0 25px 50px rgba(0,0,0,.08);
+  transform:scale(1.03);
+}
+
+.badge{
+  position:absolute;
+  top:-16px;
+  right:28px;
+  background:var(--primary);
+  color:#fff;
+  padding:7px 16px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.3px;
+}
+
+.plan h3{
+  font-size:28px;
+  margin-bottom:8px;
+}
+
+.plan small{
+  color:var(--muted);
+}
+
+.price{
+  margin-top:22px;
+  font-size:46px;
+  font-weight:800;
+  color:var(--primary);
+}
+
+.price span{
+  font-size:16px;
+  font-weight:600;
+  color:var(--muted);
+}
+
+.old-price{
+  margin-top:6px;
+  font-size:14px;
+  color:var(--muted);
+  text-decoration:line-through;
+}
+
+.promo{
+  margin-top:18px;
+  background:#ecfdf5;
+  color:#065f46;
+  padding:14px;
+  border-radius:16px;
+  font-size:14px;
+  line-height:1.4;
+}
+
+.features{
+  margin-top:30px;
+  display:grid;
+  gap:14px;
+  flex:1;
+}
+
+.features li{
+  list-style:none;
+  display:flex;
+  gap:10px;
+  font-size:15px;
+}
+
+.features li::before{
+  content:"✔";
+  color:var(--primary);
+  font-weight:800;
+}
+
+.plan .btn{
+  width:100%;
+  margin-top:34px;
+  font-size:15px;
+}
+
+/* ================= INFO ================= */
+.info{
+  text-align:center;
+  margin-top:60px;
+  color:var(--muted);
+  font-size:14px;
+}
+
+/* ================= CTA ================= */
+.cta{
+  max-width:1200px;
+  margin:110px auto;
+  background:var(--primary);
+  color:#fff;
+  border-radius:38px;
+  padding:80px 40px;
+  text-align:center;
+}
+
+.cta h2{
+  font-size:40px;
+  margin-bottom:14px;
+}
+
+.cta p{
+  font-size:18px;
+}
+
+.cta .btn{
+  background:var(--accent);
+  margin-top:26px;
+}
+
+/* ================= FOOTER ================= */
+footer{
+  border-top:1px solid var(--border);
+  padding:70px 20px;
+}
+
+.footer{
+  max-width:1200px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:40px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:900px){
+  nav,.actions{display:none;}
+  .hero h1{font-size:36px;}
+  .cta h2{font-size:32px;}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header">
+    <div class="logo">AGENDA CLENA</div>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="loja.html">Para Salões</a>
+      <a href="cliente.html">Para Clientes</a>
+      <a href="planos.html">Planos</a>
+    </nav>
+    <div class="actions">
+      <a href="login.html"><button class="btn btn-outline">Entrar</button></a>
+      <a href="cadastro.html"><button class="btn btn-primary">Teste grátis</button></a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Plano único, <span>completo e sem surpresas</span></h1>
+  <p>
+    Assine uma única vez e tenha acesso a todas as funcionalidades
+    para organizar, vender e crescer o seu negócio.
+  </p>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="plans">
+
+      <div class="plan featured">
+        <div class="badge">PROMOÇÃO VITALÍCIA</div>
+
+        <h3>Plano Profissional</h3>
+        <small>Para salões, barbearias, clínicas e studios</small>
+
+        <div class="price">
+          R$ 9,90 <span>/mês</span>
+        </div>
+
+        <div class="old-price">
+          Após a promoção: R$ 32,90/mês
+        </div>
+
+        <div class="promo">
+          🔥 Promoção válida até <strong>06/02/2026</strong><br>
+          Assinando neste período, o valor será <strong>sempre R$ 9,90</strong>,
+          sem reajustes futuros.
+        </div>
+
+        <ul class="features">
+          <li>Criação da loja online personalizada</li>
+          <li>Agendamentos online 24h</li>
+          <li>Controle completo de estoque</li>
+          <li>PDV de vendas integrado</li>
+          <li>Carteira de clientes organizada</li>
+          <li>Programas de fidelização</li>
+          <li>Relatórios e controle financeiro</li>
+          <li>Acesso em computador, tablet e celular</li>
+        </ul>
+
+        <button class="btn btn-primary" onclick="assinarPlano()">
+          Assinar agora
+        </button>
+      </div>
+
+    </div>
+
+    <div class="info">
+      O pagamento é mensal e a renovação ocorre automaticamente
+      a partir da data do último pagamento aprovado.
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>Garanta o valor vitalício agora</h2>
+  <p>
+    Comece hoje por apenas <strong>R$ 9,90</strong> e nunca mais se preocupe
+    com reajustes.
+  </p>
+  <button class="btn" onclick="assinarPlano()">Criar conta e assinar</button>
+</section>
+
+<footer>
+  <div class="footer">
+    <div>
+      <h4>Institucional</h4>
+      <a href="#">Quem somos</a><br>
+      <a href="#">Contato</a><br>
+      <a href="#">Termos</a>
+    </div>
+    <div>
+      <h4>Sistema</h4>
+      <a href="loja.html">Para salões</a><br>
+      <a href="cliente.html">Para clientes</a><br>
+      <a href="planos.html">Planos</a>
+    </div>
+    <div>
+      <h4>Acesso</h4>
+      <a href="login.html">Entrar</a><br>
+      <a href="cadastro.html">Criar conta</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+async function assinarPlano(){
+  // Aqui você já deve ter o usuário logado
+  // Exemplo:
+  // const user = { id: 'USER_ID', email: 'email@cliente.com' }
+
+  if(!window.user){
+    window.location.href = 'cadastro.html'
+    return
+  }
+
+  const res = await fetch('/api/create-subscription', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      user_id: user.id,
+      email: user.email
+    })
+  })
+
+  const data = await res.json()
+
+  if(data.ticket_url){
+    window.location.href = data.ticket_url
+  }else{
+    alert('Erro ao iniciar pagamento')
+  }
+}
+</script>
+
+</body>
+</html>
