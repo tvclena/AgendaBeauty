@@ -43,16 +43,17 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Payload inválido" });
     }
 
-    /* ========== VALIDAÇÃO LOJA ========== */
-    const { data: loja, error: lojaErr } = await supabase
-      .from("user_profile")
-      .select("id")
-      .eq("id", loja_id)
-      .single();
+/* ========== BUSCA LOJA ========== */
+const { data: loja, error: lojaErr } = await supabase
+  .from("lojas")
+  .select("id, user_id")
+  .eq("id", loja_id)
+  .single();
 
-    if (lojaErr || !loja) {
-      return res.status(400).json({ error: "Loja inválida" });
-    }
+if (lojaErr || !loja) {
+  return res.status(400).json({ error: "Loja inválida" });
+}
+
 
     /* ========== CREDENCIAL MP ========== */
     const { data: cred, error: credErr } = await supabase
