@@ -4,10 +4,14 @@
 <meta charset="UTF-8">
 <title>AgendaBeauty • Sistema de Agendamentos Profissional</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport"
+  content="width=device-width,
+  initial-scale=1,
+  maximum-scale=1,
+  viewport-fit=cover">
+
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
 <style>
 :root{
   --primary:#ff6a00;
@@ -139,7 +143,6 @@ nav a{
   justify-content:center;
   font-weight:700;
   color:#9ca3af;
-  height:420px;
 }
 
 /* ================= NUMBERS ================= */
@@ -222,6 +225,10 @@ nav a{
   padding:28px;
 }
 
+.card h3{
+  margin-bottom:10px;
+}
+
 /* TIMELINE */
 .timeline{
   margin-top:50px;
@@ -233,6 +240,28 @@ nav a{
 .step strong{
   color:var(--primary);
   font-size:13px;
+}
+
+/* CTA */
+.cta{
+  max-width:1200px;
+  margin:100px auto;
+  background:var(--primary);
+  color:#fff;
+  border-radius:36px;
+  padding:70px;
+  display:grid;
+  grid-template-columns:1.3fr .7fr;
+}
+
+.cta h2{
+  font-size:40px;
+  margin-bottom:14px;
+}
+
+.cta .btn{
+  background:var(--accent);
+  margin-top:26px;
 }
 
 /* TESTIMONIAL */
@@ -259,28 +288,6 @@ nav a{
   padding:22px;
 }
 
-/* CTA */
-.cta{
-  max-width:1200px;
-  margin:100px auto;
-  background:var(--primary);
-  color:#fff;
-  border-radius:36px;
-  padding:70px;
-  display:grid;
-  grid-template-columns:1.3fr .7fr;
-}
-
-.cta h2{
-  font-size:40px;
-  margin-bottom:14px;
-}
-
-.cta .btn{
-  background:var(--accent);
-  margin-top:26px;
-}
-
 /* FOOTER */
 footer{
   border-top:1px solid var(--border);
@@ -297,14 +304,39 @@ footer{
 
 /* ================= RESPONSIVE ================= */
 @media(max-width:900px){
-  nav,.actions{ display:none; }
-  .menu-btn{ display:block; }
-  .hero{ grid-template-columns:1fr; padding-top:60px; }
-  .hero h1{ font-size:38px; }
-  .hero-box{ height:260px; }
-  .video-box iframe{ height:300px; }
-  .cta{ grid-template-columns:1fr; padding:50px; }
-  .cta h2{ font-size:32px; }
+  nav,.actions{
+    display:none;
+  }
+
+  .menu-btn{
+    display:block;
+  }
+
+  .hero{
+    grid-template-columns:1fr;
+    padding-top:60px;
+  }
+
+  .hero h1{
+    font-size:38px;
+  }
+
+  .hero-box{
+    height:240px;
+  }
+
+  .video-box iframe{
+    height:300px;
+  }
+
+  .cta{
+    grid-template-columns:1fr;
+    padding:50px;
+  }
+
+  .cta h2{
+    font-size:32px;
+  }
 }
 </style>
 </head>
@@ -331,7 +363,10 @@ footer{
 <section class="hero">
   <div>
     <h1>Gestão completa para <span>salões de beleza</span></h1>
-    <p>Sistema profissional para agendamentos online, clientes, profissionais e crescimento do seu negócio.</p>
+    <p>
+      Um sistema profissional para agendamentos online, organização de profissionais,
+      controle de clientes e crescimento do seu negócio.
+    </p>
     <div class="hero-actions">
       <a href="cadastro.html"><button class="btn btn-primary">Criar conta grátis</button></a>
       <a href="login.html"><button class="btn btn-outline">Sou cliente</button></a>
@@ -345,14 +380,14 @@ footer{
     <div class="number"><strong>+40 mil</strong><span>negócios atendidos</span></div>
     <div class="number"><strong>+1M</strong><span>agendamentos mensais</span></div>
     <div class="number"><strong>99%</strong><span>satisfação</span></div>
-    <div class="number"><strong>24h</strong><span>agenda online</span></div>
+    <div class="number"><strong>24h</strong><span>agendamento online</span></div>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <h2>Veja o sistema funcionando</h2>
-    <p class="lead">Agenda, clientes, profissionais e loja integrados.</p>
+    <h2>Conheça o sistema de agendamentos e loja integrada da Clena</h2>
+    <p class="lead">Veja como funciona na prática.</p>
     <div class="video-box">
       <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
     </div>
@@ -361,33 +396,12 @@ footer{
 
 <section class="section bg">
   <div class="container">
-    <h2>Como funciona</h2>
-    <div class="timeline">
-      <div class="step"><strong>PASSO 1</strong><p>Crie sua conta</p></div>
-      <div class="step"><strong>PASSO 2</strong><p>Cadastre serviços</p></div>
-      <div class="step"><strong>PASSO 3</strong><p>Receba agendamentos</p></div>
-      <div class="step"><strong>PASSO 4</strong><p>Cresça seu salão</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="container">
-    <h2>O que dizem nossos clientes</h2>
-    <div class="testimonial">
-      <p>“Organizamos todo nosso salão e aumentamos os agendamentos em poucas semanas.”</p>
-      <strong>— Salão Bella Mulher</strong>
-    </div>
-  </div>
-</section>
-
-<section class="section bg">
-  <div class="container">
-    <h2>Dúvidas frequentes</h2>
-    <div class="faq">
-      <div class="faq-item"><strong>Tem taxa?</strong><p>Não. Teste grátis.</p></div>
-      <div class="faq-item"><strong>Clientes precisam pagar?</strong><p>Não.</p></div>
-      <div class="faq-item"><strong>Funciona no celular?</strong><p>Sim, 100% responsivo.</p></div>
+    <h2>Para quem é</h2>
+    <div class="grid">
+      <div class="card"><h3>Salões</h3><p>Gestão completa da agenda.</p></div>
+      <div class="card"><h3>Barbearias</h3><p>Agendamentos rápidos.</p></div>
+      <div class="card"><h3>Clínicas</h3><p>Controle profissional.</p></div>
+      <div class="card"><h3>Studios</h3><p>Profissionalismo total.</p></div>
     </div>
   </div>
 </section>
@@ -395,7 +409,7 @@ footer{
 <section class="cta">
   <div>
     <h2>Seu salão mais organizado</h2>
-    <p>Comece hoje e transforme sua gestão.</p>
+    <p>Automatize processos e cresça.</p>
     <a href="cadastro.html"><button class="btn">Começar agora</button></a>
   </div>
 </section>
@@ -404,19 +418,19 @@ footer{
   <div class="footer">
     <div>
       <h4>Institucional</h4>
-      <a href="#">Quem somos</a><br>
-      <a href="#">Contato</a><br>
+      <a href="#">Quem somos</a>
+      <a href="#">Contato</a>
       <a href="#">Termos</a>
     </div>
     <div>
       <h4>Sistema</h4>
-      <a href="loja.html">Para salões</a><br>
-      <a href="cliente.html">Para clientes</a><br>
+      <a href="loja.html">Para salões</a>
+      <a href="cliente.html">Para clientes</a>
       <a href="planos.html">Planos</a>
     </div>
     <div>
       <h4>Acesso</h4>
-      <a href="login.html">Entrar</a><br>
+      <a href="login.html">Entrar</a>
       <a href="cadastro.html">Criar conta</a>
     </div>
   </div>
