@@ -187,10 +187,7 @@ const lojaId = new URLSearchParams(location.search).get("l");
 const servicoPreSelecionado =
   new URLSearchParams(location.search).get("servico");
 
-  
-/* CLIENTE JÁ IDENTIFICADO */
-const clienteNome  = localStorage.getItem("NOME_CLIENTE");
-const clienteWhats = localStorage.getItem("WHATS_CLIENTE");
+;
 
 let duracao = 0;
 let dados = {};
@@ -493,14 +490,10 @@ async function selecionarDia(index){
 
 async function confirmar(h){
 
-  const clienteNome  = localStorage.getItem("NOME_CLIENTE");
-  const clienteWhats = localStorage.getItem("WHATS_CLIENTE");
+  const cliente = getCliente();
 
-  console.log("DEBUG NOME:", clienteNome);
-  console.log("DEBUG WHATS:", clienteWhats);
-
-  if (!clienteNome || !clienteWhats || clienteNome === "undefined") {
-    alert("❌ Identifique-se antes de agendar.");
+  if(!cliente){
+    abrirModal();
     return;
   }
 
@@ -514,8 +507,8 @@ async function confirmar(h){
     data: dados.data,
     hora_inicio: h,
     hora_fim: fim,
-    cliente_nome: clienteNome.trim(),
-    cliente_whatsapp: clienteWhats.trim()
+    cliente_nome: cliente.nome,
+    cliente_whatsapp: cliente.whatsapp
   });
 
   if(error){
@@ -524,7 +517,6 @@ async function confirmar(h){
     return;
   }
 
-  // ✅ OVERLAY DE CONFIRMAÇÃO (AGORA NO LUGAR CERTO)
   document.body.insertAdjacentHTML("beforeend", `
     <div class="overlay" id="overlayConfirm">
       <div class="msg-final">
@@ -534,15 +526,10 @@ async function confirmar(h){
         Data: <b>${dados.data}</b><br>
         Horário: <b>${h}</b><br><br>
 
-        ⚠️ Caso precise cancelar ou alterar,<br>
-        acesse o painel <b>Meus Agendamentos</b><br>
-        com no mínimo <b>40 minutos</b> de antecedência.<br><br>
-
         <div style="display:flex;gap:10px">
           <button onclick="irParaAgendamentos()" style="flex:1">
             📋 Meus Agendamentos
           </button>
-
           <button onclick="fecharOverlay()" style="flex:1">
             ✖ Fechar
           </button>
@@ -568,8 +555,101 @@ document.getElementById("days").addEventListener("scroll", e=>{
     carregarDiasLazy();
   }
 });
+function getCliente(){
+  try{
+    const raw = localStorage.getItem("CLIENTE_LOJA");
+    if(!raw) return null;
+    const c = JSON.parse(raw);
+    if(!c?.nome || !c?.whatsapp) return null;
+    return c;
+  }catch{
+    return null;
+  }
+}
+
+
+function clienteValido(){
+  const c = getCliente();
+  return c?.nome && c?.whatsapp;
+}
+
+function abrirModal(){
+  const modal = document.getElementById("clienteModal");
+  if(!modal.classList.contains("hidden")) return;
+
+  const cliente = getCliente();
+  if(cliente){
+    cliNome.value = cliente.nome || "";
+    cliWhats.value = cliente.whatsapp || "";
+    cliEmail.value = cliente.email || "";
+  }
+
+  modal.classList.remove("hidden");
+}
+
+
+function fecharModal(){
+  if(!clienteValido()) return;
+  document.getElementById("clienteModal").classList.add("hidden");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const whatsInput = document.getElementById("cliWhats");
+  if(!whatsInput) return;
+
+  whatsInput.addEventListener("input", () => {
+    let v = whatsInput.value.replace(/\D/g,"").slice(0,11);
+    if(v.length > 6)
+      v = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
+    else if(v.length > 2)
+      v = `(${v.slice(0,2)}) ${v.slice(2)}`;
+    whatsInput.value = v;
+  });
+});
+
+
+function salvarCliente(){
+  const nome = cliNome.value.trim().toUpperCase();
+  const whats = cliWhats.value.replace(/\D/g,"");
+  const email = cliEmail.value.trim() || null;
+
+  if(nome.length < 3 || whats.length < 10){
+    alert("Informe nome completo e WhatsApp válido");
+    return;
+  }
+
+  localStorage.setItem("CLIENTE_LOJA", JSON.stringify({
+    nome,
+    whatsapp: whats,
+    email
+  }));
+
+  fecharModal();
+}
+if(!clienteValido()){
+  abrirModal();
+}
 
 </script>
+<!-- MODAL CLIENTE -->
+<div id="clienteModal" class="hidden">
+  <div class="overlay" onclick="fecharModal()"></div>
+
+  <div class="msg-final" style="max-width:380px">
+    <h2 style="margin-bottom:6px">Seus dados</h2>
+    <p style="color:#6b7280;margin-bottom:10px">
+      Precisamos dessas informações para confirmar seu agendamento
+    </p>
+
+    <input id="cliNome" placeholder="NOME COMPLETO" style="text-transform:uppercase;width:100%;margin-bottom:10px">
+    <input id="cliWhats" placeholder="WHATSAPP" inputmode="numeric" style="width:100%;margin-bottom:10px">
+    <input id="cliEmail" placeholder="E-MAIL (opcional)" style="width:100%;margin-bottom:12px">
+
+    <button onclick="salvarCliente()" style="width:100%">
+      Salvar e continuar
+    </button>
+  </div>
+</div>
 
 </body>
 </html>
