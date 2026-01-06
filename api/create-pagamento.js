@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import MercadoPago from "mercadopago";
+import crypto from "crypto";
 
 /* ================= SUPABASE ================= */
 const supabase = createClient(
@@ -24,13 +25,15 @@ export default async function handler(req, res) {
   }
 
   try {
-    /* ========== BODY ========== */
-    const body = typeof req.body === "string"
-      ? JSON.parse(req.body)
-      : req.body;
+    /* ========== BODY SAFE ========== */
+    const body =
+      typeof req.body === "string"
+        ? JSON.parse(req.body)
+        : req.body;
 
     const { loja_id, cliente, itens } = body;
 
+    /* ========== VALIDAÇÃO PAYLOAD ========== */
     if (
       !loja_id ||
       !cliente?.nome ||
@@ -52,7 +55,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Loja inválida" });
     }
 
-    /* ========== CREDENCIAL MP ========== */
+    /* ========== CREDENCIAL MERCADO PAGO ========== */
     const { data: cred, error: credErr } = await supabase
       .from("lojas_pagamento_credenciais")
       .select("mp_access_token")
@@ -69,7 +72,7 @@ export default async function handler(req, res) {
     /* ========== PRODUTOS ========== */
     const produtoIds = itens.map(i => i.id);
 
-    const { data: produtos } = await supabase
+    const { data: produtos, error: prodErr } = await supabase
       .from("produtos_servicos")
       .select("id, nome, preco")
       .in("id", produtoIds)
@@ -77,18 +80,18 @@ export default async function handler(req, res) {
       .eq("pg_online", true)
       .eq("ativo", true);
 
-    if (!produtos || produtos.length !== itens.length) {
+    if (prodErr || !produtos || produtos.length !== itens.length) {
       return res.status(400).json({ error: "Itens inválidos" });
     }
 
-    /* ========== ITENS MP ========== */
+    /* ========== ITENS MERCADO PAGO ========== */
     const mpItems = produtos.map(p => {
       const carrinho = itens.find(i => i.id === p.id);
       const quantidade = Number(carrinho?.quantidade || 1);
       const preco = Number(String(p.preco).replace(",", "."));
 
       if (preco <= 0 || quantidade <= 0) {
-        throw new Error("Preço inválido");
+        throw new Error("Preço ou quantidade inválidos");
       }
 
       return {
@@ -104,34 +107,41 @@ export default async function handler(req, res) {
       0
     );
 
-    /* ========== INSERT SIMPLES (IGUAL AO PROJETO BOM) ========== */
-    const { data: pedido, error: pedidoErr } = await supabase
+    /* ========== REFERÊNCIA ÚNICA (IGUAL AO PROJETO BOM) ========== */
+    const referencia = crypto.randomUUID();
+
+    /* ========== INSERT SIMPLES (SEM SELECT) ========== */
+    const { error: insertErr } = await supabase
       .from("movimentacoes_pagamento")
       .insert({
+        referencia,
         user_id: loja.user_id,
-        loja_id: loja.user_id,
         status: "CRIADO",
         valor: valorTotal,
         cliente_nome: cliente.nome,
         cliente_whatsapp: cliente.whatsapp
-      })
-      .select("id")
-      .single();
+      });
 
-    if (pedidoErr) {
-      console.error(pedidoErr);
-      throw new Error("Falha ao criar pedido");
+    if (insertErr) {
+      console.error(insertErr);
+      throw new Error("Erro ao criar pedido");
     }
 
     /* ========== MERCADO PAGO ========== */
+    if (!process.env.APP_URL) {
+      throw new Error("APP_URL não configurada");
+    }
+
     const mp = new MercadoPago({
       accessToken: cred.mp_access_token
     });
 
     const mpRes = await mp.preferences.create({
       items: mpItems,
-      payer: { name: cliente.nome },
-      external_reference: pedido.id,
+      payer: {
+        name: cliente.nome
+      },
+      external_reference: referencia,
       back_urls: {
         success: `${process.env.APP_URL}/sucesso.html`,
         failure: `${process.env.APP_URL}/erro.html`,
@@ -145,16 +155,19 @@ export default async function handler(req, res) {
     const initPoint = mpRes?.body?.init_point;
 
     if (!prefId || !initPoint) {
-      throw new Error("Erro Mercado Pago");
+      throw new Error("Erro ao gerar checkout Mercado Pago");
     }
 
-    /* ========== UPDATE ========== */
+    /* ========== UPDATE PELO CAMPO REFERÊNCIA ========== */
     await supabase
       .from("movimentacoes_pagamento")
       .update({ mp_preference_id: prefId })
-      .eq("id", pedido.id);
+      .eq("referencia", referencia);
 
-    return res.json({ init_point: initPoint });
+    /* ========== SUCESSO ========== */
+    return res.status(200).json({
+      init_point: initPoint
+    });
 
   } catch (err) {
     console.error("❌ CREATE PAGAMENTO:", err);
