@@ -43,25 +43,24 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Payload inválido" });
     }
 
-/* ========== BUSCA LOJA ========== */
-const { data: loja, error: lojaErr } = await supabase
-  .from("lojas")
-  .select("id, user_id")
-  .eq("id", loja_id)
-  .single();
+    /* ========== BUSCA LOJA (ID DA URL) ========== */
+    const { data: loja, error: lojaErr } = await supabase
+      .from("lojas")
+      .select("id, user_id")
+      .eq("id", loja_id)
+      .single();
 
-if (lojaErr || !loja) {
-  return res.status(400).json({ error: "Loja inválida" });
-}
+    if (lojaErr || !loja) {
+      return res.status(400).json({ error: "Loja inválida" });
+    }
 
-
-    /* ========== CREDENCIAL MP ========== */
-const { data: cred, error: credErr } = await supabase
-  .from("lojas_pagamento_credenciais")
-  .select("mp_access_token")
-.eq("user_id", loja.user_id)
-  .eq("ativo", true)
-  .single();
+    /* ========== CREDENCIAL MERCADO PAGO (DONO) ========== */
+    const { data: cred, error: credErr } = await supabase
+      .from("lojas_pagamento_credenciais")
+      .select("mp_access_token")
+      .eq("user_id", loja.user_id)
+      .eq("ativo", true)
+      .single();
 
     if (credErr || !cred?.mp_access_token) {
       return res.status(400).json({
@@ -69,25 +68,23 @@ const { data: cred, error: credErr } = await supabase
       });
     }
 
-    /* ========== PRODUTOS ========== */
+    /* ========== PRODUTOS (DO DONO DA LOJA) ========== */
     const produtoIds = itens.map(i => i.id);
 
-const { data: produtos, error: prodErr } = await supabase
-  .from("produtos_servicos")
-  .select("id, nome, preco")
-  .in("id", produtoIds)
-  .eq("user_id", loja.user_id) // ✔ DONO DA LOJA
-  .eq("pg_online", true)
-  .eq("ativo", true);
+    const { data: produtos, error: prodErr } = await supabase
+      .from("produtos_servicos")
+      .select("id, nome, preco")
+      .in("id", produtoIds)
+      .eq("user_id", loja.user_id)
+      .eq("pg_online", true)
+      .eq("ativo", true);
 
-
-    if (prodErr || !produtos?.length) {
+    if (prodErr || !produtos || produtos.length === 0) {
       return res.status(400).json({
         error: "Itens inválidos para pagamento online"
       });
     }
 
-    /* ❗ GARANTE QUE TODOS OS ITENS EXISTEM */
     if (produtos.length !== itens.length) {
       return res.status(400).json({
         error: "Um ou mais itens não são válidos"
@@ -124,20 +121,19 @@ const { data: produtos, error: prodErr } = await supabase
       0
     );
 
-/* ========== CRIA PEDIDO ========== */
-const { data: pedido, error: pedidoErr } = await supabase
-  .from("movimentacoes_pagamento")
-  .insert({
-    loja_id: loja.id,          // ID da loja pública
-    user_id: loja.user_id,     // DONO DA LOJA (ESSENCIAL)
-    status: "CRIADO",
-    valor_total: valorTotal,
-    cliente_nome: cliente.nome,
-    cliente_whatsapp: cliente.whatsapp
-  })
-  .select()
-  .single();
-;
+    /* ========== CRIA PEDIDO ========== */
+    const { data: pedido, error: pedidoErr } = await supabase
+      .from("movimentacoes_pagamento")
+      .insert({
+        loja_id: loja.id,
+        user_id: loja.user_id,
+        status: "CRIADO",
+        valor_total: valorTotal,
+        cliente_nome: cliente.nome,
+        cliente_whatsapp: cliente.whatsapp
+      })
+      .select()
+      .single();
 
     if (pedidoErr || !pedido) {
       throw new Error("Erro ao criar pedido");
@@ -154,7 +150,7 @@ const { data: pedido, error: pedidoErr } = await supabase
         name: cliente.nome
       },
       metadata: {
-        loja_id,
+        loja_id: loja.id,
         pedido_id: pedido.id
       },
       back_urls: {
@@ -170,13 +166,13 @@ const { data: pedido, error: pedidoErr } = await supabase
     await supabase
       .from("movimentacoes_pagamento")
       .update({
-        mp_preference_id: response.id
+        mp_preference_id: response.body.id
       })
       .eq("id", pedido.id);
 
-    /* ========== RETORNO ========== */
+    /* ========== RETORNO FINAL ========== */
     return res.status(200).json({
-      init_point: response.init_point
+      init_point: response.body.init_point
     });
 
   } catch (err) {
