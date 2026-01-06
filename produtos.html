@@ -390,9 +390,11 @@ body{
         <label>Duração (minutos)</label>
 <input id="duracao" type="number" inputmode="numeric">
 
-        <label>
-          <input type="checkbox" id="podeAgendar"> Pode agendar
-        </label>
+<label>
+  <input type="checkbox" id="pgOnline">
+  Aceita pagamento online
+</label>
+
       </div>
 
       <!-- PRODUTO -->
@@ -534,7 +536,7 @@ preco_promocional: promoAtiva.checked
    
   promocao_ativa:promoAtiva.checked,
   duracao_minutos:tipo.value==="SERVICO"?Number(duracao.value||0):null,
-  pode_agendar:podeAgendar.checked,
+  pg_online: pgOnline.checked,
   controla_estoque:controlaEstoque.checked,
   estoque_atual:Number(estoqueAtual.value||0),
   estoque_minimo:Number(estoqueMinimo.value||0),
@@ -575,23 +577,25 @@ function render(){
   if(filtroTipo.value && i.tipo!==filtroTipo.value) return false;
   return true;
  }).forEach(i=>{
-  lista.innerHTML+=`
-   <div class="item">
-    ${i.imagem_url?`<img src="${i.imagem_url}">`:""}
-    <div class="item-body">
-     <h4>${i.nome}</h4>
+ lista.innerHTML+=`
+ <div class="item">
+  ${i.imagem_url?`<img src="${i.imagem_url}">`:""}
+  <div class="item-body">
+   <h4>${i.nome}</h4>
 
+   <div class="badge ${i.tipo === "SERVICO" ? "servico" : "produto"}">
+     ${TIPO_LABEL[i.tipo] || i.tipo}
+   </div>
 
+   ${i.pg_online ? `<span class="badge promo">💳 Pagamento online</span>` : ""}
 
-     
-<div class="badge ${i.tipo === "SERVICO" ? "servico" : "produto"}">
-  ${TIPO_LABEL[i.tipo] || i.tipo}
-</div>
+   <span class="price">
+     R$ ${Number(i.preco).toFixed(2).replace('.',',')}
+   </span>
 
-     <span class="price">R$ ${Number(i.preco).toFixed(2).replace('.',',')}</span>
-     <div class="actions" onclick="editar('${i.id}')">Editar</div>
-    </div>
-   </div>`;
+   <div class="actions" onclick="editar('${i.id}')">Editar</div>
+  </div>
+ </div>`;
  });
 }
 
@@ -631,7 +635,7 @@ precoPromo.value = i.preco_promocional
  promoAtiva.checked=i.promocao_ativa;
  precoPromo.disabled = !i.promocao_ativa;
  duracao.value=i.duracao_minutos||"";
- podeAgendar.checked=i.pode_agendar;
+ pgOnline.checked = i.pg_online;
  controlaEstoque.checked=i.controla_estoque;
  estoqueAtual.value=i.estoque_atual||"";
  estoqueMinimo.value=i.estoque_minimo||"";
@@ -666,7 +670,7 @@ function abrirModalNovo(){
   precoPromo.disabled = true;
 
   ativo.checked = true;
-  podeAgendar.checked = false;
+  pgOnline.checked = false;
   controlaEstoque.checked = false;
 
   duracao.value = "";
