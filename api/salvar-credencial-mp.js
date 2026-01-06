@@ -14,39 +14,23 @@ export default async function handler(req, res) {
     const { loja_id, mp_access_token } = req.body;
 
     if (!loja_id || !mp_access_token) {
-      return res.status(400).json({ error: "Dados incompletos" });
+      return res.status(400).json({ error: "Payload inválido" });
     }
 
-    /* 🔐 valida token MP produção */
     if (!mp_access_token.startsWith("APP_USR-")) {
-      return res.status(400).json({
-        error: "Use apenas Access Token de PRODUÇÃO"
-      });
+      return res.status(400).json({ error: "Token Mercado Pago inválido" });
     }
 
-    /* ❌ bloqueia duplicidade */
-    const { data: existente } = await supabase
-      .from("lojas_pagamento_credenciais")
-      .select("id")
-      .eq("user_id", loja_id)
-      .single();
-
-    if (existente) {
-      return res.status(409).json({
-        error: "Esta loja já possui integração ativa"
-      });
-    }
-
-    /* 1️⃣ salva credencial */
+    /* 1️⃣ SALVA OU ATUALIZA CREDENCIAL */
     await supabase
       .from("lojas_pagamento_credenciais")
-      .insert({
+      .upsert({
         user_id: loja_id,
         mp_access_token,
         ativo: true
       });
 
-    /* 2️⃣ ativa flag da loja */
+    /* 2️⃣ ATIVA FLAG DA LOJA */
     await supabase
       .from("user_profile")
       .update({ pagamento_online_ativo: true })
@@ -55,7 +39,9 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true });
 
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Erro ao salvar credencial" });
+    console.error("ERRO SALVAR MP:", err);
+    return res.status(500).json({
+      error: "Erro interno ao salvar credencial"
+    });
   }
 }
