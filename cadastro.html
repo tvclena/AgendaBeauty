@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <title>Cadastrar negócio • Agenda Fácil</title>
 
+  
+  
 <meta name="viewport"
   content="width=device-width,
   initial-scale=1,
@@ -23,7 +25,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* === TODO O SEU CSS ORIGINAL (INALTERADO) === */
 :root{
   --primary:#ff6a00;
   --border:#e5e7eb;
@@ -32,7 +33,13 @@
   --muted:#6b7280;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter;-webkit-tap-highlight-color:transparent}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Inter;
+  -webkit-tap-highlight-color:transparent;
+}
 
 body{
   min-height:100vh;
@@ -41,7 +48,7 @@ body{
   background:#000;
 }
 
-/* FUNDO */
+/* ===== FUNDO COM FOTO ===== */
 .left{
   background:url("https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&w=1600&q=80")
   center/cover no-repeat;
@@ -52,12 +59,26 @@ body{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(120deg,rgba(0,0,0,.75),rgba(0,0,0,.35));
+  background:linear-gradient(
+    120deg,
+    rgba(0,0,0,.75),
+    rgba(0,0,0,.35)
+  );
 }
-.left div{position:relative;z-index:2;padding:80px}
+.left div{
+  position:relative;
+  z-index:2;
+  padding:80px;
+}
 .left span{color:var(--primary)}
 
-.right{display:flex;align-items:center;justify-content:center;background:#fff}
+/* ===== ÁREA DO CARD ===== */
+.right{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+}
 
 .card{
   width:100%;
@@ -68,6 +89,21 @@ body{
   box-shadow:0 20px 60px rgba(0,0,0,.08);
 }
 
+.card small{
+  color:var(--primary);
+  font-weight:600;
+}
+
+.card h2{
+  margin:10px 0 6px;
+}
+
+.card p{
+  color:var(--muted);
+  margin-bottom:18px;
+}
+
+/* ===== FORM ===== */
 input,select{
   width:100%;
   padding:14px;
@@ -78,7 +114,10 @@ input,select{
   text-transform:uppercase;
 }
 
-input[type="email"],input[type="password"]{text-transform:none}
+input[type="email"],
+input[type="password"]{
+  text-transform:none;
+}
 
 button{
   width:100%;
@@ -92,6 +131,7 @@ button{
   cursor:pointer;
 }
 
+/* ===== ERROS ===== */
 .error{
   background:#ffe5e5;
   color:var(--danger);
@@ -102,7 +142,8 @@ button{
   display:none;
 }
 
-#overlay,#modal{
+/* ===== OVERLAY / MODAIS ===== */
+#overlay,#modal,#iosModal{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.55);
@@ -120,36 +161,117 @@ button{
   max-width:360px;
 }
 
-@media (max-width:900px){
-  body{grid-template-columns:1fr;overflow:hidden}
-  .left{position:fixed;inset:0;filter:blur(7px);transform:scale(1.08)}
-  .left div{display:none}
-  .right{position:relative;z-index:2;min-height:100vh;padding:24px 14px}
-  .card{padding:28px 22px 30px;border-radius:28px}
+.modal-box h3{
+  margin-bottom:8px;
+}
+
+.modal-box p{
+  color:var(--muted);
+  font-size:14px;
+  margin-bottom:16px;
+}
+
+.modal-box button{
+  margin-top:10px;
+}
+
+.secondary{
+  background:#e5e7eb;
+  color:#111;
+}
+
+/* ========================= */
+/* 📱 MOBILE FIRST (CELULAR) */
+/* ========================= */
+@media (max-width: 900px){
+
+  body{
+    grid-template-columns:1fr;
+    overflow:hidden;
+  }
+
+  .left{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    filter:blur(7px);
+    transform:scale(1.08);
+  }
+
+  .left::after{
+    background:rgba(0,0,0,.55);
+  }
+
+  .left div{
+    display:none;
+  }
+
+  .right{
+    position:relative;
+    z-index:2;
+    min-height:100vh;
+    padding:24px 14px env(safe-area-inset-bottom);
+    align-items:flex-end;
+    background:transparent;
+  }
+
+  .card{
+    width:100%;
+    max-width:520px;
+    padding:28px 22px 30px;
+    border-radius:28px;
+    box-shadow:
+      0 30px 80px rgba(0,0,0,.25),
+      0 10px 30px rgba(0,0,0,.12);
+    animation:slideUp .4s ease;
+  }
+}
+
+/* ANIMAÇÃO */
+@keyframes slideUp{
+  from{
+    transform:translateY(40px);
+    opacity:0;
+  }
+  to{
+    transform:translateY(0);
+    opacity:1;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div id="overlay"><div class="modal-box">Salvando cadastro…</div></div>
+<!-- OVERLAY -->
+<div id="overlay">
+  <div class="modal-box">Salvando cadastro…</div>
+</div>
 
+<!-- MODAL SUCESSO -->
 <div id="modal">
   <div class="modal-box">
     <h3>Cadastro realizado 🎉</h3>
-    <p id="modalText">Agora você pode acessar o sistema.</p>
-    <button onclick="continuar()">Continuar</button>
+    <p>Agora você pode instalar o Agenda Fácil como app.</p>
+    <button class="secondary" onclick="irLogin()">Ir para login</button>
   </div>
 </div>
 
-<div class="left"><div>
-  <h1>Crie seu salão<br><span>digital</span></h1>
-  <p style="margin-top:12px">Agenda, clientes e controle em um só lugar.</p>
-</div></div>
+<!-- FUNDO -->
+<div class="left">
+  <div>
+    <h1>Crie seu salão<br><span>digital</span></h1>
+    <p style="margin-top:12px">
+      Agenda, clientes e controle em um só lugar.
+    </p>
+  </div>
+</div>
 
+<!-- CARD -->
 <div class="right">
   <div class="card">
 
+    <small>Acesso à plataforma</small>
     <h2>Cadastrar negócio</h2>
     <p>Leva menos de 1 minuto</p>
 
@@ -186,9 +308,6 @@ const sb = supabase.createClient(
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-const params = new URLSearchParams(window.location.search);
-const veioDoPlano = params.get("from") === "planos";
-
 async function cadastrar(e){
   e.preventDefault();
   overlay.style.display = "flex";
@@ -197,8 +316,9 @@ async function cadastrar(e){
   const emailValue = email.value.trim().toLowerCase();
   const senhaValue = senha.value.trim();
 
+  /* 1️⃣ CRIA USUÁRIO (AUTH) */
   const { data, error } = await sb.auth.signUp({
-    email: emailValue,
+email: emailValue,
     password: senhaValue
   });
 
@@ -211,44 +331,44 @@ async function cadastrar(e){
 
   const userId = data.user.id;
 
-  const { error: erroPerfil } = await sb.from("user_profile").insert({
-    user_id: userId,
-    responsavel: responsavel.value.trim(),
-    whatsapp: whatsapp.value.replace(/\D/g,''),
-    negocio: negocio.value.trim(),
-    tipo: tipo.value,
-    cidade: cidade.value.trim(),
-    uf: uf.value.trim().toUpperCase(),
-    email_contato: emailValue
-  });
+  /* 2️⃣ CRIA PERFIL */
+  const { error: erroPerfil } = await sb
+    .from("user_profile")
+    .insert({
+      user_id: userId,
+      responsavel: responsavel.value.trim(),
+      whatsapp: whatsapp.value.replace(/\D/g,''),
+      negocio: negocio.value.trim(),
+      tipo: tipo.value,
+      cidade: cidade.value.trim(),
+      uf: uf.value.trim().toUpperCase(),
+      email_contato: emailValue
+    });
 
   overlay.style.display = "none";
 
   if(erroPerfil){
     errorBox.style.display = "block";
     errorBox.innerText = "Conta criada, mas erro ao salvar o perfil.";
+    console.error(erroPerfil);
     return;
   }
 
+  /* 3️⃣ SUCESSO */
   modal.style.display = "flex";
-  modalText.innerText = veioDoPlano
-    ? "Cadastro concluído. Vamos finalizar sua assinatura."
-    : "Cadastro concluído com sucesso.";
 }
 
-function continuar(){
-  if(veioDoPlano){
-    window.location.href = "planos.html?autoAssinar=1";
-  }else{
-    window.location.href = "login.html";
-  }
+function irLogin(){
+  location.href = "login.html";
 }
 </script>
-
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/clena/sw.js");
+    navigator.serviceWorker
+      .register("/clena/sw.js")
+      .then(reg => console.log("PWA ativo:", reg.scope))
+      .catch(err => console.error("Erro PWA:", err));
   });
 }
 </script>
