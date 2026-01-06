@@ -308,6 +308,15 @@ const sb = supabase.createClient(
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
 async function cadastrar(e){
   e.preventDefault();
   overlay.style.display = "flex";
@@ -318,7 +327,7 @@ async function cadastrar(e){
 
   /* 1️⃣ CRIA USUÁRIO (AUTH) */
   const { data, error } = await sb.auth.signUp({
-email: emailValue,
+    email: emailValue,
     password: senhaValue
   });
 
@@ -331,10 +340,12 @@ email: emailValue,
 
   const userId = data.user.id;
 
-  /* 2️⃣ CRIA PERFIL */
+  /* 2️⃣ CRIA PERFIL (UPSERT + SLUG ÚNICO) */
+  const slug = `${slugify(negocio.value)}-${userId.slice(0,6)}`;
+
   const { error: erroPerfil } = await sb
     .from("user_profile")
-    .insert({
+    .upsert({
       user_id: userId,
       responsavel: responsavel.value.trim(),
       whatsapp: whatsapp.value.replace(/\D/g,''),
@@ -342,8 +353,11 @@ email: emailValue,
       tipo: tipo.value,
       cidade: cidade.value.trim(),
       uf: uf.value.trim().toUpperCase(),
-      email_contato: emailValue
-    });
+      email_contato: emailValue,
+      slug: slug,
+      status: "TESTE",
+      fim_teste: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)
+    }, { onConflict: "user_id" });
 
   overlay.style.display = "none";
 
@@ -360,16 +374,6 @@ email: emailValue,
 
 function irLogin(){
   location.href = "login.html";
-}
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/clena/sw.js")
-      .then(reg => console.log("PWA ativo:", reg.scope))
-      .catch(err => console.error("Erro PWA:", err));
-  });
 }
 </script>
 
