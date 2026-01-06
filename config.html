@@ -202,7 +202,7 @@ async function carregar(){
   lojaId = session.user.id;
 
   document.getElementById("linkLoja").innerText =
-    `${location.origin}/clena/loja.html?l=${lojaId}`;
+    `${location.origin}/loja.html?l=${lojaId}`;
 
   const {data} = await sb
     .from("user_profile")
