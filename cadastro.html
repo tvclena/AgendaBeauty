@@ -331,19 +331,21 @@ email: emailValue,
 
   const userId = data.user.id;
 
-  /* 2️⃣ CRIA PERFIL */
-  const { error: erroPerfil } = await sb
-    .from("user_profile")
-    .insert({
-      user_id: userId,
-      responsavel: responsavel.value.trim(),
-      whatsapp: whatsapp.value.replace(/\D/g,''),
-      negocio: negocio.value.trim(),
-      tipo: tipo.value,
-      cidade: cidade.value.trim(),
-      uf: uf.value.trim().toUpperCase(),
-      email_contato: emailValue
-    });
+const { error: erroPerfil } = await sb
+  .from("user_profile")
+  .upsert({
+    user_id: userId,
+    responsavel: responsavel.value.trim(),
+    whatsapp: whatsapp.value.replace(/\D/g,''),
+    negocio: negocio.value.trim(),
+    tipo: tipo.value,
+    cidade: cidade.value.trim(),
+    uf: uf.value.trim().toUpperCase(),
+    email_contato: emailValue
+  }, {
+    onConflict: 'user_id'
+  });
+
 
   overlay.style.display = "none";
 
