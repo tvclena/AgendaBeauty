@@ -120,7 +120,7 @@ export default async function handler(req, res) {
       .insert({
         user_id: loja.user_id,
         status: "CRIADO",
-        valor_total: valorTotal,
+        valor: valorTotal,
         cliente_nome: cliente.nome,
         cliente_whatsapp: cliente.whatsapp
       })
