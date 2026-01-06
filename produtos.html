@@ -721,6 +721,20 @@ filtroTipo.addEventListener("change", () => {
   render();
 });
 
+// 📸 CAPTURA DA IMAGEM (ESTE ERA O QUE FALTAVA)
+imagem.addEventListener("change", () => {
+  const file = imagem.files[0];
+  if (!file) return;
+
+  blob = file;
+
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = "block";
+});
+
+
+
+  
 async function confirmarExclusao(){
   if(!editId) return;
 
