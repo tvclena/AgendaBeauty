@@ -8,8 +8,7 @@
   content="width=device-width,
   initial-scale=1,
   maximum-scale=1,
-  user-scalable=no,
-  viewport-fit=cover">
+  user-scalable=no">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -20,6 +19,7 @@
   --bg:#f4f6fb;
   --card:#fff;
   --border:#e5e7eb;
+  --dark:#111827;
 }
 
 *{box-sizing:border-box;font-family:Inter}
@@ -33,13 +33,12 @@ html,body{margin:0;background:var(--bg)}
   align-items:center;
   justify-content:center;
   font-weight:800;
-  position:sticky;
-  top:0;
 }
 
-.section{padding:18px 14px}
-.title{font-weight:800;margin-bottom:10px}
+.section{padding:18px}
+.title{font-weight:800;margin-bottom:12px}
 
+/* SERVIÇOS */
 .services{
   display:flex;
   gap:16px;
@@ -54,32 +53,33 @@ html,body{margin:0;background:var(--bg)}
   overflow:hidden;
   box-shadow:0 18px 44px rgba(0,0,0,.14);
   cursor:pointer;
+  transition:.2s;
 }
+.service:hover{transform:translateY(-4px)}
 .service img{width:100%;height:140px;object-fit:cover}
 .service-info{padding:12px}
 .service-name{font-weight:800}
 .service-price{color:var(--primary);font-weight:700}
 
+/* GRID */
 .grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:14px;
+  gap:12px;
 }
 
 .item{
   background:#fff;
   border:1px solid var(--border);
   border-radius:16px;
-  padding:16px 0;
+  padding:14px 0;
   text-align:center;
   font-weight:800;
   cursor:pointer;
 }
 .item:hover{background:#fff3ea}
-.selected{border:2px solid #2563eb}
 
-.hidden{display:none}
-
+/* MODAIS */
 .overlay{
   position:fixed;
   inset:0;
@@ -90,12 +90,31 @@ html,body{margin:0;background:var(--bg)}
   z-index:9999;
 }
 
-.msg-final{
+.modal{
+  width:92%;
+  max-width:420px;
   background:#fff;
   border-radius:22px;
   padding:18px;
-  box-shadow:0 18px 44px rgba(0,0,0,.18);
+  animation:pop .25s ease;
 }
+@keyframes pop{
+  from{transform:scale(.92);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+.modal h2{margin:0 0 10px;font-size:20px}
+.modal small{color:#6b7280}
+
+.btn{
+  border:none;
+  border-radius:12px;
+  padding:12px;
+  font-weight:800;
+  cursor:pointer;
+}
+.btn-primary{background:#2563eb;color:#fff}
+.btn-gray{background:#e5e7eb}
 </style>
 </head>
 
@@ -108,16 +127,6 @@ html,body{margin:0;background:var(--bg)}
   <div class="services" id="services"></div>
 </div>
 
-<div class="section hidden" id="secDays">
-  <div class="title">Escolha a data</div>
-  <div class="grid" id="days"></div>
-</div>
-
-<div class="section hidden" id="secTimes">
-  <div class="title">Escolha o horário</div>
-  <div class="grid" id="times"></div>
-</div>
-
 <script>
 /* ================= SUPABASE ================= */
 const sb = supabase.createClient(
@@ -128,10 +137,10 @@ const sb = supabase.createClient(
 const lojaId = new URLSearchParams(location.search).get("l");
 
 /* ================= ESTADO ================= */
-let duracao = 0;
 let dados = {};
-let DIAS_VALIDOS = [];
-let MAPA_AGENDAMENTOS = {};
+let duracao = 0;
+let DIAS = [];
+let MAPA = {};
 
 /* ================= UTILS ================= */
 const toMin = h => {
@@ -142,11 +151,8 @@ const toHour = m =>
   String(Math.floor(m/60)).padStart(2,"0")+":"+
   String(m%60).padStart(2,"0");
 
-const hojeLocal = () =>
-  new Date().toISOString().split("T")[0];
-
-const diaSemana = d =>
-  ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][new Date(d).getDay()];
+const hoje = () => new Date().toISOString().split("T")[0];
+const semana = d => ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][new Date(d).getDay()];
 
 /* ================= SERVIÇOS ================= */
 async function carregarServicos(){
@@ -157,8 +163,9 @@ async function carregarServicos(){
     .eq("ativo", true)
     .order("ordem_exibicao",{ascending:true,nullsLast:true});
 
-  document.getElementById("services").innerHTML = data.map(s=>`
-    <div class="service" onclick="selecionarServico('${s.id}',${s.duracao_minutos},'${s.nome}',${s.preco})">
+  services.innerHTML = data.map(s=>`
+    <div class="service"
+      onclick="abrirCalendario('${s.id}',${s.duracao_minutos},'${s.nome}',${s.preco})">
       <img src="${s.imagem_url||'https://via.placeholder.com/400'}">
       <div class="service-info">
         <div class="service-name">${s.nome}</div>
@@ -168,33 +175,30 @@ async function carregarServicos(){
   `).join("");
 }
 
-/* ================= SERVIÇO → DIAS ================= */
-async function selecionarServico(id,dur,nome,preco){
-  duracao = dur;
-  dados = { servico:id, servico_nome:nome, valor_servico:preco };
+/* ================= CALENDÁRIO ================= */
+async function abrirCalendario(id,dur,nome,preco){
+  dados={servico:id,servico_nome:nome,valor_servico:preco};
+  duracao=dur;
 
-  document.getElementById("secDays").classList.remove("hidden");
-  document.getElementById("secTimes").classList.add("hidden");
+  document.body.insertAdjacentHTML("beforeend",`
+    <div class="overlay" id="modalDias">
+      <div class="modal">
+        <h2>Escolha a data</h2>
+        <div id="listaDias" class="grid">🔄 Carregando...</div>
+        <br>
+        <button class="btn btn-gray" onclick="fechar('modalDias')">Cancelar</button>
+      </div>
+    </div>
+  `);
 
-  document.getElementById("days").innerHTML =
-    "🔄 Carregando dias disponíveis...";
-
-  /* 1️⃣ BUSCA AGENDA */
   const { data: agenda } = await sb
     .from("agenda_loja")
     .select("data,horarios")
     .eq("user_id", lojaId)
     .eq("fechado", false)
-    .gte("data", hojeLocal())
+    .gte("data", hoje())
     .order("data");
 
-  if(!agenda?.length){
-    document.getElementById("days").innerHTML =
-      "❌ Nenhum dia disponível";
-    return;
-  }
-
-  /* 2️⃣ BUSCA AGENDAMENTOS EM LOTE */
   const datas = agenda.map(a=>a.data);
   const { data: ags } = await sb
     .from("agendamentos")
@@ -202,25 +206,19 @@ async function selecionarServico(id,dur,nome,preco){
     .eq("user_id", lojaId)
     .in("data", datas);
 
-  MAPA_AGENDAMENTOS = {};
+  MAPA={};
   (ags||[]).forEach(a=>{
-    if(!MAPA_AGENDAMENTOS[a.data])
-      MAPA_AGENDAMENTOS[a.data]=[];
-    MAPA_AGENDAMENTOS[a.data].push([
-      toMin(a.hora_inicio),
-      toMin(a.hora_fim)
-    ]);
+    if(!MAPA[a.data]) MAPA[a.data]=[];
+    MAPA[a.data].push([toMin(a.hora_inicio),toMin(a.hora_fim)]);
   });
 
-  /* 3️⃣ FILTRA DIAS LIVRES */
-  DIAS_VALIDOS = [];
-
+  DIAS=[];
   for(const d of agenda){
-    let blocos = typeof d.horarios==="string"
+    const blocos = typeof d.horarios==="string"
       ? JSON.parse(d.horarios)
       : d.horarios;
 
-    const ocupados = MAPA_AGENDAMENTOS[d.data]||[];
+    const ocupados = MAPA[d.data]||[];
     let livre=false;
 
     for(const b of blocos){
@@ -233,32 +231,39 @@ async function selecionarServico(id,dur,nome,preco){
       }
       if(livre) break;
     }
-    if(livre) DIAS_VALIDOS.push(d);
+    if(livre) DIAS.push(d);
   }
 
-  document.getElementById("days").innerHTML =
-    DIAS_VALIDOS.map((d,i)=>`
-      <div class="item" onclick="selecionarDia(${i})">
-        <div>${d.data.split("-")[2]}</div>
-        <small>${diaSemana(d.data)}</small>
-      </div>
-    `).join("");
+  listaDias.innerHTML = DIAS.map((d,i)=>`
+    <div class="item" onclick="abrirHorarios(${i})">
+      <div>${d.data.split("-")[2]}</div>
+      <small>${semana(d.data)}</small>
+    </div>
+  `).join("");
 }
 
-/* ================= DIA → HORÁRIOS ================= */
-async function selecionarDia(i){
-  document.getElementById("secTimes").classList.remove("hidden");
-  document.getElementById("times").innerHTML =
-    "🔄 Carregando horários...";
-
-  const dia = DIAS_VALIDOS[i];
+/* ================= HORÁRIOS ================= */
+function abrirHorarios(i){
+  fechar("modalDias");
+  const dia = DIAS[i];
   dados.data = dia.data;
+
+  document.body.insertAdjacentHTML("beforeend",`
+    <div class="overlay" id="modalHoras">
+      <div class="modal">
+        <h2>Horários disponíveis</h2>
+        <div id="listaHoras" class="grid"></div>
+        <br>
+        <button class="btn btn-gray" onclick="fechar('modalHoras')">Voltar</button>
+      </div>
+    </div>
+  `);
 
   const blocos = typeof dia.horarios==="string"
     ? JSON.parse(dia.horarios)
     : dia.horarios;
 
-  const ocupados = MAPA_AGENDAMENTOS[dia.data]||[];
+  const ocupados = MAPA[dia.data]||[];
   let slots=[];
 
   blocos.forEach(b=>{
@@ -271,16 +276,16 @@ async function selecionarDia(i){
     }
   });
 
-  document.getElementById("times").innerHTML =
-    slots.length
-      ? slots.map(h=>`<div class="item" onclick="confirmar('${h}')">${h}</div>`).join("")
-      : "❌ Nenhum horário disponível";
+  listaHoras.innerHTML = slots.map(h=>`
+    <div class="item" onclick="confirmar('${h}')">${h}</div>
+  `).join("");
 }
 
 /* ================= CONFIRMAR ================= */
 async function confirmar(h){
-  const fim = toHour(toMin(h)+duracao);
+  fechar("modalHoras");
 
+  const fim = toHour(toMin(h)+duracao);
   await sb.from("agendamentos").insert({
     user_id: lojaId,
     loja_id: lojaId,
@@ -291,7 +296,20 @@ async function confirmar(h){
     hora_fim: fim
   });
 
-  alert("✅ Agendamento confirmado!");
+  document.body.insertAdjacentHTML("beforeend",`
+    <div class="overlay" id="modalOk">
+      <div class="modal">
+        <h2>Agendamento confirmado 🎉</h2>
+        <small>${dados.servico_nome}<br>${dados.data} às ${h}</small>
+        <br><br>
+        <button class="btn btn-primary" onclick="fechar('modalOk')">Fechar</button>
+      </div>
+    </div>
+  `);
+}
+
+function fechar(id){
+  document.getElementById(id)?.remove();
 }
 
 /* INIT */
