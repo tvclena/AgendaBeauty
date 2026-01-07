@@ -351,7 +351,8 @@ function open(key){
   dirty=false;
   modal.style.display="flex";
 
-  const date=new Date(key);
+const date = dateFromISO(key);
+  
   modalDate.innerText=date.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"});
   replicaDia.innerText=date.toLocaleDateString("pt-BR",{weekday:"long"});
 
@@ -400,24 +401,26 @@ async function salvar(){
   const base = { fechado: fechadoVal, horarios: horariosVal };
 
   const updates = new Set();
+  
   updates.add(selected);
 
-  if(replicaSemana.checked){
-    const baseDate = new Date(selected + "T12:00:00");
-    const wd = baseDate.getDay();
-    const y = baseDate.getFullYear();
-    const m = baseDate.getMonth();
+ if(replicaSemana.checked){
+  const baseDate = dateFromISO(selected);
+  const wd = baseDate.getDay();
+  const y = baseDate.getFullYear();
+  const m = baseDate.getMonth();
 
-    const lastDay = new Date(y, m + 1, 0).getDate();
+  const lastDay = new Date(y, m + 1, 0).getDate();
 
-    for(let d=1; d<=lastDay; d++){
-      const date = new Date(y, m, d);
-      if(date.getDay() === wd){
-        const key = `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-        updates.add(key);
-      }
+  for(let d=1; d<=lastDay; d++){
+    const date = new Date(y, m, d, 12, 0, 0);
+    if(date.getDay() === wd){
+      const key = `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+      updates.add(key);
     }
   }
+}
+
 
   for(const d of updates){
     await sb.from("agenda_loja").upsert({
@@ -430,6 +433,10 @@ async function salvar(){
   replicaSemana.checked = false;
   modal.style.display = "none";
   carregar();
+}
+function dateFromISO(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d, 12, 0, 0); // meio-dia local
 }
 
 </script>
