@@ -5,8 +5,6 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE
 );
-
-
 export async function handlePedido(paymentMaster) {
   try {
     const paymentId = String(paymentMaster.id);
