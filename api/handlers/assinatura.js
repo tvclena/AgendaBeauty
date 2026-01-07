@@ -5,6 +5,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE
 );
 
+
 export async function handleAssinatura(payment) {
   try {
     const status = payment.status;
