@@ -338,11 +338,18 @@ iframe{
   text-align:center;
   margin-top:10px;
 }
+#appRoot.locked{
+  filter: blur(2px) brightness(.85);
+  pointer-events:none;
+  user-select:none;
+}
 
 </style>
 </head>
 
 <body>
+  <div id="appRoot">
+
 <div id="notifyModal" style="
   position:fixed;
   inset:0;
@@ -558,9 +565,40 @@ async function carregarPerfil(){
     avatar.style.backgroundImage = `url(${p.avatar_url})`;
     avatar.textContent = "";
   }
-} // ✅ FECHAMENTO CORRETO DA FUNÇÃO
+  verificarAssinatura();
 
+} 
 
+async function criarAssinatura() {
+  const btn = document.getElementById("btnAssinar");
+  btn.innerText = "Processando...";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch("/api/create-subscription.js", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: user.id,
+        email: user.email
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.init_point) {
+      throw new Error(data.error || "Erro ao criar assinatura");
+    }
+
+    // 🔁 Redireciona para pagamento Mercado Pago
+    window.location.href = data.init_point;
+
+  } catch (err) {
+    alert(err.message);
+    btn.innerText = "Assinar agora";
+    btn.disabled = false;
+  }
+}
 
 
 /* ================= NAV ================= */
@@ -737,12 +775,84 @@ async function ativarNotificacoes(){
 
 
   
+function verificarAssinatura() {
+  if (!profile) return;
+
+  const status = profile.status;
+  const modal = document.getElementById("subscriptionModal");
+  const app = document.getElementById("appRoot");
+
+  if (status !== "active" && status !== "trial") {
+    modal.style.display = "flex";
+    app.classList.add("locked");
+  } else {
+    modal.style.display = "none";
+    app.classList.remove("locked");
+  }
+}
+
+  
 </script>
   <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/sw.js");
 }
 </script>
+</div>
+<!-- ================= SUBSCRIPTION MODAL ================= -->
+<div id="subscriptionModal" style="
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.65);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100000;
+">
+  <div style="
+    background:#fff;
+    width:92%;
+    max-width:360px;
+    border-radius:22px;
+    padding:22px;
+    text-align:center;
+    box-shadow:0 30px 80px rgba(0,0,0,.35);
+  ">
+    <h2 style="font-size:18px;margin-bottom:6px">Assinatura necessária</h2>
+
+    <p style="font-size:13px;color:#6b7280;margin-bottom:14px">
+      Para continuar usando o Agenda Fácil, ative sua assinatura.
+    </p>
+
+    <div style="
+      background:#f9fafb;
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      padding:14px;
+      margin-bottom:16px;
+    ">
+      <strong style="font-size:22px;color:#111">R$ 9,90</strong>
+      <div style="font-size:12px;color:#6b7280">por 30 dias</div>
+    </div>
+
+    <button id="btnAssinar" onclick="criarAssinatura()" style="
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:999px;
+      background:#ff6a00;
+      color:#fff;
+      font-weight:900;
+      cursor:pointer;
+    ">
+      Assinar agora
+    </button>
+
+    <div style="font-size:11px;color:#9ca3af;margin-top:10px">
+      Cobrança automática • Cancelamento a qualquer momento
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
