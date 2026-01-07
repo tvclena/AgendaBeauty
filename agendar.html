@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Agendar Serviço</title>
+<title>Agendar Horário</title>
 
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 
@@ -11,140 +11,244 @@
 
 <style>
 :root{
-  --primary:#ff6a00;
-  --bg:#f4f6fb;
-  --card:#fff;
-  --border:#e5e7eb;
+  --primary:#c9a44a;
+  --dark:#111;
+  --bg:#0f0f0f;
+  --card:#1a1a1a;
+  --border:#2a2a2a;
+  --text:#f5f5f5;
+  --muted:#9ca3af;
 }
 *{box-sizing:border-box;font-family:Inter}
-body{margin:0;background:var(--bg)}
-.header{
-  height:56px;background:#fff;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;font-weight:800
+body{
+  margin:0;
+  background:linear-gradient(180deg,#0b0b0b,#141414);
+  color:var(--text);
 }
-.section{padding:18px}
-h3{margin:0 0 12px}
+.header{
+  height:64px;
+  background:rgba(0,0,0,.7);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  letter-spacing:.5px;
+}
+.section{
+  padding:22px 16px;
+}
+.title{
+  font-weight:800;
+  margin-bottom:14px;
+  font-size:18px;
+}
 
 /* SERVIÇOS */
-.services{display:flex;gap:16px;overflow-x:auto}
+.services{
+  display:flex;
+  gap:18px;
+  overflow-x:auto;
+}
 .services::-webkit-scrollbar{display:none}
 .service{
-  min-width:220px;background:#fff;border-radius:18px;cursor:pointer;
-  box-shadow:0 12px 30px rgba(0,0,0,.15);overflow:hidden
+  min-width:230px;
+  background:var(--card);
+  border-radius:22px;
+  overflow:hidden;
+  cursor:pointer;
+  border:2px solid transparent;
+  transition:.25s;
 }
-.service.selected{outline:3px solid #2563eb}
-.service img{width:100%;height:140px;object-fit:cover}
-.service-info{padding:12px}
-.service-info b{display:block}
+.service:hover{
+  transform:translateY(-4px);
+}
+.service.selected{
+  border-color:var(--primary);
+  box-shadow:0 0 0 1px rgba(201,164,74,.3);
+}
+.service img{
+  width:100%;
+  height:140px;
+  object-fit:cover;
+}
+.service-info{
+  padding:14px;
+}
+.service-name{
+  font-weight:800;
+  font-size:17px;
+}
+.service-price{
+  color:var(--primary);
+  font-weight:700;
+  margin-top:6px;
+}
 
 /* DIAS */
-.days{display:flex;gap:12px;overflow-x:auto}
-.day{
-  min-width:60px;text-align:center;padding:12px;border-radius:14px;
-  background:#fff;border:1px solid var(--border);cursor:pointer;font-weight:700
+.days{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
 }
-.day.selected{background:#fff3ea;border-color:var(--primary)}
+.day{
+  min-width:72px;
+  background:var(--card);
+  border-radius:18px;
+  padding:14px 0;
+  text-align:center;
+  cursor:pointer;
+  border:2px solid transparent;
+  transition:.2s;
+}
+.day small{color:var(--muted)}
+.day.selected{
+  border-color:var(--primary);
+  background:rgba(201,164,74,.12);
+}
 
 /* HORÁRIOS */
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.time{
-  background:#fff;padding:14px;border-radius:14px;
-  text-align:center;font-weight:700;border:1px solid var(--border);
-  cursor:pointer
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
 }
-.time:hover{background:#fff3ea}
+.time{
+  background:var(--card);
+  border-radius:16px;
+  padding:14px 0;
+  text-align:center;
+  font-weight:700;
+  cursor:pointer;
+  transition:.2s;
+  border:1px solid var(--border);
+}
+.time:hover{
+  background:rgba(201,164,74,.15);
+  border-color:var(--primary);
+}
 
-/* UTIL */
+/* FEEDBACK */
+.center{
+  grid-column:1/-1;
+  text-align:center;
+  color:var(--muted);
+}
 .hidden{display:none}
-.center{grid-column:1/-1;text-align:center;color:#6b7280}
+
+/* OVERLAY */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.modal{
+  background:var(--card);
+  border-radius:22px;
+  padding:22px;
+  width:90%;
+  max-width:360px;
+  text-align:center;
+}
+.modal h2{
+  margin:0 0 10px;
+}
+.modal button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  font-weight:700;
+  cursor:pointer;
+  margin-top:10px;
+}
+.btn-primary{
+  background:var(--primary);
+  color:#111;
+}
+.btn-secondary{
+  background:#2a2a2a;
+  color:#fff;
+}
 </style>
 </head>
 
 <body>
 
-<div class="header">Agendar Serviço</div>
+<div class="header">Agendar Horário</div>
 
 <div class="section">
-  <h3>Escolha um serviço</h3>
+  <div class="title">Escolha um serviço</div>
   <div class="services" id="services"></div>
 </div>
 
 <div class="section hidden" id="secDays">
-  <h3>Escolha a data</h3>
+  <div class="title">Escolha a data</div>
   <div class="days" id="days"></div>
 </div>
 
 <div class="section hidden" id="secTimes">
-  <h3>Escolha o horário</h3>
+  <div class="title">Escolha o horário</div>
   <div class="grid" id="times"></div>
 </div>
 
 <script>
 /* ================= SUPABASE ================= */
 const sb = supabase.createClient(
-  "https://egxjgmzukjyyxmkukwub.supabase.co",
-  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+ "https://egxjgmzukjyyxmkukwub.supabase.co",
+ "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
 const lojaId = new URLSearchParams(location.search).get("l");
 
 /* ================= ESTADO ================= */
-let dados = {
-  servico: null,
-  servico_nome: "",
-  valor: 0,
-  data: null
-};
+let dados = { servico:null, nome:"", valor:0, data:null };
 let duracao = 0;
 let DIAS = [];
 
 /* ================= UTILS ================= */
-const toMin = h => {
-  const [a,b] = h.split(":").map(Number);
-  return a * 60 + b;
-};
-const toHour = m =>
-  String(Math.floor(m/60)).padStart(2,"0") + ":" +
-  String(m%60).padStart(2,"0");
-
-const hoje = () => new Date().toISOString().split("T")[0];
-const diaSemana = d => ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][new Date(d).getDay()];
+const toMin = h => { const [a,b]=h.split(":").map(Number); return a*60+b }
+const toHour = m => String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")
+const hoje = () => new Date().toISOString().split("T")[0]
+const semana = d => ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][new Date(d).getDay()]
 
 /* ================= SERVIÇOS ================= */
 async function carregarServicos(){
-  const { data } = await sb
-    .from("produtos_servicos")
+  const { data } = await sb.from("produtos_servicos")
     .select("*")
     .eq("user_id", lojaId)
-    .eq("ativo", true)
-    .order("ordem_exibicao",{ascending:true,nullsLast:true});
+    .eq("ativo", true);
 
   const el = document.getElementById("services");
   el.innerHTML = "";
 
   data.forEach(s=>{
-    const card = document.createElement("div");
-    card.className = "service";
-    card.innerHTML = `
-      <img src="${s.imagem_url || "https://via.placeholder.com/400"}">
+    const c = document.createElement("div");
+    c.className="service";
+    c.innerHTML=`
+      <img src="${s.imagem_url||'https://via.placeholder.com/400'}">
       <div class="service-info">
-        <b>${s.nome}</b>
-        R$ ${s.preco}
-      </div>
-    `;
-    card.onclick = () => selecionarServico(card,s);
-    el.appendChild(card);
+        <div class="service-name">${s.nome}</div>
+        <div class="service-price">R$ ${s.preco}</div>
+      </div>`;
+    c.onclick=()=>selecionarServico(c,s);
+    el.appendChild(c);
   });
 }
 
 function selecionarServico(card,s){
-  document.querySelectorAll(".service").forEach(c=>c.classList.remove("selected"));
+  document.querySelectorAll(".service").forEach(e=>e.classList.remove("selected"));
   card.classList.add("selected");
 
-  dados.servico = s.id;
-  dados.servico_nome = s.nome;
-  dados.valor = s.preco;
-  duracao = Number(s.duracao_minutos) || 0;
+  dados.servico=s.id;
+  dados.nome=s.nome;
+  dados.valor=s.preco;
+  duracao=Number(s.duracao_minutos)||0;
 
   document.getElementById("secDays").classList.remove("hidden");
   document.getElementById("secTimes").classList.add("hidden");
@@ -153,99 +257,106 @@ function selecionarServico(card,s){
 
 /* ================= DIAS ================= */
 async function carregarDias(){
-  const { data } = await sb
-    .from("agenda_loja")
+  const { data } = await sb.from("agenda_loja")
     .select("*")
     .eq("user_id", lojaId)
     .eq("fechado", false)
     .gte("data", hoje())
     .order("data");
 
-  DIAS = data;
-  const el = document.getElementById("days");
-  el.innerHTML = "";
+  DIAS=data;
+  const el=document.getElementById("days");
+  el.innerHTML="";
 
   data.forEach((d,i)=>{
-    const day = document.createElement("div");
-    day.className = "day";
-    day.innerHTML = `
-      ${d.data.split("-")[2]}<br>
-      <small>${diaSemana(d.data)}</small>
-    `;
-    day.onclick = () => selecionarDia(day,i);
+    const day=document.createElement("div");
+    day.className="day";
+    day.innerHTML=`${d.data.split("-")[2]}<br><small>${semana(d.data)}</small>`;
+    day.onclick=()=>selecionarDia(day,i);
     el.appendChild(day);
   });
 }
 
 /* ================= HORÁRIOS ================= */
-async function selecionarDia(el,index){
-  if(!dados.servico){
-    alert("Selecione um serviço");
-    return;
-  }
+async function selecionarDia(el,i){
+  if(!dados.servico) return;
 
   document.querySelectorAll(".day").forEach(d=>d.classList.remove("selected"));
   el.classList.add("selected");
 
   document.getElementById("secTimes").classList.remove("hidden");
-  const times = document.getElementById("times");
-  times.innerHTML = `<div class="center">🔄 Buscando horários...</div>`;
+  const times=document.getElementById("times");
+  times.innerHTML=`<div class="center">Buscando horários...</div>`;
 
-  const dia = DIAS[index];
-  dados.data = dia.data;
+  const dia=DIAS[i];
+  dados.data=dia.data;
 
-  let blocos = [];
+  let blocos=[];
   try{
-    blocos = typeof dia.horarios === "string"
-      ? JSON.parse(dia.horarios)
-      : (dia.horarios || []);
+    blocos=typeof dia.horarios==="string"?JSON.parse(dia.horarios):(dia.horarios||[]);
   }catch{
-    times.innerHTML = `<div class="center">❌ Horários inválidos</div>`;
+    times.innerHTML=`<div class="center">Horários inválidos</div>`;
     return;
   }
 
-  const { data: ag } = await sb
-    .from("agendamentos")
+  const { data:ag } = await sb.from("agendamentos")
     .select("hora_inicio,hora_fim")
     .eq("user_id", lojaId)
     .eq("data", dia.data);
 
-  const ocupados = (ag||[]).map(a=>[
-    toMin(a.hora_inicio),
-    toMin(a.hora_fim)
-  ]);
-
-  let slots = [];
+  const ocupados=(ag||[]).map(a=>[toMin(a.hora_inicio),toMin(a.hora_fim)]);
+  let slots=[];
 
   blocos.forEach(b=>{
-    let ini = toMin(b.inicio);
-    let fim = toMin(b.fim);
-
-    while(ini + duracao <= fim){
-      const conflito = ocupados.some(o =>
-        !(ini + duracao <= o[0] || ini >= o[1])
-      );
-      if(!conflito) slots.push(toHour(ini));
-      ini += duracao;
+    let s=toMin(b.inicio),e=toMin(b.fim);
+    while(s+duracao<=e){
+      if(!ocupados.some(o=>!(s+duracao<=o[0]||s>=o[1])))
+        slots.push(toHour(s));
+      s+=duracao;
     }
   });
 
-  times.innerHTML = "";
-
+  times.innerHTML="";
   if(!slots.length){
-    times.innerHTML = `<div class="center">❌ Nenhum horário disponível</div>`;
+    times.innerHTML=`<div class="center">Nenhum horário disponível</div>`;
     return;
   }
 
   slots.forEach(h=>{
-    const t = document.createElement("div");
-    t.className = "time";
-    t.textContent = h;
+    const t=document.createElement("div");
+    t.className="time";
+    t.textContent=h;
+    t.onclick=()=>confirmar(h);
     times.appendChild(t);
   });
 }
 
-/* ================= INIT ================= */
+/* ================= CONFIRMAR ================= */
+async function confirmar(h){
+  const fim=toHour(toMin(h)+duracao);
+
+  await sb.from("agendamentos").insert({
+    user_id:lojaId,
+    loja_id:lojaId,
+    servico_id:dados.servico,
+    valor_servico:dados.valor,
+    data:dados.data,
+    hora_inicio:h,
+    hora_fim:fim
+  });
+
+  document.body.insertAdjacentHTML("beforeend",`
+    <div class="overlay">
+      <div class="modal">
+        <h2>Agendamento confirmado</h2>
+        <p>${dados.nome}<br>${dados.data} às ${h}</p>
+        <button class="btn-primary" onclick="location.reload()">OK</button>
+        <button class="btn-secondary" onclick="document.querySelector('.overlay').remove()">Fechar</button>
+      </div>
+    </div>
+  `);
+}
+
 carregarServicos();
 </script>
 
