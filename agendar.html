@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Agendar Serviço</title>
 
-
 <meta name="viewport"
   content="width=device-width,
   initial-scale=1,
@@ -137,18 +136,6 @@ html,body{margin:0;background:var(--bg)}
 .msg-final button:last-child{
   background:#e5e7eb;
 }
-.days-scroll{
-  display:flex;
-  gap:14px;
-  overflow-x:auto;
-  padding-bottom:6px;
-}
-.days-scroll::-webkit-scrollbar{display:none}
-
-.days-scroll .item{
-  min-width:70px;
-}
-
 
 </style>
 </head>
@@ -164,9 +151,8 @@ html,body{margin:0;background:var(--bg)}
 
 <div class="section hidden" id="secDays">
   <div class="title">Escolha a data</div>
-  <div class="days-scroll" id="days"></div>
+  <div class="grid" id="days"></div>
 </div>
-
 
 <div class="section hidden" id="secTimes">
   <div class="title">Escolha o horário</div>
@@ -179,110 +165,186 @@ html,body{margin:0;background:var(--bg)}
 <script>
 /* ================= SUPABASE ================= */
 const sb = supabase.createClient(
-  "https://egxjgmzukjyyxmkukwub.supabase.co",
-  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+ "https://egxjgmzukjyyxmkukwub.supabase.co",
+ "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-/* ================= PARAMS ================= */
 const lojaId = new URLSearchParams(location.search).get("l");
 const servicoPreSelecionado =
   new URLSearchParams(location.search).get("servico");
 
-/* ================= ESTADO ================= */
+  
+/* CLIENTE JÁ IDENTIFICADO */
+const clienteNome  = localStorage.getItem("NOME_CLIENTE");
+const clienteWhats = localStorage.getItem("WHATS_CLIENTE");
+
 let duracao = 0;
 let dados = {};
-
-let MAPA_AGENDAMENTOS = {};
 let DIAS_VALIDOS = [];
 
-let carregandoDias = false;
-let page = 0;
-const PAGE_SIZE = 10;
-
-/* ================= UTILS ================= */
-const toMin = h => {
-  const [a, b] = h.split(":").map(Number);
-  return a * 60 + b;
-};
-
-const toHour = m =>
-  String(Math.floor(m / 60)).padStart(2, "0") +
-  ":" +
-  String(m % 60).padStart(2, "0");
-
-const hojeLocal = () => new Date().toISOString().split("T")[0];
+/* UTILS */
+const toMin = h => { const [a,b]=h.split(":").map(Number); return a*60+b; }
+const toHour = m => String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
 
 /* ================= SERVIÇOS ================= */
-async function carregarServicos() {
-  const { data } = await sb
-    .from("produtos_servicos")
-    .select("id,nome,preco,imagem_url,duracao_minutos")
-    .eq("user_id", lojaId)
-    .eq("ativo", true)
-    .order("ordem_exibicao", { ascending: true, nullsLast: true });
+async function carregarServicos(){
+const { data } = await sb
+  .from("produtos_servicos")
+  .select(`
+    id,
+    nome,
+    preco,
+    imagem_url,
+    duracao_minutos,
+    ordem_exibicao,
+    created_at,
+    updated_at
+  `)
+  .eq("user_id", lojaId)
+  .eq("ativo", true)
+  // 1️⃣ quem tem ordem_exibicao vem primeiro
+  .order("ordem_exibicao", { ascending: true, nullsLast: true })
+  // 2️⃣ se empatar, o atualizado mais recente vem primeiro
+  .order("updated_at", { ascending: false })
+  // 3️⃣ para os sem ordem, respeita a ordem de cadastro
+  .order("created_at", { ascending: true });
 
-  document.getElementById("services").innerHTML = data.map(s => `
-    <div class="service" data-id="${s.id}"
-      onclick="selecionarServico('${s.id}',${s.duracao_minutos},'${s.nome}',${Number(s.preco)})">
-      <img src="${s.imagem_url || 'https://via.placeholder.com/400'}">
-      <div class="service-info">
-        <div class="service-name">${s.nome}</div>
-        <div class="service-price">R$ ${s.preco}</div>
-      </div>
+
+  const container = document.getElementById("services");
+
+ container.innerHTML = data.map(s=>`
+  <div class="service"
+       data-id="${s.id}"
+       onclick="selecionarServico(
+         '${s.id}',
+         ${s.duracao_minutos},
+         '${s.nome}',
+         ${Number(s.preco)}
+       )">
+       
+    <img src="${s.imagem_url || 'https://via.placeholder.com/400'}">
+
+    <div class="service-info">
+      <div class="service-name">${s.nome}</div>
+      <div class="service-price">R$ ${s.preco}</div>
     </div>
-  `).join("");
+  </div>
+`).join("");
 
-  if (servicoPreSelecionado) {
+
+  // ✅ SE VEIO SERVIÇO PELA URL, JÁ SELECIONA AUTOMATICAMENTE
+  if(servicoPreSelecionado){
     const s = data.find(x => x.id === servicoPreSelecionado);
-    if (s) selecionarServico(s.id, s.duracao_minutos, s.nome, s.preco);
+    if(s){
+      selecionarServico(s.id, s.duracao_minutos, s.nome);
+    }
   }
 }
 
-/* ================= DIAS (PAGINADO) ================= */
-async function carregarDiasLazy() {
-  if (carregandoDias) return;
-  carregandoDias = true;
+
+
+  
+function formatarDia(dataISO){
+  const [ano, mes, dia] = dataISO.split("-");
+  return Number(dia);
+}
+
+function diaSemana(dataISO){
+  const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+  const [ano, mes, dia] = dataISO.split("-");
+  const d = new Date(ano, mes - 1, dia);
+  return dias[d.getDay()];
+}
+
+
+
+
+
+
+
+
+
+
+  
+/* ================= SERVIÇO → DIAS ================= */
+async function selecionarServico(id, dur, nome, preco){
+
+  document.querySelectorAll(".service")
+    .forEach(el => el.classList.remove("selected"));
+
+  const card = document.querySelector(`[data-id="${id}"]`);
+  card?.classList.add("selected");
+
+  // 🔥 AQUI A ROLAGEM AUTOMÁTICA
+  card?.scrollIntoView({
+    behavior: "smooth",
+    inline: "center",
+    block: "nearest"
+  });
+
+  dados.servico = id;
+  dados.servico_nome = nome;
+  dados.valor_servico = preco;
+  duracao = dur;
+
+  // 🔹 mostra seção de dias
+  document.getElementById("secDays").classList.remove("hidden");
+  document.getElementById("secTimes").classList.add("hidden");
+
+  document.getElementById("days").innerHTML = `
+    <div style="grid-column:1/-1;text-align:center;color:#6b7280">
+      🔄 Buscando dias disponíveis...
+    </div>
+  `;
+
+  document.getElementById("times").innerHTML = "";
+  document.getElementById("final").innerHTML = "";
+
+
+function hojeLocal(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+const hoje = hojeLocal();
 
   const { data: agenda } = await sb
     .from("agenda_loja")
-    .select("data,horarios")
+    .select("*")
     .eq("user_id", lojaId)
-    .eq("fechado", false)
-    .gte("data", hojeLocal())
-    .order("data")
-    .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
+    .gte("data", hoje)
+    .eq("fechado", false);
 
-  if (!agenda || agenda.length === 0) {
-    carregandoDias = false;
-    return;
-  }
-
-  const datas = agenda.map(a => a.data);
-
-  const { data: ags } = await sb
-    .from("agendamentos")
-    .select("data,hora_inicio,hora_fim")
-    .eq("user_id", lojaId)
-    .in("data", datas);
-
-  ags?.forEach(a => {
-    if (!MAPA_AGENDAMENTOS[a.data]) MAPA_AGENDAMENTOS[a.data] = [];
-    MAPA_AGENDAMENTOS[a.data].push([
-      toMin(a.hora_inicio),
-      toMin(a.hora_fim)
-    ]);
-  });
+  DIAS_VALIDOS = [];
 
   for (const d of agenda) {
     let blocos;
-    try {
-      blocos = JSON.parse(d.horarios);
-    } catch { continue; }
 
-    const ocupados = MAPA_AGENDAMENTOS[d.data] || [];
+    try {
+      blocos = typeof d.horarios === "string"
+        ? JSON.parse(d.horarios)
+        : d.horarios;
+    } catch {
+      continue;
+    }
+
+    const { data: ags } = await sb
+      .from("agendamentos")
+      .select("hora_inicio,hora_fim")
+      .eq("user_id", lojaId)
+      .eq("data", d.data);
+
+    const ocupados = ags.map(a => [
+      toMin(a.hora_inicio),
+      toMin(a.hora_fim)
+    ]);
+
     let livre = false;
 
-    for (const b of blocos) {
+    blocos.forEach(b => {
       let s = toMin(b.inicio);
       let e = toMin(b.fim);
 
@@ -293,99 +355,173 @@ async function carregarDiasLazy() {
         }
         s += duracao;
       }
-      if (livre) break;
-    }
+    });
 
-    if (livre) {
-      DIAS_VALIDOS.push(d);
-      document.getElementById("days").insertAdjacentHTML("beforeend", `
-        <div class="item" onclick="selecionarDia(${DIAS_VALIDOS.length - 1})">
-          <div style="font-size:18px">${Number(d.data.split("-")[2])}</div>
-          <div style="font-size:12px;color:#6b7280">
-            ${["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][new Date(d.data).getDay()]}
-          </div>
-        </div>
-      `);
-    }
+if (livre) DIAS_VALIDOS.push(d);
+}
+
+// ✅ ORDENA OS DIAS (3, 4, 5, 6...)
+DIAS_VALIDOS.sort((a, b) => {
+  return a.data.localeCompare(b.data);
+});
+
+document.getElementById("days").innerHTML = DIAS_VALIDOS.map((d, i) => `
+
+
+<div class="item" onclick="selecionarDia(${i})">
+  <div style="font-size:18px">${formatarDia(d.data)}</div>
+  <div style="font-size:12px;color:#6b7280;margin-top:4px">
+    ${diaSemana(d.data)}
+  </div>
+</div>
+`).join("");
+}
+
+/* ================= DIA → HORÁRIOS ================= */
+async function selecionarDia(index){
+
+  /* ===== MARCA VISUAL DO DIA ===== */
+  document.querySelectorAll("#days .item")
+    .forEach(el => el.classList.remove("selected"));
+
+  const itemSelecionado =
+    document.querySelectorAll("#days .item")[index];
+
+  if(itemSelecionado){
+    itemSelecionado.classList.add("selected");
   }
 
-  page++;
-  carregandoDias = false;
-}
+  /* ===== MOSTRA SEÇÃO DE HORÁRIOS ===== */
+  document.getElementById("secTimes").classList.remove("hidden");
 
-/* ================= FLUXO ================= */
-function selecionarServico(id, dur, nome, preco) {
-  duracao = dur;
-  dados = { servico: id, servico_nome: nome, valor_servico: preco };
+  /* ===== FEEDBACK DE CARREGAMENTO ===== */
+  document.getElementById("times").innerHTML = `
+    <div style="grid-column:1/-1;text-align:center;color:#6b7280;padding:14px">
+      🔄 Buscando horários disponíveis...
+    </div>
+  `;
 
-  DIAS_VALIDOS = [];
-  MAPA_AGENDAMENTOS = {};
-  page = 0;
-
-  document.getElementById("days").innerHTML = "";
-  document.getElementById("times").innerHTML = "";
-
-  document.getElementById("secDays").classList.remove("hidden");
-  document.getElementById("secTimes").classList.add("hidden");
-
-  carregarDiasLazy();
-}
-
-function selecionarDia(index) {
+  /* ===== DADOS DO DIA ===== */
   const dia = DIAS_VALIDOS[index];
-  const blocos = JSON.parse(dia.horarios);
-  const ocupados = MAPA_AGENDAMENTOS[dia.data] || [];
+  dados.data = dia.data;
 
+  /* ===== HORÁRIOS DA AGENDA ===== */
+  const blocos = typeof dia.horarios === "string"
+    ? JSON.parse(dia.horarios)
+    : dia.horarios;
+
+  /* ===== AGENDAMENTOS JÁ OCUPADOS ===== */
+  const { data: ag } = await sb
+    .from("agendamentos")
+    .select("hora_inicio,hora_fim")
+    .eq("user_id", lojaId)
+    .eq("data", dia.data);
+
+  const ocupados = ag.map(a => [
+    toMin(a.hora_inicio),
+    toMin(a.hora_fim)
+  ]);
+
+  /* ===== GERA SLOTS LIVRES ===== */
   let slots = [];
 
   blocos.forEach(b => {
-    let s = toMin(b.inicio);
-    let e = toMin(b.fim);
-    while (s + duracao <= e) {
-      if (!ocupados.some(o => !(s + duracao <= o[0] || s >= o[1]))) {
-        slots.push(toHour(s));
+    let inicio = toMin(b.inicio);
+    let fim = toMin(b.fim);
+
+    while(inicio + duracao <= fim){
+      const conflito = ocupados.some(o =>
+        !(inicio + duracao <= o[0] || inicio >= o[1])
+      );
+
+      if(!conflito){
+        slots.push(toHour(inicio));
       }
-      s += duracao;
+
+      inicio += duracao;
     }
   });
 
-  document.getElementById("secTimes").classList.remove("hidden");
-  document.getElementById("times").innerHTML =
-    slots.length
-      ? slots.map(h => `<div class="item">${h}</div>`).join("")
-      : `<div style="grid-column:1/-1;text-align:center;color:#6b7280">Sem horários</div>`;
+  /* ===== RENDERIZA HORÁRIOS ===== */
+  if(slots.length === 0){
+    document.getElementById("times").innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;color:#6b7280;padding:14px">
+        ❌ Nenhum horário disponível neste dia
+      </div>
+    `;
+    return;
+  }
+
+  document.getElementById("times").innerHTML = slots.map(h => `
+    <div class="item" onclick="confirmar('${h}')">${h}</div>
+  `).join("");
 }
 
-/* ================= INIT ================= */
-carregarServicos();
+/* ================= CONFIRMAR ================= */
+/* ================= CONFIRMAR ================= */
+async function confirmar(h){
+  const fim = toHour(toMin(h) + duracao);
 
-document.getElementById("days").addEventListener("scroll", e => {
-  const el = e.target;
-  if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 60) {
-    carregarDiasLazy();
+  const { error } = await sb.from("agendamentos").insert({
+    user_id: lojaId,
+    loja_id: lojaId,
+    servico_id: dados.servico,
+    valor_servico: dados.valor_servico,
+    data: dados.data,
+    hora_inicio: h,
+    hora_fim: fim,
+    cliente_nome: clienteNome,
+    cliente_whatsapp: clienteWhats
+  });
+
+  if(error){
+    alert("❌ Erro ao salvar o agendamento.\n" + error.message);
+    console.error(error);
+    return;
   }
-});
-</script>
 
-<!-- MODAL CLIENTE -->
-<div id="clienteModal" class="hidden">
-  <div class="overlay" onclick="fecharModal()"></div>
+  document.body.insertAdjacentHTML("beforeend", `
 
-  <div class="msg-final" style="max-width:380px">
-    <h2 style="margin-bottom:6px">Seus dados</h2>
-    <p style="color:#6b7280;margin-bottom:10px">
-      Precisamos dessas informações para confirmar seu agendamento
-    </p>
+  
+   <div class="overlay" id="overlayConfirm">
+  <div class="msg-final">
+    ✅ <strong>Agendamento confirmado!</strong><br><br>
 
-    <input id="cliNome" placeholder="NOME COMPLETO" style="text-transform:uppercase;width:100%;margin-bottom:10px">
-    <input id="cliWhats" placeholder="WHATSAPP" inputmode="numeric" style="width:100%;margin-bottom:10px">
-    <input id="cliEmail" placeholder="E-MAIL (opcional)" style="width:100%;margin-bottom:12px">
+    Serviço: <b>${dados.servico_nome}</b><br>
+    Data: <b>${dados.data}</b><br>
+    Horário: <b>${h}</b><br><br>
 
-    <button onclick="salvarCliente()" style="width:100%">
-      Salvar e continuar
-    </button>
+    ⚠️ Caso precise cancelar ou alterar,<br>
+    acesse o painel <b>Meus Agendamentos</b><br>
+    com no mínimo <b>40 minutos</b> de antecedência.<br><br>
+
+    <div style="display:flex;gap:10px">
+      <button onclick="irParaAgendamentos()" style="flex:1">
+        📋 Meus Agendamentos
+      </button>
+
+      <button onclick="fecharOverlay()" style="flex:1">
+        ✖ Fechar
+      </button>
+    </div>
   </div>
 </div>
+
+  `);
+}
+
+/* ✅ CHAMA UMA ÚNICA VEZ */
+carregarServicos();
+function fecharOverlay(){
+  document.getElementById("overlayConfirm")?.remove();
+}
+
+function irParaAgendamentos(){
+  // ajuste a rota se necessário
+  window.location.href = "agendamentosclientes.html?l=" + lojaId;
+}
+
+</script>
 
 </body>
 </html>
