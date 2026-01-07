@@ -4,12 +4,7 @@
 <meta charset="UTF-8">
 <title>Agendar Serviço</title>
 
-<meta name="viewport"
-  content="width=device-width,
-  initial-scale=1,
-  maximum-scale=1,
-  user-scalable=no,
-  viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -22,133 +17,53 @@
   --border:#e5e7eb;
   --text:#111827;
 }
-
 *{box-sizing:border-box;font-family:Inter}
-html,body{margin:0;background:var(--bg)}
-
+body{margin:0;background:var(--bg)}
 .header{
-  height:56px;
-  background:#fff;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:800;
-  position:sticky;
-  top:0;
+  height:56px;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-weight:800;position:sticky;top:0
 }
+.section{padding:18px 14px}
+.title{font-weight:800;margin-bottom:10px}
+.hidden{display:none}
+.selected{border:2px solid #2563eb!important}
 
-.section{
-  padding:18px 14px;
-}
-
-.title{
-  font-weight:800;
-  margin-bottom:10px;
-}
-
-.services{
-  display:flex;
-  gap:16px;
-  overflow-x:auto;
-}
+/* Serviços */
+.services{display:flex;gap:16px;overflow-x:auto}
 .services::-webkit-scrollbar{display:none}
-
 .service{
-  min-width:220px;
-  background:#fff;
-  border-radius:22px;
-  overflow:hidden;
-  box-shadow:0 18px 44px rgba(0,0,0,.14);
-  cursor:pointer;
+  min-width:220px;background:#fff;border-radius:22px;overflow:hidden;
+  box-shadow:0 18px 44px rgba(0,0,0,.14);cursor:pointer
 }
+.service img{width:100%;height:140px;object-fit:cover}
+.service-info{padding:12px}
+.service-name{font-weight:800}
+.service-price{color:var(--primary);font-weight:700}
 
-.service img{
-  width:100%;
-  height:140px;
-  object-fit:cover;
-}
-
-.service-info{
- padding:12px;
-}
-
-.service-name{font-weight:800;font-size:17px}
-.service-price{color:var(--primary);font-weight:700;margin-top:6px}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
-}
-
+/* Dias e horários */
+.days-scroll{display:flex;gap:14px;overflow-x:auto}
+.days-scroll .item{min-width:70px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .item{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:16px 0;
-  text-align:center;
-  font-weight:800;
-  cursor:pointer;
+  background:#fff;border:1px solid var(--border);border-radius:16px;
+  padding:16px 0;text-align:center;font-weight:800;cursor:pointer
 }
+.item:hover{background:#fff3ea}
 
-.item:hover{
-  background:#fff3ea;
+/* Overlay */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);
+  display:flex;align-items:center;justify-content:center;z-index:9999
 }
-
 .msg-final{
-  background:#fff;
-  border-radius:22px;
-  padding:18px;
-  box-shadow:0 18px 44px rgba(0,0,0,.18);
-  font-weight:700;
-}
-
-.hidden {
-  display: none;
-}
-
-.selected {
-  border: 2px solid #2563eb !important; /* azul */
-}
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
+  background:#fff;border-radius:22px;padding:18px;
+  box-shadow:0 18px 44px rgba(0,0,0,.18);font-weight:700;max-width:320px
 }
 .msg-final button{
-  border:none;
-  border-radius:12px;
-  padding:12px;
-  font-weight:700;
-  cursor:pointer;
+  border:none;border-radius:12px;padding:12px;font-weight:700;cursor:pointer;width:100%
 }
-
-.msg-final button:first-child{
-  background:#2563eb;
-  color:#fff;
-}
-
-.msg-final button:last-child{
-  background:#e5e7eb;
-}
-.days-scroll{
-  display:flex;
-  gap:14px;
-  overflow-x:auto;
-  padding-bottom:6px;
-}
-.days-scroll::-webkit-scrollbar{display:none}
-
-.days-scroll .item{
-  min-width:70px;
-}
-
-
+.msg-final .ok{background:#2563eb;color:#fff}
+.msg-final .close{background:#e5e7eb}
 </style>
 </head>
 
@@ -166,14 +81,10 @@ html,body{margin:0;background:var(--bg)}
   <div class="days-scroll" id="days"></div>
 </div>
 
-
 <div class="section hidden" id="secTimes">
   <div class="title">Escolha o horário</div>
   <div class="grid" id="times"></div>
 </div>
-
-
-<div class="section" id="final"></div>
 
 <script>
 /* ================= SUPABASE ================= */
@@ -183,317 +94,121 @@ const sb = supabase.createClient(
 );
 
 const lojaId = new URLSearchParams(location.search).get("l");
-const servicoPreSelecionado =
-  new URLSearchParams(location.search).get("servico");
-
-  
-/* CLIENTE JÁ IDENTIFICADO */
-const clienteNome  = localStorage.getItem("NOME_CLIENTE");
-const clienteWhats = localStorage.getItem("WHATS_CLIENTE");
+const clienteNome  = localStorage.getItem("NOME_CLIENTE") || "Cliente";
+const clienteWhats = localStorage.getItem("WHATS_CLIENTE") || "";
 
 let duracao = 0;
 let dados = {};
 let DIAS_VALIDOS = [];
 
-let cursorData = null;
-let carregandoDias = false;
-const BLOCO_DIAS = 7;
-
-
-/* UTILS */
-const toMin = h => { const [a,b]=h.split(":").map(Number); return a*60+b; }
-const toHour = m => String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
-function hojeLocal(){
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
+/* ================= UTILS ================= */
+const toMin = h => { const [a,b]=h.split(":").map(Number); return a*60+b }
+const toHour = m => String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")
+const hoje = () => new Date().toISOString().split("T")[0]
+const addDias = (d,q)=>{const x=new Date(d);x.setDate(x.getDate()+q);return x.toISOString().split("T")[0]}
+const diaSemana = d => ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][new Date(d).getDay()]
 
 /* ================= SERVIÇOS ================= */
 async function carregarServicos(){
-const { data } = await sb
-  .from("produtos_servicos")
-  .select(`
-    id,
-    nome,
-    preco,
-    imagem_url,
-    duracao_minutos,
-    ordem_exibicao,
-    created_at,
-    updated_at
-  `)
-  .eq("user_id", lojaId)
-  .eq("ativo", true)
-  // 1️⃣ quem tem ordem_exibicao vem primeiro
-  .order("ordem_exibicao", { ascending: true, nullsLast: true })
-  // 2️⃣ se empatar, o atualizado mais recente vem primeiro
-  .order("updated_at", { ascending: false })
-  // 3️⃣ para os sem ordem, respeita a ordem de cadastro
-  .order("created_at", { ascending: true });
+  const { data } = await sb
+    .from("produtos_servicos")
+    .select("*")
+    .eq("user_id", lojaId)
+    .eq("ativo", true)
+    .order("ordem_exibicao",{ascending:true,nullsLast:true});
 
-
-  const container = document.getElementById("services");
-
- container.innerHTML = data.map(s=>`
-  <div class="service"
-       data-id="${s.id}"
-       onclick="selecionarServico(
-         '${s.id}',
-         ${s.duracao_minutos},
-         '${s.nome}',
-         ${Number(s.preco)}
-       )">
-       
-    <img src="${s.imagem_url || 'https://via.placeholder.com/400'}">
-
-    <div class="service-info">
-      <div class="service-name">${s.nome}</div>
-      <div class="service-price">R$ ${s.preco}</div>
+  document.getElementById("services").innerHTML = data.map(s=>`
+    <div class="service" data-id="${s.id}"
+      onclick="selecionarServico('${s.id}',${s.duracao_minutos},'${s.nome}',${s.preco})">
+      <img src="${s.imagem_url || 'https://via.placeholder.com/400'}">
+      <div class="service-info">
+        <div class="service-name">${s.nome}</div>
+        <div class="service-price">R$ ${s.preco}</div>
+      </div>
     </div>
-  </div>
-`).join("");
-
-
-  // ✅ SE VEIO SERVIÇO PELA URL, JÁ SELECIONA AUTOMATICAMENTE
-  if(servicoPreSelecionado){
-    const s = data.find(x => x.id === servicoPreSelecionado);
-    if(s){
-      selecionarServico(s.id, s.duracao_minutos, s.nome);
-    }
-  }
+  `).join("");
 }
 
+/* ================= SERVIÇO → DIAS ================= */
+async function selecionarServico(id,dur,nome,preco){
+  document.querySelectorAll(".service").forEach(s=>s.classList.remove("selected"));
+  document.querySelector(`[data-id="${id}"]`)?.classList.add("selected");
 
+  duracao = dur;
+  dados = {servico:id,servico_nome:nome,valor_servico:preco};
 
-  
-function formatarDia(dataISO){
-  const [ano, mes, dia] = dataISO.split("-");
-  return Number(dia);
-}
+  document.getElementById("secDays").classList.remove("hidden");
+  document.getElementById("secTimes").classList.add("hidden");
+  document.getElementById("days").innerHTML="";
+  document.getElementById("times").innerHTML="";
+  DIAS_VALIDOS=[];
 
-function diaSemana(dataISO){
-  const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-  const [ano, mes, dia] = dataISO.split("-");
-  const d = new Date(ano, mes - 1, dia);
-  return dias[d.getDay()];
-}
-function addDias(data, qtd){
-  const d = new Date(data);
-  d.setDate(d.getDate() + qtd);
-  return d.toISOString().split("T")[0];
-}
-
-async function carregarDiasLazy(){
-
-  if(carregandoDias) return;
-  carregandoDias = true;
-
-  const inicio = cursorData || hojeLocal();
-  const fim = addDias(inicio, BLOCO_DIAS);
-
-  const { data: agenda } = await sb
+  const { data } = await sb
     .from("agenda_loja")
     .select("*")
     .eq("user_id", lojaId)
     .eq("fechado", false)
-    .gte("data", inicio)
-    .lte("data", fim)
+    .gte("data", hoje())
     .order("data");
 
-  for(const d of agenda){
-
-    let blocos;
-    try{
-      blocos = typeof d.horarios === "string"
-        ? JSON.parse(d.horarios)
-        : d.horarios;
-    }catch{ continue }
-
-    const { data: ags } = await sb
-      .from("agendamentos")
-      .select("hora_inicio,hora_fim")
-      .eq("user_id", lojaId)
-      .eq("data", d.data);
-
-    const ocupados = ags.map(a => [
-      toMin(a.hora_inicio),
-      toMin(a.hora_fim)
-    ]);
-
-    let livre = false;
-
-    blocos.forEach(b=>{
-      let s = toMin(b.inicio);
-      let e = toMin(b.fim);
-
-      while(s + duracao <= e){
-        if(!ocupados.some(o => !(s + duracao <= o[0] || s >= o[1]))){
-          livre = true;
-          break;
-        }
-        s += duracao;
-      }
-    });
-
-    if(livre){
-      DIAS_VALIDOS.push(d);
-      renderizarDia(d, DIAS_VALIDOS.length - 1);
-    }
-  }
-
-  cursorData = addDias(fim, 1);
-  carregandoDias = false;
-}
-function renderizarDia(d, index){
-  document.getElementById("days")
-    .insertAdjacentHTML("beforeend", `
-      <div class="item" onclick="selecionarDia(${index})">
-        <div style="font-size:18px">${formatarDia(d.data)}</div>
-        <div style="font-size:12px;color:#6b7280">
-          ${diaSemana(d.data)}
-        </div>
+  data.forEach((d,i)=>{
+    DIAS_VALIDOS.push(d);
+    document.getElementById("days").insertAdjacentHTML("beforeend",`
+      <div class="item" onclick="selecionarDia(${i})">
+        <div>${d.data.split("-")[2]}</div>
+        <div style="font-size:12px;color:#6b7280">${diaSemana(d.data)}</div>
       </div>
     `);
-}
-
-
-
-
-
-
-
-
-
-  
-/* ================= SERVIÇO → DIAS ================= */
-async function selecionarServico(id, dur, nome, preco){
-
-  document.querySelectorAll(".service")
-    .forEach(el => el.classList.remove("selected"));
-
-  const card = document.querySelector(`[data-id="${id}"]`);
-  card?.classList.add("selected");
-
-  // 🔥 AQUI A ROLAGEM AUTOMÁTICA
-  card?.scrollIntoView({
-    behavior: "smooth",
-    inline: "center",
-    block: "nearest"
   });
-
-  dados.servico = id;
-  dados.servico_nome = nome;
-  dados.valor_servico = preco;
-  duracao = dur;
-
-  // 🔹 mostra seção de dias
-  document.getElementById("secDays").classList.remove("hidden");
-  document.getElementById("secTimes").classList.add("hidden");
-
-
-  document.getElementById("times").innerHTML = "";
-  document.getElementById("final").innerHTML = "";
-
-DIAS_VALIDOS = [];
-cursorData = null;
-carregandoDias = false;
-
-document.getElementById("days").innerHTML = "";
-
-carregarDiasLazy();
 }
-
-
-
 
 /* ================= DIA → HORÁRIOS ================= */
 async function selecionarDia(index){
+  if(!duracao){ alert("Selecione um serviço"); return }
 
-  /* ===== MARCA VISUAL DO DIA ===== */
-  document.querySelectorAll("#days .item")
-    .forEach(el => el.classList.remove("selected"));
-
-  const itemSelecionado =
-    document.querySelectorAll("#days .item")[index];
-
-  if(itemSelecionado){
-    itemSelecionado.classList.add("selected");
-  }
-
-  /* ===== MOSTRA SEÇÃO DE HORÁRIOS ===== */
   document.getElementById("secTimes").classList.remove("hidden");
+  document.getElementById("times").innerHTML="🔄 Buscando horários...";
 
-  /* ===== FEEDBACK DE CARREGAMENTO ===== */
-  document.getElementById("times").innerHTML = `
-    <div style="grid-column:1/-1;text-align:center;color:#6b7280;padding:14px">
-      🔄 Buscando horários disponíveis...
-    </div>
-  `;
-
-  /* ===== DADOS DO DIA ===== */
   const dia = DIAS_VALIDOS[index];
   dados.data = dia.data;
 
-  /* ===== HORÁRIOS DA AGENDA ===== */
-  const blocos = typeof dia.horarios === "string"
-    ? JSON.parse(dia.horarios)
-    : dia.horarios;
+  let blocos=[];
+  try{
+    blocos = typeof dia.horarios==="string"
+      ? JSON.parse(dia.horarios)
+      : dia.horarios;
+  }catch{
+    document.getElementById("times").innerHTML="❌ Horários inválidos";
+    return;
+  }
 
-  /* ===== AGENDAMENTOS JÁ OCUPADOS ===== */
   const { data: ag } = await sb
     .from("agendamentos")
     .select("hora_inicio,hora_fim")
     .eq("user_id", lojaId)
     .eq("data", dia.data);
 
-  const ocupados = ag.map(a => [
-    toMin(a.hora_inicio),
-    toMin(a.hora_fim)
-  ]);
+  const ocupados = (ag||[]).map(a=>[toMin(a.hora_inicio),toMin(a.hora_fim)]);
+  let slots=[];
 
-  /* ===== GERA SLOTS LIVRES ===== */
-  let slots = [];
-
-  blocos.forEach(b => {
-    let inicio = toMin(b.inicio);
-    let fim = toMin(b.fim);
-
-    while(inicio + duracao <= fim){
-      const conflito = ocupados.some(o =>
-        !(inicio + duracao <= o[0] || inicio >= o[1])
-      );
-
-      if(!conflito){
-        slots.push(toHour(inicio));
+  blocos.forEach(b=>{
+    let s=toMin(b.inicio), e=toMin(b.fim);
+    while(s+duracao<=e){
+      if(!ocupados.some(o=>!(s+duracao<=o[0]||s>=o[1]))){
+        slots.push(toHour(s));
       }
-
-      inicio += duracao;
+      s+=duracao;
     }
   });
 
-  /* ===== RENDERIZA HORÁRIOS ===== */
-  if(slots.length === 0){
-    document.getElementById("times").innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;color:#6b7280;padding:14px">
-        ❌ Nenhum horário disponível neste dia
-      </div>
-    `;
-    return;
-  }
-
-  document.getElementById("times").innerHTML = slots.map(h => `
-    <div class="item" onclick="confirmar('${h}')">${h}</div>
-  `).join("");
+  document.getElementById("times").innerHTML = slots.length
+    ? slots.map(h=>`<div class="item" onclick="confirmar('${h}')">${h}</div>`).join("")
+    : "❌ Nenhum horário disponível";
 }
 
 /* ================= CONFIRMAR ================= */
-/* ================= CONFIRMAR ================= */
 async function confirmar(h){
-  const fim = toHour(toMin(h) + duracao);
+  const fim = toHour(toMin(h)+duracao);
 
   const { error } = await sb.from("agendamentos").insert({
     user_id: lojaId,
@@ -507,59 +222,23 @@ async function confirmar(h){
     cliente_whatsapp: clienteWhats
   });
 
-  if(error){
-    alert("❌ Erro ao salvar o agendamento.\n" + error.message);
-    console.error(error);
-    return;
-  }
+  if(error){ alert(error.message); return }
 
-  document.body.insertAdjacentHTML("beforeend", `
-
-  
-   <div class="overlay" id="overlayConfirm">
-  <div class="msg-final">
-    ✅ <strong>Agendamento confirmado!</strong><br><br>
-
-    Serviço: <b>${dados.servico_nome}</b><br>
-    Data: <b>${dados.data}</b><br>
-    Horário: <b>${h}</b><br><br>
-
-    ⚠️ Caso precise cancelar ou alterar,<br>
-    acesse o painel <b>Meus Agendamentos</b><br>
-    com no mínimo <b>40 minutos</b> de antecedência.<br><br>
-
-    <div style="display:flex;gap:10px">
-      <button onclick="irParaAgendamentos()" style="flex:1">
-        📋 Meus Agendamentos
-      </button>
-
-      <button onclick="fecharOverlay()" style="flex:1">
-        ✖ Fechar
-      </button>
+  document.body.insertAdjacentHTML("beforeend",`
+    <div class="overlay" id="overlay">
+      <div class="msg-final">
+        ✅ <b>Agendamento confirmado!</b><br><br>
+        Serviço: ${dados.servico_nome}<br>
+        Data: ${dados.data}<br>
+        Horário: ${h}<br><br>
+        <button class="ok" onclick="location.reload()">OK</button><br><br>
+        <button class="close" onclick="document.getElementById('overlay').remove()">Fechar</button>
+      </div>
     </div>
-  </div>
-</div>
-
   `);
 }
 
-/* ✅ CHAMA UMA ÚNICA VEZ */
 carregarServicos();
-function fecharOverlay(){
-  document.getElementById("overlayConfirm")?.remove();
-}
-
-function irParaAgendamentos(){
-  // ajuste a rota se necessário
-  window.location.href = "agendamentosclientes.html?l=" + lojaId;
-}
-document.getElementById("days").addEventListener("scroll", e=>{
-  const el = e.target;
-  if(el.scrollLeft + el.clientWidth >= el.scrollWidth - 50){
-    carregarDiasLazy();
-  }
-});
-
 </script>
 
 </body>
