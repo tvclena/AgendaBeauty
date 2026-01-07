@@ -37,7 +37,7 @@ export default async function handler(req, res) {
 
 const valor = 5.5;
 
-const { response: payment } = await paymentClient.create({
+const payment = await paymentClient.create({
   body: {
     transaction_amount: valor,
     description: "Assinatura Agenda Fácil",
@@ -49,7 +49,6 @@ const { response: payment } = await paymentClient.create({
     },
   },
 });
-
 
 await supabase.from("pagamentos_assinatura").insert({
   user_id,
