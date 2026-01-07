@@ -35,7 +35,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Usuário não encontrado" });
     }
 
-const valor = 9.9;
+const valor = 5.5;
 
 const payment = await paymentClient.create({
   body: {
