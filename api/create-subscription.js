@@ -24,28 +24,33 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "user_id e email obrigatórios" });
     }
 
-    const { data: profile } = await supabase
+    // 🔎 Confirma usuário
+    const { data: profile, error } = await supabase
       .from("user_profile")
       .select("user_id")
       .eq("user_id", user_id)
       .single();
 
-    if (!profile) {
-      return res.status(404).json({ error: "Usuário não encontrado" });
+    if (error || !profile) {
+      return res.status(400).json({ error: "Usuário não encontrado" });
     }
 
+    // 💰 Valor
     const valor = 9.9;
 
+    // 💳 Cria pagamento PIX
     const payment = await paymentClient.create({
-      body: {
-        transaction_amount: valor,
-        payment_method_id: "pix",
-        description: "Assinatura Agenda Fácil",
-        payer: { email },
-        metadata: { user_id },
+      transaction_amount: valor,
+      description: "Assinatura Agenda Fácil",
+      payment_method_id: "pix",
+      payer: { email },
+      metadata: {
+        user_id,
+        tipo: "assinatura",
       },
     });
 
+    // 🗄️ Salva pagamento
     await supabase.from("pagamentos_assinatura").insert({
       user_id,
       mp_payment_id: payment.id,
@@ -53,6 +58,7 @@ export default async function handler(req, res) {
       valor,
     });
 
+    // ✅ RETORNO JSON (O MAIS IMPORTANTE)
     return res.status(200).json({
       mp_payment_id: payment.id,
       status: payment.status,
@@ -62,9 +68,10 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error("❌ ERRO PIX:", err);
+    console.error("❌ create-subscription error:", err);
     return res.status(500).json({
-      error: err.message || "Erro interno",
+      error: "Erro interno ao criar assinatura",
+      detail: err.message,
     });
   }
 }
