@@ -52,18 +52,19 @@ const payment = await paymentClient.create({
 
 await supabase.from("pagamentos_assinatura").insert({
   user_id,
-  mp_payment_id: payment.id,
-  status: payment.status,
+  mp_payment_id: payment.body.id,
+  status: payment.body.status,
   valor,
 });
 
 return res.status(200).json({
-  mp_payment_id: payment.id,
-  status: payment.status,
-  qr_code: payment.point_of_interaction.transaction_data.qr_code,
+  mp_payment_id: payment.body.id,
+  status: payment.body.status,
+  qr_code: payment.body.point_of_interaction.transaction_data.qr_code,
   qr_code_base64:
-    payment.point_of_interaction.transaction_data.qr_code_base64,
+    payment.body.point_of_interaction.transaction_data.qr_code_base64,
 });
+
 
   } catch (err) {
     console.error("❌ create-subscription error:", err);
