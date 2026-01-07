@@ -182,6 +182,7 @@ const sb = supabase.createClient(
  "https://egxjgmzukjyyxmkukwub.supabase.co",
  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
+let MAPA_AGENDAMENTOS = {};
 
 const lojaId = new URLSearchParams(location.search).get("l");
 const servicoPreSelecionado =
@@ -285,51 +286,89 @@ function addDias(data, qtd){
   return d.toISOString().split("T")[0];
 }
 
-async function carregarDiasLazy(){
+async function buscarAgendaComAgendamentos(inicio, fim) {
 
-  if(carregandoDias) return;
-  carregandoDias = true;
-
-  const inicio = cursorData || hojeLocal();
-  const fim = addDias(inicio, BLOCO_DIAS);
-
+  // 1️⃣ Agenda aberta da loja
   const { data: agenda } = await sb
     .from("agenda_loja")
-    .select("*")
+    .select("data, horarios")
     .eq("user_id", lojaId)
     .eq("fechado", false)
     .gte("data", inicio)
     .lte("data", fim)
     .order("data");
 
-  for(const d of agenda){
+  if (!agenda || agenda.length === 0) {
+    return { agenda: [], mapaAgendamentos: {} };
+  }
 
-    let blocos;
-    try{
-      blocos = typeof d.horarios === "string"
-        ? JSON.parse(d.horarios)
-        : d.horarios;
-    }catch{ continue }
+  // 2️⃣ Datas envolvidas
+  const datas = agenda.map(a => a.data);
 
-    const { data: ags } = await sb
-      .from("agendamentos")
-      .select("hora_inicio,hora_fim")
-      .eq("user_id", lojaId)
-      .eq("data", d.data);
+  // 3️⃣ Todos agendamentos de UMA VEZ
+  const { data: ags } = await sb
+    .from("agendamentos")
+    .select("data, hora_inicio, hora_fim")
+    .eq("user_id", lojaId)
+    .in("data", datas);
 
-    const ocupados = ags.map(a => [
+  // 4️⃣ Mapa rápido em memória
+  const mapaAgendamentos = {};
+
+  (ags || []).forEach(a => {
+    if (!mapaAgendamentos[a.data]) {
+      mapaAgendamentos[a.data] = [];
+    }
+    mapaAgendamentos[a.data].push([
       toMin(a.hora_inicio),
       toMin(a.hora_fim)
     ]);
+  });
 
+  return { agenda, mapaAgendamentos };
+}
+
+
+
+
+
+
+  
+async function carregarDiasLazy() {
+
+  if (carregandoDias) return;
+  carregandoDias = true;
+
+  const inicio = cursorData || hojeLocal();
+  const fim = addDias(inicio, BLOCO_DIAS);
+
+  const { agenda, mapaAgendamentos } =
+    await buscarAgendaComAgendamentos(inicio, fim);
+  Object.assign(MAPA_AGENDAMENTOS, mapaAgendamentos);
+
+
+  for (const d of agenda) {
+
+    let blocos;
+    try {
+      blocos = typeof d.horarios === "string"
+        ? JSON.parse(d.horarios)
+        : d.horarios;
+    } catch {
+      continue;
+    }
+
+    const ocupados = mapaAgendamentos[d.data] || [];
     let livre = false;
 
-    blocos.forEach(b=>{
+    blocos.forEach(b => {
       let s = toMin(b.inicio);
       let e = toMin(b.fim);
 
-      while(s + duracao <= e){
-        if(!ocupados.some(o => !(s + duracao <= o[0] || s >= o[1]))){
+      while (s + duracao <= e) {
+        if (!ocupados.some(o =>
+          !(s + duracao <= o[0] || s >= o[1])
+        )) {
           livre = true;
           break;
         }
@@ -337,15 +376,21 @@ async function carregarDiasLazy(){
       }
     });
 
-    if(livre){
+    if (livre) {
       DIAS_VALIDOS.push(d);
       renderizarDia(d, DIAS_VALIDOS.length - 1);
+    }
+
+    // 🔹 libera a UI (anti-travamento)
+    if (DIAS_VALIDOS.length % 5 === 0) {
+      await new Promise(r => setTimeout(r, 0));
     }
   }
 
   cursorData = addDias(fim, 1);
   carregandoDias = false;
 }
+
 function renderizarDia(d, index){
   document.getElementById("days")
     .insertAdjacentHTML("beforeend", `
@@ -441,17 +486,8 @@ async function selecionarDia(index){
     ? JSON.parse(dia.horarios)
     : dia.horarios;
 
-  /* ===== AGENDAMENTOS JÁ OCUPADOS ===== */
-  const { data: ag } = await sb
-    .from("agendamentos")
-    .select("hora_inicio,hora_fim")
-    .eq("user_id", lojaId)
-    .eq("data", dia.data);
-
-  const ocupados = ag.map(a => [
-    toMin(a.hora_inicio),
-    toMin(a.hora_fim)
-  ]);
+const ocupados =
+  (MAPA_AGENDAMENTOS[dia.data] || []);
 
   /* ===== GERA SLOTS LIVRES ===== */
   let slots = [];
