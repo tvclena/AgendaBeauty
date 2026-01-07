@@ -2,6 +2,7 @@ export default async function handler(req, res) {
   // 🔔 RESPONDE IMEDIATO (MP exige isso)
   res.status(200).json({ received: true });
 
+  
   try {
     const paymentId =
       req.body?.data?.id ||
