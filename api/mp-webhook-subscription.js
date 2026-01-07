@@ -14,13 +14,8 @@ const paymentClient = new Payment(mp);
 
 export default async function handler(req, res) {
   try {
-    
-   const body = req.body || {};
-
-const paymentId =
-  body.data?.id ||
-  body.id ||
-  body.resource?.split("/")?.pop();
+    // 🔔 SEMPRE responder 200 rápido
+    const paymentId = req.body?.data?.id;
 
     if (!paymentId) {
       return res.status(200).json({ ignored: true });
@@ -40,8 +35,8 @@ const paymentId =
 
     const user_id = metadata.user_id;
 
-    // 🗄️ Atualiza status do pagamento
-    await supabase
+    // 🗄️ ATUALIZA PAGAMENTO (ID COMO STRING)
+    const { data: pagamentoAtualizado } = await supabase
       .from("pagamentos_assinatura")
       .update({
         status,
@@ -49,9 +44,17 @@ const paymentId =
         pago_em: status === "approved" ? new Date().toISOString() : null,
         atualizado_em: new Date().toISOString(),
       })
-      .eq("mp_payment_id", paymentId);
+      .eq("mp_payment_id", String(paymentId))
+      .select()
+      .single();
 
-    // ❌ Se não aprovado, encerra
+    // ❗ Se não encontrou o pagamento no banco
+    if (!pagamentoAtualizado) {
+      console.warn("Pagamento não encontrado no banco:", paymentId);
+      return res.status(200).json({ not_found: true });
+    }
+
+    // ❌ Se ainda não foi aprovado, encerra aqui
     if (status !== "approved") {
       return res.status(200).json({ status });
     }
@@ -64,10 +67,9 @@ const paymentId =
       .single();
 
     const agora = new Date();
-
-    // 🧠 Se já existe assinatura válida → renova a partir dela
     let novaValidade = new Date();
 
+    // 🧠 Se já tinha assinatura válida, renova a partir dela
     if (
       profile?.assinatura_valida_ate &&
       new Date(profile.assinatura_valida_ate) > agora
