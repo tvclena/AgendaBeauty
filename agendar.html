@@ -188,7 +188,7 @@ const lojaId = new URLSearchParams(location.search).get("l");
 const servicoPreSelecionado =
   new URLSearchParams(location.search).get("servico");
 
-/* ================= ESTADO GLOBAL ================= */
+/* ================= ESTADO ================= */
 let duracao = 0;
 let dados = {};
 
@@ -210,10 +210,7 @@ const toHour = m =>
   ":" +
   String(m % 60).padStart(2, "0");
 
-function hojeLocal() {
-  const d = new Date();
-  return d.toISOString().split("T")[0];
-}
+const hojeLocal = () => new Date().toISOString().split("T")[0];
 
 /* ================= SERVIÇOS ================= */
 async function carregarServicos() {
@@ -224,8 +221,7 @@ async function carregarServicos() {
     .eq("ativo", true)
     .order("ordem_exibicao", { ascending: true, nullsLast: true });
 
-  const container = document.getElementById("services");
-  container.innerHTML = data.map(s => `
+  document.getElementById("services").innerHTML = data.map(s => `
     <div class="service" data-id="${s.id}"
       onclick="selecionarServico('${s.id}',${s.duracao_minutos},'${s.nome}',${Number(s.preco)})">
       <img src="${s.imagem_url || 'https://via.placeholder.com/400'}">
@@ -242,95 +238,74 @@ async function carregarServicos() {
   }
 }
 
-
-
-
-  
+/* ================= DIAS (PAGINADO) ================= */
 async function carregarDiasLazy() {
   if (carregandoDias) return;
   carregandoDias = true;
 
-  const hoje = hojeLocal();
-
-  /* 1️⃣ BUSCA AGENDA (PAGINADA) */
-  const { data: agenda, error } = await sb
+  const { data: agenda } = await sb
     .from("agenda_loja")
-    .select("data, horarios")
+    .select("data,horarios")
     .eq("user_id", lojaId)
     .eq("fechado", false)
-    .gte("data", hoje)
+    .gte("data", hojeLocal())
     .order("data")
-    .range(
-      page * PAGE_SIZE,
-      page * PAGE_SIZE + PAGE_SIZE - 1
-    );
-
-  if (error) {
-    console.error("Erro agenda:", error);
-    carregandoDias = false;
-    return;
-  }
+    .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
 
   if (!agenda || agenda.length === 0) {
     carregandoDias = false;
     return;
   }
 
-  /* 2️⃣ BUSCA AGENDAMENTOS DESSES DIAS */
   const datas = agenda.map(a => a.data);
 
   const { data: ags } = await sb
     .from("agendamentos")
-    .select("data, hora_inicio, hora_fim")
+    .select("data,hora_inicio,hora_fim")
     .eq("user_id", lojaId)
     .in("data", datas);
 
-  const mapa = {};
-  (ags || []).forEach(a => {
-    if (!mapa[a.data]) mapa[a.data] = [];
-    mapa[a.data].push([
+  ags?.forEach(a => {
+    if (!MAPA_AGENDAMENTOS[a.data]) MAPA_AGENDAMENTOS[a.data] = [];
+    MAPA_AGENDAMENTOS[a.data].push([
       toMin(a.hora_inicio),
       toMin(a.hora_fim)
     ]);
   });
 
-  Object.assign(MAPA_AGENDAMENTOS, mapa);
-
-  /* 3️⃣ PROCESSA DIAS */
   for (const d of agenda) {
     let blocos;
     try {
-      blocos = typeof d.horarios === "string"
-        ? JSON.parse(d.horarios)
-        : d.horarios;
-    } catch {
-      continue;
-    }
+      blocos = JSON.parse(d.horarios);
+    } catch { continue; }
 
     const ocupados = MAPA_AGENDAMENTOS[d.data] || [];
     let livre = false;
 
     for (const b of blocos) {
-      let inicio = toMin(b.inicio);
-      let fim = toMin(b.fim);
+      let s = toMin(b.inicio);
+      let e = toMin(b.fim);
 
-      while (inicio + duracao <= fim) {
-        const conflito = ocupados.some(o =>
-          !(inicio + duracao <= o[0] || inicio >= o[1])
-        );
-
-        if (!conflito) {
+      while (s + duracao <= e) {
+        if (!ocupados.some(o => !(s + duracao <= o[0] || s >= o[1]))) {
           livre = true;
           break;
         }
-        inicio += duracao;
+        s += duracao;
       }
       if (livre) break;
     }
 
     if (livre) {
       DIAS_VALIDOS.push(d);
-      renderizarDia(d, DIAS_VALIDOS.length - 1);
+      document.getElementById("days").insertAdjacentHTML("beforeend", `
+        <div class="item" onclick="selecionarDia(${DIAS_VALIDOS.length - 1})">
+          <div style="font-size:18px">${Number(d.data.split("-")[2])}</div>
+          <div style="font-size:12px;color:#6b7280">
+            ${["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][new Date(d.data).getDay()]}
+          </div>
+        </div>
+      `);
     }
   }
 
@@ -338,260 +313,60 @@ async function carregarDiasLazy() {
   carregandoDias = false;
 }
 
-
-  
-/* ================= SERVIÇO → DIAS ================= */
-async function selecionarServico(id, dur, nome, preco) {
-
-  document.querySelectorAll(".service")
-    .forEach(el => el.classList.remove("selected"));
-
-  document
-    .querySelector(`[data-id="${id}"]`)
-    ?.classList.add("selected");
-
-  dados.servico = id;
-  dados.servico_nome = nome;
-  dados.valor_servico = preco;
+/* ================= FLUXO ================= */
+function selecionarServico(id, dur, nome, preco) {
   duracao = dur;
+  dados = { servico: id, servico_nome: nome, valor_servico: preco };
 
-  document.getElementById("secDays").classList.remove("hidden");
-  document.getElementById("secTimes").classList.add("hidden");
+  DIAS_VALIDOS = [];
+  MAPA_AGENDAMENTOS = {};
+  page = 0;
 
   document.getElementById("days").innerHTML = "";
   document.getElementById("times").innerHTML = "";
 
-  /* RESET TOTAL */
-  DIAS_VALIDOS = [];
-  MAPA_AGENDAMENTOS = {};
-  page = 0;
-  carregandoDias = false;
+  document.getElementById("secDays").classList.remove("hidden");
+  document.getElementById("secTimes").classList.add("hidden");
 
   carregarDiasLazy();
 }
 
-
-
-
-
-/* ================= DIA → HORÁRIOS ================= */
-async function selecionarDia(index){
-
-  /* ===== MARCA VISUAL DO DIA ===== */
-  document.querySelectorAll("#days .item")
-    .forEach(el => el.classList.remove("selected"));
-
-  const itemSelecionado =
-    document.querySelectorAll("#days .item")[index];
-
-  if(itemSelecionado){
-    itemSelecionado.classList.add("selected");
-  }
-
-  /* ===== MOSTRA SEÇÃO DE HORÁRIOS ===== */
-  document.getElementById("secTimes").classList.remove("hidden");
-
-  /* ===== FEEDBACK DE CARREGAMENTO ===== */
-  document.getElementById("times").innerHTML = `
-    <div style="grid-column:1/-1;text-align:center;color:#6b7280;padding:14px">
-      🔄 Buscando horários disponíveis...
-    </div>
-  `;
-
-  /* ===== DADOS DO DIA ===== */
+function selecionarDia(index) {
   const dia = DIAS_VALIDOS[index];
-  dados.data = dia.data;
+  const blocos = JSON.parse(dia.horarios);
+  const ocupados = MAPA_AGENDAMENTOS[dia.data] || [];
 
-  /* ===== HORÁRIOS DA AGENDA ===== */
-  const blocos = typeof dia.horarios === "string"
-    ? JSON.parse(dia.horarios)
-    : dia.horarios;
-
-const ocupados =
-  (MAPA_AGENDAMENTOS[dia.data] || []);
-
-  /* ===== GERA SLOTS LIVRES ===== */
   let slots = [];
 
   blocos.forEach(b => {
-    let inicio = toMin(b.inicio);
-    let fim = toMin(b.fim);
-
-    while(inicio + duracao <= fim){
-      const conflito = ocupados.some(o =>
-        !(inicio + duracao <= o[0] || inicio >= o[1])
-      );
-
-      if(!conflito){
-        slots.push(toHour(inicio));
+    let s = toMin(b.inicio);
+    let e = toMin(b.fim);
+    while (s + duracao <= e) {
+      if (!ocupados.some(o => !(s + duracao <= o[0] || s >= o[1]))) {
+        slots.push(toHour(s));
       }
-
-      inicio += duracao;
+      s += duracao;
     }
   });
 
-  /* ===== RENDERIZA HORÁRIOS ===== */
-  if(slots.length === 0){
-    document.getElementById("times").innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;color:#6b7280;padding:14px">
-        ❌ Nenhum horário disponível neste dia
-      </div>
-    `;
-    return;
-  }
-
-  document.getElementById("times").innerHTML = slots.map(h => `
-    <div class="item" onclick="confirmar('${h}')">${h}</div>
-  `).join("");
+  document.getElementById("secTimes").classList.remove("hidden");
+  document.getElementById("times").innerHTML =
+    slots.length
+      ? slots.map(h => `<div class="item">${h}</div>`).join("")
+      : `<div style="grid-column:1/-1;text-align:center;color:#6b7280">Sem horários</div>`;
 }
 
-async function confirmar(h){
-
-  const cliente = getCliente();
-
-  if(!cliente){
-    abrirModal();
-    return;
-  }
-
-  const fim = toHour(toMin(h) + duracao);
-
-  const { error } = await sb.from("agendamentos").insert({
-    user_id: lojaId,
-    loja_id: lojaId,
-    servico_id: dados.servico,
-    valor_servico: dados.valor_servico,
-    data: dados.data,
-    hora_inicio: h,
-    hora_fim: fim,
-    cliente_nome: cliente.nome,
-    cliente_whatsapp: cliente.whatsapp
-  });
-
-  if(error){
-    alert("❌ Erro ao salvar o agendamento.\n" + error.message);
-    console.error(error);
-    return;
-  }
-
-  document.body.insertAdjacentHTML("beforeend", `
-    <div class="overlay" id="overlayConfirm">
-      <div class="msg-final">
-        ✅ <strong>Agendamento confirmado!</strong><br><br>
-
-        Serviço: <b>${dados.servico_nome}</b><br>
-        Data: <b>${dados.data}</b><br>
-        Horário: <b>${h}</b><br><br>
-
-        <div style="display:flex;gap:10px">
-          <button onclick="irParaAgendamentos()" style="flex:1">
-            📋 Meus Agendamentos
-          </button>
-          <button onclick="fecharOverlay()" style="flex:1">
-            ✖ Fechar
-          </button>
-        </div>
-      </div>
-    </div>
-  `);
-}
-
-/* ✅ CHAMA UMA ÚNICA VEZ */
+/* ================= INIT ================= */
 carregarServicos();
-function fecharOverlay(){
-  document.getElementById("overlayConfirm")?.remove();
-}
 
-function irParaAgendamentos(){
-  // ajuste a rota se necessário
-  window.location.href = "agendamentosclientes.html?l=" + lojaId;
-}
-
-
-  
 document.getElementById("days").addEventListener("scroll", e => {
   const el = e.target;
   if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 60) {
     carregarDiasLazy();
   }
 });
-
-function getCliente(){
-  try{
-    const raw = localStorage.getItem("CLIENTE_LOJA");
-    if(!raw) return null;
-    const c = JSON.parse(raw);
-    if(!c?.nome || !c?.whatsapp) return null;
-    return c;
-  }catch{
-    return null;
-  }
-}
-
-
-function clienteValido(){
-  const c = getCliente();
-  return c?.nome && c?.whatsapp;
-}
-
-function abrirModal(){
-  const modal = document.getElementById("clienteModal");
-  if(!modal.classList.contains("hidden")) return;
-
-  const cliente = getCliente();
-  if(cliente){
-    cliNome.value = cliente.nome || "";
-    cliWhats.value = cliente.whatsapp || "";
-    cliEmail.value = cliente.email || "";
-  }
-
-  modal.classList.remove("hidden");
-}
-
-
-function fecharModal(){
-  if(!clienteValido()) return;
-  document.getElementById("clienteModal").classList.add("hidden");
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  const whatsInput = document.getElementById("cliWhats");
-  if(!whatsInput) return;
-
-  whatsInput.addEventListener("input", () => {
-    let v = whatsInput.value.replace(/\D/g,"").slice(0,11);
-    if(v.length > 6)
-      v = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
-    else if(v.length > 2)
-      v = `(${v.slice(0,2)}) ${v.slice(2)}`;
-    whatsInput.value = v;
-  });
-});
-
-
-function salvarCliente(){
-  const nome = cliNome.value.trim().toUpperCase();
-  const whats = cliWhats.value.replace(/\D/g,"");
-  const email = cliEmail.value.trim() || null;
-
-  if(nome.length < 3 || whats.length < 10){
-    alert("Informe nome completo e WhatsApp válido");
-    return;
-  }
-
-  localStorage.setItem("CLIENTE_LOJA", JSON.stringify({
-    nome,
-    whatsapp: whats,
-    email
-  }));
-
-  fecharModal();
-}
-if(!clienteValido()){
-  abrirModal();
-}
-
 </script>
+
 <!-- MODAL CLIENTE -->
 <div id="clienteModal" class="hidden">
   <div class="overlay" onclick="fecharModal()"></div>
