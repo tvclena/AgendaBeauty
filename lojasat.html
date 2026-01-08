@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Agenda Fácil • Escolha sua loja</title>
+<title>Agenda Clena • Escolha sua loja</title>
 
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#ff6a00">
@@ -14,22 +14,17 @@
 <style>
 :root{
   --primary:#ff6a00;
+  --accent:#b8ff65;
   --bg:#f6f7fb;
   --card:#ffffff;
   --border:#e5e7eb;
   --text:#1f2937;
   --muted:#6b7280;
-  --open:#16a34a;
-  --closed:#dc2626;
+  --radius:22px;
 }
 
 *{box-sizing:border-box;font-family:Inter}
-html,body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  overflow-x:hidden;
-}
+body{margin:0;background:var(--bg);color:var(--text);overflow-x:hidden}
 
 /* HEADER */
 header{
@@ -37,12 +32,12 @@ header{
   border-bottom:1px solid var(--border);
   position:sticky;
   top:0;
-  z-index:20;
+  z-index:10;
 }
 .header{
   max-width:1200px;
   margin:auto;
-  padding:16px 20px;
+  padding:18px 20px;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -55,36 +50,36 @@ header{
 /* HERO */
 .hero{
   max-width:1200px;
-  margin:24px auto;
+  margin:30px auto;
   padding:0 20px;
   display:grid;
   grid-template-columns:1.2fr .8fr;
-  gap:24px;
+  gap:30px;
 }
 .hero-box{
   background:linear-gradient(135deg,#ff6a00,#ff9a57);
   color:#fff;
-  border-radius:28px;
-  padding:32px;
+  border-radius:36px;
+  padding:40px;
 }
 .hero-box h2{
-  font-size:34px;
-  margin-bottom:10px;
+  font-size:40px;
+  margin-bottom:12px;
 }
 .hero-box p{
-  font-size:15px;
+  font-size:16px;
   opacity:.95;
 }
 .hero-img{
   background:#fff;
-  border-radius:28px;
+  border-radius:36px;
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 20px 60px rgba(0,0,0,.12);
+  box-shadow:0 30px 80px rgba(0,0,0,.12);
 }
 .hero-img i{
-  font-size:110px;
+  font-size:120px;
   color:var(--primary);
 }
 
@@ -94,89 +89,81 @@ header{
   margin:auto;
   padding:0 20px;
   display:grid;
-  grid-template-columns:2fr 1fr 1fr;
+  grid-template-columns:2fr 1fr 1fr 1fr;
   gap:10px;
 }
-.filters input{
+.filters input,.filters select{
   padding:14px;
   border-radius:14px;
   border:1px solid var(--border);
   font-size:14px;
 }
 
-/* GRID */
+/* LIST */
 .list{
   max-width:1200px;
   margin:30px auto 80px;
   padding:0 20px;
   display:grid;
-  gap:16px;
-}
-
-/* MOBILE: 2 POR LINHA */
-@media(max-width:600px){
-  .list{grid-template-columns:repeat(2,1fr)}
-}
-
-/* MOBILE GRANDE: 3 POR LINHA */
-@media(min-width:601px) and (max-width:900px){
-  .list{grid-template-columns:repeat(3,1fr)}
-}
-
-/* DESKTOP */
-@media(min-width:901px){
-  .list{grid-template-columns:repeat(4,1fr)}
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:20px;
 }
 
 /* CARD */
 .card{
   background:var(--card);
-  border-radius:22px;
-  padding:16px;
-  box-shadow:0 12px 34px rgba(0,0,0,.08);
-  display:flex;
-  flex-direction:column;
+  border-radius:26px;
+  padding:18px;
+  box-shadow:0 14px 40px rgba(0,0,0,.08);
+  transition:.3s;
 }
+.card:hover{transform:translateY(-6px)}
 .logo{
-  width:64px;
-  height:64px;
+  width:64px;height:64px;
   border-radius:50%;
   background:#eee center/cover;
   margin-bottom:10px;
 }
 .card h3{
-  font-size:15px;
+  font-size:16px;
   font-weight:800;
-  margin-bottom:4px;
 }
 .card small{
-  font-size:12px;
   color:var(--muted);
-}
-.status{
-  margin:10px 0;
   font-size:12px;
+}
+.badges{
+  display:flex;
+  gap:8px;
+  margin:10px 0;
+  flex-wrap:wrap;
+}
+.badge{
+  font-size:11px;
+  padding:6px 10px;
+  border-radius:999px;
   font-weight:700;
 }
-.status.open{color:var(--open)}
-.status.closed{color:var(--closed)}
+.open{background:#dcfce7;color:#166534}
+.closed{background:#fee2e2;color:#991b1b}
+.prod{background:#ede9fe;color:#5b21b6}
+.serv{background:#e0f2fe;color:#075985}
 
 .card button{
-  margin-top:auto;
   width:100%;
   padding:12px;
   border:none;
   border-radius:999px;
-  background:var(--primary);
-  color:#fff;
+  background:var(--accent);
   font-weight:800;
   cursor:pointer;
 }
 
-/* RESPONSIVE HERO */
+/* RESPONSIVE */
 @media(max-width:900px){
   .hero{grid-template-columns:1fr}
-  .hero-box h2{font-size:28px}
+  .hero-box h2{font-size:30px}
+  .filters{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
@@ -191,8 +178,8 @@ header{
 
 <section class="hero">
   <div class="hero-box">
-    <h2>Agende com os melhores</h2>
-    <p>Um único cadastro funciona em todas as lojas.</p>
+    <h2>Agende com os melhores perto de você</h2>
+    <p>Um único cadastro funciona em todas as lojas disponíveis.</p>
   </div>
   <div class="hero-img">
     <i class="ri-store-2-line"></i>
@@ -200,9 +187,14 @@ header{
 </section>
 
 <section class="filters">
-  <input id="fNome" placeholder="Buscar por nome">
+  <input id="fNome" placeholder="Buscar loja">
   <input id="fCidade" placeholder="Cidade">
   <input id="fHora" type="time">
+  <select id="fStatus">
+    <option value="">Aberta ou fechada</option>
+    <option value="open">Aberta agora</option>
+    <option value="closed">Fechada</option>
+  </select>
 </section>
 
 <section class="list" id="lista"></section>
@@ -213,102 +205,74 @@ const sb = supabase.createClient(
  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-let lojas = [];
+let lojas=[];
 
-/* STATUS DE AGENDA CORRETO */
+/* STATUS AGENDA REAL */
 async function statusAgenda(lojaId){
-  const agora = new Date();
-  const hoje = agora.toISOString().slice(0,10);
+  const hoje = new Date();
+  const hojeStr = hoje.toISOString().slice(0,10);
 
   const { data } = await sb
     .from("agenda_loja")
-    .select("data,fechado,horarios")
+    .select("*")
     .eq("user_id",lojaId)
-    .gte("data",hoje)
+    .gte("data",hojeStr)
     .order("data",{ascending:true});
 
-  if(!data || !data.length)
-    return { text:"Fechada", cls:"closed" };
+  if(!data?.length) return {label:"Fechada",cls:"closed"};
 
   for(const d of data){
     if(d.fechado) continue;
-
-    for(const h of d.horarios || []){
+    for(const h of d.horarios||[]){
       const ini = new Date(`${d.data}T${h.inicio}`);
       const fim = new Date(`${d.data}T${h.fim}`);
-
-      if(agora >= ini && agora <= fim)
-        return { text:"Aberta agora", cls:"open" };
-
-      if(d.data === hoje && agora < ini)
-        return { text:`Abre hoje às ${h.inicio}`, cls:"closed" };
+      if(hoje>=ini && hoje<=fim)
+        return {label:"Aberta agora",cls:"open"};
+      if(d.data===hojeStr && hoje<ini)
+        return {label:`Abre hoje ${h.inicio}`,cls:"closed"};
     }
-
-    return {
-      text:`Abre ${new Date(d.data).toLocaleDateString()} às ${d.horarios?.[0]?.inicio}`,
-      cls:"closed"
-    };
+    return {label:`Abre ${d.data} ${d.horarios?.[0]?.inicio||""}`,cls:"closed"};
   }
-
-  return { text:"Fechada", cls:"closed" };
+  return {label:"Fechada",cls:"closed"};
 }
 
-/* LOAD LOJAS */
-async function carregar(){
-  const { data } = await sb
-    .from("user_profile")
-    .select("user_id,negocio,tipo,cidade,uf,avatar_url,status")
+/* LOAD */
+(async()=>{
+  const { data } = await sb.from("user_profile")
+    .select("*")
     .eq("status","active");
 
-  lojas = data || [];
+  lojas=data||[];
   render();
-}
+})();
 
-/* RENDER */
 async function render(){
   lista.innerHTML="";
   for(const l of lojas){
     if(fNome.value && !l.negocio.toLowerCase().includes(fNome.value.toLowerCase())) continue;
-    if(fCidade.value && l.cidade?.toLowerCase() !== fCidade.value.toLowerCase()) continue;
+    if(fCidade.value && l.cidade?.toLowerCase()!==fCidade.value.toLowerCase()) continue;
 
     const st = await statusAgenda(l.user_id);
 
-    lista.innerHTML += `
+    lista.innerHTML+=`
       <div class="card">
         <div class="logo" style="background-image:url('${l.avatar_url||""}')"></div>
         <h3>${l.negocio}</h3>
         <small>${l.tipo} • ${l.cidade}/${l.uf}</small>
-        <div class="status ${st.cls}">${st.text}</div>
-        <button onclick="entrar('${l.user_id}')">Entrar</button>
+
+        <div class="badges">
+          <div class="badge ${st.cls}">${st.label}</div>
+        </div>
+
+        <button onclick="location.href='app.html?l=${l.user_id}'">
+          Entrar
+        </button>
       </div>
     `;
   }
 }
 
-/* ENTRAR NA LOJA */
-async function entrar(lojaId){
-  const { data:{user} } = await sb.auth.getUser();
-
-  const { data:perfil } = await sb
-    .from("clientes_profile")
-    .select("lojas")
-    .eq("id",user.id)
-    .single();
-
-  const lojasCliente = perfil?.lojas || [];
-  if(!lojasCliente.includes(lojaId)) lojasCliente.push(lojaId);
-
-  await sb.from("clientes_profile").update({
-    lojas:lojasCliente,
-    loja_ativa:lojaId
-  }).eq("id",user.id);
-
-  location.href = `app.html?l=${lojaId}`;
-}
-
-[fNome,fCidade,fHora].forEach(i=>i.addEventListener("input",render));
-
-carregar();
+[fNome,fCidade,fHora,fStatus].forEach(i=>i.addEventListener("input",render));
 </script>
 
 </body>
