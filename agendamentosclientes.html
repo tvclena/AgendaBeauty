@@ -13,7 +13,7 @@
 :root{
   --primary:#ff6a00;
   --bg:#f4f6fb;
-  --card:#fff;
+  --card:#ffffff;
   --border:#e5e7eb;
   --text:#111827;
   --muted:#6b7280;
@@ -25,7 +25,7 @@
 html,body{margin:0;background:var(--bg)}
 
 .header{
-  height:56px;
+  height:58px;
   background:#fff;
   border-bottom:1px solid var(--border);
   display:flex;
@@ -38,21 +38,21 @@ html,body{margin:0;background:var(--bg)}
 }
 
 .container{
-  padding:16px;
+  padding:18px;
   display:flex;
   flex-direction:column;
-  gap:16px;
+  gap:18px;
 }
 
-/* ================= CARD ================= */
+/* ===== CARD ===== */
 .card{
-  background:#fff;
+  background:var(--card);
   border-radius:22px;
-  padding:16px;
-  box-shadow:0 14px 40px rgba(0,0,0,.12);
+  padding:18px;
+  box-shadow:0 12px 36px rgba(0,0,0,.12);
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:14px;
 }
 
 .row{
@@ -61,41 +61,69 @@ html,body{margin:0;background:var(--bg)}
   align-items:center;
 }
 
-.title{font-weight:800;font-size:17px}
+.title{
+  font-weight:800;
+  font-size:18px;
+}
 
 .badge{
   background:rgba(255,106,0,.15);
   color:var(--primary);
-  padding:6px 12px;
+  padding:6px 14px;
   border-radius:999px;
   font-size:12px;
-  font-weight:700;
+  font-weight:800;
 }
 
-.info{font-size:14px;color:var(--muted)}
-.price{font-weight:800;color:var(--primary)}
+.info{
+  font-size:14px;
+  color:var(--muted);
+}
+
+.time{
+  font-size:16px;
+  font-weight:700;
+  color:var(--text);
+}
 
 .actions{
   display:flex;
-  gap:10px;
+  gap:12px;
 }
 
 button{
   flex:1;
-  padding:12px;
+  padding:13px;
   border-radius:14px;
   border:none;
   font-weight:800;
   cursor:pointer;
+  font-size:14px;
 }
 
-.btn-outline{background:#fff;border:1px solid var(--border)}
-.btn-danger{background:#fee2e2;color:var(--danger)}
-.btn-primary{background:var(--primary);color:#fff}
+.btn-outline{
+  background:#fff;
+  border:1px solid var(--border);
+}
 
-button:disabled{opacity:.45}
+.btn-danger{
+  background:#fee2e2;
+  color:var(--danger);
+}
 
-/* ================= OVERLAY ================= */
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+/* ===== BLOQUEIO ===== */
+.lock{
+  color:var(--danger);
+  font-size:13px;
+  font-weight:700;
+}
+
+/* ===== OVERLAY ===== */
 .overlay{
   position:fixed;
   inset:0;
@@ -105,23 +133,25 @@ button:disabled{opacity:.45}
   justify-content:center;
   z-index:9999;
 }
+
 .hidden{display:none}
 
 .modal{
   background:#fff;
   width:100%;
   max-width:420px;
-  max-height:85vh;
+  max-height:88vh;
   overflow-y:auto;
-  border-radius:22px;
-  padding:16px;
+  border-radius:24px;
+  padding:18px;
 }
 
-/* ================= SERVICES ================= */
+/* ===== SERVIÇOS ===== */
 .services{
   display:flex;
   gap:14px;
   overflow-x:auto;
+  margin-top:14px;
 }
 .services::-webkit-scrollbar{display:none}
 
@@ -140,15 +170,18 @@ button:disabled{opacity:.45}
   object-fit:cover;
 }
 
-.service-info{padding:10px}
+.service-info{
+  padding:10px;
+}
 .service-name{font-weight:800}
 .service-price{color:var(--primary);font-weight:700}
 
-/* ================= GRID ================= */
+/* ===== GRID ===== */
 .grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:12px;
+  margin-top:16px;
 }
 
 .item{
@@ -170,7 +203,7 @@ button:disabled{opacity:.45}
 <div class="container" id="lista"></div>
 
 <script>
-/* ================= SUPABASE ================= */
+/* ===== SUPABASE ===== */
 const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
@@ -180,215 +213,80 @@ const lojaId = new URLSearchParams(location.search).get("l");
 const clienteWhats = localStorage.getItem("WHATS_CLIENTE");
 const lista = document.getElementById("lista");
 
-/* ================= UTILS ================= */
+/* ===== UTILS ===== */
 const toMin = h => { const [a,b]=h.split(":").map(Number); return a*60+b; }
 const toHour = m => String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
 
 function dateLocal(dataISO){
   const [y,m,d] = dataISO.split("-");
-  return new Date(Number(y), Number(m)-1, Number(d));
+  return new Date(y, m-1, d);
 }
-
-function diaSemana(data){
-  return ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][dateLocal(data).getDay()];
-}
-
-function diaNumero(data){
-  return dateLocal(data).getDate();
-}
-
 function minutosAte(data, hora){
   const [h,m] = hora.split(":").map(Number);
   const d = dateLocal(data);
-  d.setHours(h, m, 0, 0);
+  d.setHours(h,m,0,0);
   return Math.floor((d - new Date()) / 60000);
 }
 
-/* ================= LOAD ================= */
+/* ===== LOAD ===== */
 async function carregar(){
   const { data: ags } = await sb
     .from("agendamentos")
-    .select("id,data,hora_inicio,hora_fim,servico_id")
+    .select("id,data,hora_inicio,hora_fim,servico_id,status")
     .eq("loja_id",lojaId)
     .eq("cliente_whatsapp",clienteWhats)
     .neq("status","cancelado");
 
   const { data: servs } = await sb
     .from("produtos_servicos")
-    .select("id,nome,preco");
+    .select("id,nome");
 
   const mapa = {};
-  servs.forEach(s=>mapa[s.id]=s);
+  servs.forEach(s=>mapa[s.id]=s.nome);
 
- lista.innerHTML = ags.map(a=>{
-  const mins = minutosAte(a.data, a.hora_inicio);
-  const bloqueado = mins < 40;
+  lista.innerHTML = ags.map(a=>{
+    const mins = minutosAte(a.data, a.hora_inicio);
+    const bloqueado = mins < 40;
 
-  return `
-    <div class="card">
-      <div class="row">
-        <div class="title">${mapa[a.servico_id]?.nome}</div>
-        <div class="badge">${dateLocal(a.data).toLocaleDateString()}</div>
-      </div>
-
-      <div class="info">⏰ ${a.hora_inicio} - ${a.hora_fim}</div>
-
-      <div class="actions">
-        <button class="btn-outline"
-          ${bloqueado ? "disabled" : ""}
-          onclick="alterar('${a.id}','${a.servico_id}')">
-          Alterar
-        </button>
-
-        <button class="btn-danger"
-          ${bloqueado ? "disabled" : ""}
-          onclick="cancelar('${a.id}')">
-          Cancelar
-        </button>
-      </div>
-
-      ${bloqueado ? `
-        <div class="info" style="color:#ef4444">
-          🔒 Bloqueado (menos de 40 minutos)
+    return `
+      <div class="card">
+        <div class="row">
+          <div class="title">${mapa[a.servico_id] || "Serviço"}</div>
+          <div class="badge">${dateLocal(a.data).toLocaleDateString()}</div>
         </div>
-      ` : ""}
-    </div>
-  `;
-}).join("");
 
+        <div class="info">Horário</div>
+        <div class="time">${a.hora_inicio} - ${a.hora_fim}</div>
+
+        <div class="actions">
+          <button class="btn-outline"
+            ${bloqueado?"disabled":""}
+            onclick="alterar('${a.id}','${a.servico_id}')">
+            Alterar
+          </button>
+
+          <button class="btn-danger"
+            ${bloqueado?"disabled":""}
+            onclick="cancelar('${a.id}')">
+            Cancelar
+          </button>
+        </div>
+
+        ${bloqueado?`<div class="lock">🔒 Alterações permitidas até 40 minutos antes</div>`:""}
+      </div>
+    `;
+  }).join("");
 }
 
-/* ================= CANCELAR ================= */
 async function cancelar(id){
-  if(!confirm("Deseja cancelar?")) return;
+  if(!confirm("Deseja cancelar este agendamento?")) return;
   await sb.from("agendamentos").update({status:"cancelado"}).eq("id",id);
   carregar();
 }
 
-/* ================= ALTERAR ================= */
-let agendamentoAtual, servicoAtual, duracaoAtual, dataEscolhida, horaEscolhida;
-
-async function alterar(id, servicoId){
-  agendamentoAtual = id;
-  servicoAtual = servicoId;
-
-  document.getElementById("overlay").classList.remove("hidden");
-
-  const { data: servicos } = await sb
-    .from("produtos_servicos")
-    .select("id,nome,preco,imagem_url,duracao_minutos")
-    .eq("ativo",true)
-    .eq("user_id",lojaId);
-
-  document.getElementById("services").innerHTML = servicos.map(s=>`
-    <div class="service ${s.id===servicoAtual?'selected':''}"
-      onclick="selecionarServico(this,${JSON.stringify(s).replace(/"/g,'&quot;')})">
-      <img src="${s.imagem_url}">
-      <div class="service-info">
-        <div class="service-name">${s.nome}</div>
-        <div class="service-price">R$ ${s.preco}</div>
-      </div>
-    </div>
-  `).join("");
-
-  const el = document.querySelector(".service.selected");
-  el?.scrollIntoView({behavior:"smooth",inline:"center"});
-  selecionarServico(el, servicos.find(s=>s.id===servicoAtual));
-}
-
-async function selecionarServico(el, s){
-  duracaoAtual = s.duracao_minutos;
-  document.querySelectorAll(".service").forEach(x=>x.classList.remove("selected"));
-  el.classList.add("selected");
-
-  const { data: agenda } = await sb
-    .from("agenda_loja")
-    .select("*")
-    .eq("user_id",lojaId)
-    .eq("fechado",false);
-
-  document.getElementById("days").innerHTML = agenda.map(d=>`
-    <div class="item" onclick="selecionarDia(this,'${d.data}',${JSON.stringify(d.horarios).replace(/"/g,'&quot;')})">
-      <div>${diaNumero(d.data)}</div>
-      <div style="font-size:12px;color:#6b7280">${diaSemana(d.data)}</div>
-    </div>
-  `).join("");
-}
-
-async function selecionarDia(el,data,horarios){
-  document.querySelectorAll("#days .item").forEach(x=>x.classList.remove("selected"));
-  el.classList.add("selected");
-  dataEscolhida = data;
-
-  const blocos = typeof horarios==="string"?JSON.parse(horarios):horarios;
-
-  const { data: ags } = await sb
-    .from("agendamentos")
-    .select("hora_inicio,hora_fim")
-    .eq("user_id",lojaId)
-    .eq("data",data)
-    .neq("id",agendamentoAtual);
-
-  const ocupados = ags.map(a=>[toMin(a.hora_inicio),toMin(a.hora_fim)]);
-  const slots=[];
-
-  blocos.forEach(b=>{
-    let s=toMin(b.inicio), e=toMin(b.fim);
-    while(s+duracaoAtual<=e){
-      if(!ocupados.some(o=>!(s+duracaoAtual<=o[0]||s>=o[1]))){
-        slots.push(toHour(s));
-      }
-      s+=duracaoAtual;
-    }
-  });
-
-  document.getElementById("times").innerHTML = slots.map(h=>`
-    <div class="item" onclick="selecionarHora(this,'${h}')">${h}</div>
-  `).join("");
-}
-
-function selecionarHora(el,h){
-  document.querySelectorAll("#times .item").forEach(x=>x.classList.remove("selected"));
-  el.classList.add("selected");
-  horaEscolhida = h;
-}
-
-async function confirmar(){
-  const fim = toHour(toMin(horaEscolhida)+duracaoAtual);
-  await sb.from("agendamentos").update({
-    data:dataEscolhida,
-    hora_inicio:horaEscolhida,
-    hora_fim:fim
-  }).eq("id",agendamentoAtual);
-
-  document.getElementById("sucesso").classList.remove("hidden");
-}
-
-/* ================= INIT ================= */
+/* ===== INIT ===== */
 carregar();
 </script>
-
-<!-- ================= OVERLAY ================= -->
-<div class="overlay hidden" id="overlay">
-  <div class="modal">
-    <div class="title">Alterar agendamento</div>
-
-    <div class="services" id="services"></div>
-
-    <div class="grid" id="days" style="margin-top:16px"></div>
-    <div class="grid" id="times" style="margin-top:16px"></div>
-
-    <button class="btn-primary" onclick="confirmar()">Salvar alterações</button>
-    <button class="btn-outline" onclick="location.reload()">Fechar</button>
-  </div>
-</div>
-
-<div class="overlay hidden" id="sucesso">
-  <div class="modal">
-    <div style="font-weight:800;font-size:18px">✅ Alterações salvas com sucesso</div>
-    <button class="btn-primary" onclick="location.reload()">OK</button>
-  </div>
-</div>
 
 </body>
 </html>
