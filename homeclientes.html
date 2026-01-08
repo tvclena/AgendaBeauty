@@ -10,12 +10,12 @@
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  
 <style>
 :root{
   --primary:#ff6a00;
+  --primary-2:#ff9a57;
   --bg:#f4f6fb;
-  --card:#fff;
+  --card:#ffffff;
   --border:#e5e7eb;
   --text:#111827;
   --muted:#6b7280;
@@ -26,7 +26,7 @@ body{margin:0;background:var(--bg);padding:16px}
 
 /* ================= BANNER ================= */
 .banner{
-  background:linear-gradient(135deg,#ff6a00,#ff9a57);
+  background:linear-gradient(135deg,var(--primary),var(--primary-2));
   border-radius:22px;
   padding:18px;
   color:#fff;
@@ -53,10 +53,8 @@ body{margin:0;background:var(--bg);padding:16px}
 .banner-logo img{
   width:100%;
   height:100%;
-  object-fit:cover; /* preenche mantendo proporção */
+  object-fit:cover;
 }
-
-
 
 .banner h1{font-size:18px;font-weight:800}
 .banner p{font-size:13px;opacity:.9}
@@ -176,19 +174,17 @@ body{margin:0;background:var(--bg);padding:16px}
 
 <body>
 
-<!-- BANNER -->
 <div class="banner">
   <div class="banner-top">
-<div class="banner-logo">
-  <img id="logo" alt="Logo da loja">
-</div>
- <div>
-  <h1 id="nomeLoja">Carregando…</h1>
-  <p id="cidadeLoja"></p>
-  <p id="enderecoLoja"></p>
-  <p id="whatsLoja"></p>
-</div>
-
+    <div class="banner-logo">
+      <img id="logo">
+    </div>
+    <div>
+      <h1 id="nomeLoja">Carregando…</h1>
+      <p id="cidadeLoja"></p>
+      <p id="enderecoLoja"></p>
+      <p id="whatsLoja"></p>
+    </div>
   </div>
 
   <div class="banner-chips">
@@ -198,18 +194,15 @@ body{margin:0;background:var(--bg);padding:16px}
   </div>
 </div>
 
-<!-- SEARCH -->
 <div class="search">
   <input id="busca" placeholder="Buscar produto ou serviço">
 </div>
 
-<!-- TABS -->
 <div class="tabs">
-  <button id="tabServicos" class="active" onclick="setTab('SERVICO')">Serviços</button>
+  <button id="tabServicos" onclick="setTab('SERVICO')">Serviços</button>
   <button id="tabProdutos" onclick="setTab('PRODUTO')">Produtos</button>
 </div>
 
-<!-- GRID -->
 <div id="grid" class="grid"></div>
 
 <script>
@@ -219,86 +212,62 @@ const sb = supabase.createClient(
 );
 
 const lojaId = new URLSearchParams(location.search).get("l");
+if(!lojaId){
+  document.body.innerHTML = "<p style='text-align:center'>Loja não identificada</p>";
+  throw new Error("Sem loja");
+}
+
 let todos = [];
 let tipoAtual = null;
 
-const logo = document.getElementById("logo");
-const nomeLoja = document.getElementById("nomeLoja");
-const cidadeLoja = document.getElementById("cidadeLoja");
-const enderecoLoja = document.getElementById("enderecoLoja");
-const whatsLoja = document.getElementById("whatsLoja");
-
-
-
-  
 /* ================= LOAD ================= */
 async function load(){
 
-  /* ===== LOJA ===== */
-  const { data: loja } = await sb
-    .from("user_profile")
-    .select(`
-      negocio,
-      avatar_url,
-      rua,
-      numero,
-      bairro,
-      cep,
-      cidade,
-      uf,
-      whatsapp
-    `)
-    .eq("user_id", lojaId)
-    .single();
+  /* CONFIG DE CORES */
+  const { data:config } = await sb
+    .from("loja_config")
+    .select("primary_color,secondary_color")
+    .eq("user_id",lojaId)
+    .maybeSingle();
 
-  if(loja){
-    nomeLoja.innerText = loja.negocio || "Agenda Fácil";
-    cidadeLoja.innerText = `${loja.cidade || ""} • ${loja.uf || ""}`;
-    enderecoLoja.innerText = `
-      ${loja.rua || ""}, ${loja.numero || ""}
-      • ${loja.bairro || ""}
-      • CEP ${loja.cep || ""}
-    `;
-    if(loja.whatsapp){
-      whatsLoja.innerText = `📲 ${loja.whatsapp}`;
-    }
-if (loja.avatar_url) {
-  logo.src = loja.avatar_url;
-    }
+  if(config?.primary_color){
+    document.documentElement.style.setProperty("--primary",config.primary_color);
+  }
+  if(config?.secondary_color){
+    document.documentElement.style.setProperty("--primary-2",config.secondary_color);
   }
 
-  /* ===== PRODUTOS / SERVIÇOS ===== */
+  /* LOJA */
+  const { data:loja } = await sb
+    .from("user_profile")
+    .select("*")
+    .eq("user_id",lojaId)
+    .single();
+
+  nomeLoja.innerText = loja.negocio;
+  cidadeLoja.innerText = `${loja.cidade} • ${loja.uf}`;
+  enderecoLoja.innerText = `${loja.rua || ""}, ${loja.numero || ""}`;
+  whatsLoja.innerText = loja.whatsapp ? `📲 ${loja.whatsapp}` : "";
+  if(loja.avatar_url) logo.src = loja.avatar_url;
+
+  /* PRODUTOS */
   const { data } = await sb
     .from("produtos_servicos")
     .select("*")
-    .eq("user_id", lojaId)
-    .eq("ativo", true)
+    .eq("user_id",lojaId)
+    .eq("ativo",true)
     .order("ordem_exibicao");
 
   todos = data || [];
 
-  // 👉 VERIFICA EXISTÊNCIA
-  const temServicos = todos.some(i => i.tipo === "SERVICO");
-  const temProdutos = todos.some(i => i.tipo === "PRODUTO");
+  const temServ = todos.some(i=>i.tipo==="SERVICO");
+  const temProd = todos.some(i=>i.tipo==="PRODUTO");
 
-  // 👉 CONTROLA VISIBILIDADE DAS TABS
-  tabServicos.style.display = temServicos ? "inline-block" : "none";
-  tabProdutos.style.display = temProdutos ? "inline-block" : "none";
+  tabServicos.style.display = temServ ? "inline-block" : "none";
+  tabProdutos.style.display = temProd ? "inline-block" : "none";
 
-  // 👉 DEFINE TAB INICIAL
-  if(temServicos){
-    tipoAtual = "SERVICO";
-    tabServicos.classList.add("active");
-    tabProdutos.classList.remove("active");
-  } else if(temProdutos){
-    tipoAtual = "PRODUTO";
-    tabProdutos.classList.add("active");
-    tabServicos.classList.remove("active");
-  } else {
-    tipoAtual = null;
-  }
-
-  render();
+  tipoAtual = temServ ? "SERVICO" : temProd ? "PRODUTO" : null;
+  setTab(tipoAtual);
 }
 
 /* ================= RENDER ================= */
@@ -306,73 +275,50 @@ function render(){
   const q = busca.value.toLowerCase();
   grid.innerHTML = "";
 
-  if(!tipoAtual){
-    grid.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;color:#6b7280;padding:24px">
-        Nenhum produto ou serviço disponível no momento
-      </div>
-    `;
-    return;
-  }
-
   const lista = todos
-    .filter(i => i.tipo === tipoAtual)
-    .filter(i => i.nome.toLowerCase().includes(q));
+    .filter(i=>i.tipo===tipoAtual)
+    .filter(i=>i.nome.toLowerCase().includes(q));
 
-  if(lista.length === 0){
-    grid.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;color:#6b7280;padding:24px">
-        Nenhum item encontrado
-      </div>
-    `;
+  if(!lista.length){
+    grid.innerHTML = "<p style='grid-column:1/-1;text-align:center'>Nenhum item</p>";
     return;
   }
 
-  grid.innerHTML = lista.map(i => `
+  grid.innerHTML = lista.map(i=>`
     <div class="card">
       <div style="position:relative">
-        ${i.promocao_ativa ? `<div class="badge">Promoção</div>` : ``}
-        <img src="${i.imagem_url || ''}">
+        ${i.promocao_ativa ? `<div class="badge">Promoção</div>`:""}
+        <img src="${i.imagem_url||""}">
       </div>
       <div class="card-body">
         <strong>${i.nome}</strong>
         <div class="meta">
-          <span>${i.tipo === "SERVICO" ? `⏱ ${i.duracao_minutos || 0} min` : "📦 Produto"}</span>
-          <span class="price">
-            ${
-              i.promocao_ativa
-                ? `<span class="old">R$ ${Number(i.preco).toFixed(0)}</span> R$ ${Number(i.preco_promocional).toFixed(0)}`
-                : `R$ ${Number(i.preco).toFixed(0)}`
-            }
-          </span>
+          <span>${i.tipo==="SERVICO" ? `⏱ ${i.duracao_minutos||0} min`:"📦 Produto"}</span>
+          <span class="price">R$ ${Number(i.preco).toFixed(0)}</span>
         </div>
-        ${
-          i.tipo === "SERVICO"
-            ? `<button onclick="agendar('${i.id}')">Agendar</button>`
-            : `<button onclick="comprar('${i.id}')">Comprar</button>`
-        }
+        <button onclick="acao('${i.id}','${i.tipo}')">
+          ${i.tipo==="SERVICO"?"Agendar":"Comprar"}
+        </button>
       </div>
     </div>
   `).join("");
 }
 
-/* ================= AÇÕES ================= */
-function setTab(tipo){
-  tipoAtual = tipo;
-  tabServicos.classList.toggle("active", tipo === "SERVICO");
-  tabProdutos.classList.toggle("active", tipo === "PRODUTO");
+function setTab(t){
+  tipoAtual=t;
+  tabServicos.classList.toggle("active",t==="SERVICO");
+  tabProdutos.classList.toggle("active",t==="PRODUTO");
   render();
 }
 
-function agendar(id){
-  location.href = `agendar.html?l=${lojaId}&servico=${id}`;
+function acao(id,tipo){
+  if(tipo==="SERVICO")
+    location.href=`agendar.html?l=${lojaId}&servico=${id}`;
+  else
+    alert("Checkout em breve");
 }
 
-function comprar(id){
-  alert("Checkout será configurado na próxima etapa.");
-}
-
-busca.addEventListener("input", render);
+busca.addEventListener("input",render);
 load();
 </script>
 
