@@ -221,6 +221,8 @@ sb.auth.onAuthStateChange((_event, session) => {
 const lojaId = new URLSearchParams(location.search).get("l");
 const servicoPreSelecionado =
   new URLSearchParams(location.search).get("servico");
+const alterarId =
+  new URLSearchParams(location.search).get("alterar");
 
 ;
 
@@ -533,17 +535,35 @@ async function confirmar(h){
 
   const fim = toHour(toMin(h) + duracao);
 
-  const { error } = await sb.from("agendamentos").insert({
-    user_id: lojaId,
-    loja_id: lojaId,
+  const payload = {
     servico_id: dados.servico,
     valor_servico: dados.valor_servico,
     data: dados.data,
     hora_inicio: h,
     hora_fim: fim,
     cliente_nome: cliente.nome,
-    cliente_whatsapp: cliente.whatsapp // ✅ GARANTIDO
-  });
+    cliente_whatsapp: cliente.whatsapp
+  };
+
+  let query = sb.from("agendamentos");
+
+  // ✏️ ALTERAÇÃO
+  if(alterarId){
+    query = query
+      .update(payload)
+      .eq("id", alterarId)
+      .eq("loja_id", lojaId);
+  }
+  // ➕ NOVO AGENDAMENTO
+  else{
+    query = query.insert({
+      ...payload,
+      user_id: lojaId,
+      loja_id: lojaId
+    });
+  }
+
+  const { error } = await query;
 
   if(error){
     alert("❌ Erro ao salvar o agendamento.\n" + error.message);
@@ -551,14 +571,11 @@ async function confirmar(h){
     return;
   }
 
-  // sucesso…
-}
-
-
+  // ✅ CONFIRMAÇÃO VISUAL
   document.body.insertAdjacentHTML("beforeend", `
     <div class="overlay" id="overlayConfirm">
       <div class="msg-final">
-        ✅ <strong>Agendamento confirmado!</strong><br><br>
+        ✅ <strong>${alterarId ? "Agendamento atualizado!" : "Agendamento confirmado!"}</strong><br><br>
 
         Serviço: <b>${dados.servico_nome}</b><br>
         Data: <b>${dados.data}</b><br>
@@ -576,6 +593,7 @@ async function confirmar(h){
     </div>
   `);
 }
+
 
 (async ()=>{
   await verificarLogin();
@@ -616,6 +634,8 @@ function getCliente(){
       usuarioLogado.user_metadata?.whatsapp ||
       usuarioLogado.user_metadata?.phone ||
       null;
+
+    if(!whatsapp) return null; // 🔒 força modal
 
     return {
       nome,
