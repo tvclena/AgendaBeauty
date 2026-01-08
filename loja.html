@@ -3,176 +3,226 @@
 <head>
 <meta charset="UTF-8">
 <title>Agenda Fácil</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#ff6a00">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* ===== ESTILO ===== */
 :root{
   --primary:#ff6a00;
-  --border:#e5e7eb;
-  --bg:#f4f6fb;
+  --bg:#0b0b0b;
+  --card:rgba(255,255,255,.92);
+  --border:rgba(255,255,255,.18);
   --text:#111827;
   --muted:#6b7280;
 }
+
 *{box-sizing:border-box;font-family:Inter}
-html,body{margin:0;height:100%;background:var(--bg)}
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:#000;
+  overflow:hidden;
+}
 
-.topbar{
-  height:64px;
-  background:#fff;
-  border-bottom:1px solid var(--border);
+/* FUNDO DA LOJA */
+.bg{
+  position:fixed;
+  inset:0;
+  background-size:cover;
+  background-position:center;
+  filter:brightness(.55);
+  transform:scale(1.05);
+}
+
+/* OVERLAY FOSCO */
+.overlay{
+  position:fixed;
+  inset:0;
+  backdrop-filter:blur(12px);
+  background:rgba(0,0,0,.45);
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  padding:0 18px;
+  justify-content:center;
+  z-index:10;
 }
-.avatar{
-  width:40px;height:40px;border-radius:50%;
-  background:linear-gradient(135deg,#ff6a00,#ff9a57);
-  color:#fff;font-weight:800;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
-}
-.content{
-  position:fixed;
-  top:64px;bottom:72px;left:0;right:0;
-  background:#fff;
-}
-iframe{width:100%;height:100%;border:none}
 
-.navbar{
-  position:fixed;
-  bottom:0;left:0;right:0;
-  height:72px;
-  background:#fff;
-  border-top:1px solid var(--border);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
+/* CARD LOGIN */
+.card{
+  width:92%;
+  max-width:380px;
+  background:var(--card);
+  border-radius:26px;
+  padding:26px;
+  box-shadow:0 30px 80px rgba(0,0,0,.45);
+  animation:up .5s ease;
 }
-.nav-item{
-  font-size:11px;
+
+@keyframes up{
+  from{transform:translateY(30px);opacity:0}
+  to{transform:translateY(0);opacity:1}
+}
+
+.logo{
+  text-align:center;
+  margin-bottom:14px;
+}
+.logo img{
+  width:84px;
+  height:84px;
+  border-radius:22px;
+  object-fit:cover;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+
+h1{
+  text-align:center;
+  font-size:22px;
+  font-weight:800;
+  margin:10px 0 6px;
+}
+p{
+  text-align:center;
+  font-size:14px;
   color:var(--muted);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:4px;
+  margin-bottom:18px;
 }
-.nav-item.active{color:var(--primary)}
+
+input{
+  width:100%;
+  padding:14px 16px;
+  border-radius:16px;
+  border:1px solid #e5e7eb;
+  font-size:15px;
+  margin-bottom:12px;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  border-radius:18px;
+  border:none;
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
+  color:#fff;
+  font-weight:800;
+  font-size:16px;
+  cursor:pointer;
+  margin-top:6px;
+}
+
+small{
+  display:block;
+  text-align:center;
+  margin-top:12px;
+  color:var(--muted);
+  font-size:12px;
+}
 </style>
 </head>
 
 <body>
 
-<div class="topbar">
-  <h1 id="nomeLoja">Agenda Fácil</h1>
-  <div class="avatar" id="avatar">?</div>
-</div>
+<div class="bg" id="bg"></div>
 
-<div class="content">
-  <iframe id="frame"></iframe>
-</div>
+<div class="overlay">
+  <div class="card">
+    <div class="logo">
+      <img id="logoLoja" src="https://via.placeholder.com/200">
+    </div>
 
-<nav class="navbar">
-  <div class="nav-item active" onclick="go(this,'homeclientes.html')">
-    <i class="ri-home-5-line"></i>Início
+    <h1 id="nomeLoja">Agenda Fácil</h1>
+    <p>Entre para continuar seu agendamento</p>
+
+    <input id="nome" placeholder="SEU NOME">
+    <input id="whats" placeholder="WHATSAPP">
+    <input id="email" placeholder="E-MAIL">
+    <input id="senha" type="password" placeholder="SENHA">
+
+    <button onclick="entrar()">Entrar</button>
+
+    <small>Se for seu primeiro acesso, criaremos sua conta automaticamente</small>
   </div>
-  <div class="nav-item" onclick="go(this,'agendar.html')">
-    <i class="ri-calendar-check-line"></i>Agendar
-  </div>
-  <div class="nav-item" onclick="go(this,'agendamentosclientes.html')">
-    <i class="ri-user-3-line"></i>Meu espaço
-  </div>
-</nav>
+</div>
 
 <script>
 /* ===== SUPABASE ===== */
 const sb = supabase.createClient(
- "https://egxjgmzukjyyxmkukwub.supabase.co",
- "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+  "https://egxjgmzukjyyxmkukwub.supabase.co",
+  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-const frame = document.getElementById("frame");
-const avatar = document.getElementById("avatar");
-const lojaParam = new URLSearchParams(location.search).get("l");
+const lojaId = new URLSearchParams(location.search).get("l");
 
-/* ===== AUTH FLOW ===== */
-async function init(){
-  const { data:{session} } = await sb.auth.getSession();
+/* ===== MÁSCARA WHATS ===== */
+whats.addEventListener("input",()=>{
+  let v = whats.value.replace(/\D/g,"").slice(0,11);
+  if(v.length > 6) v = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
+  else if(v.length > 2) v = `(${v.slice(0,2)}) ${v.slice(2)}`;
+  whats.value = v;
+});
 
-  if(!session){
-    // login simples (email magic link)
-    const email = prompt("Digite seu e-mail");
-    await sb.auth.signInWithOtp({ email });
-    alert("Enviamos um link para seu e-mail");
-    return;
-  }
-
-  const user = session.user;
-
-  // PERFIL
-  let { data:perfil } = await sb
-    .from("clientes_profile")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  if(!perfil){
-    perfil = {
-      id:user.id,
-      nome:"CLIENTE",
-      whatsapp:"",
-      lojas:[],
-      loja_ativa:null
-    };
-    await sb.from("clientes_profile").insert(perfil);
-  }
-
-  // DEFINIR LOJA ATIVA
-  if(lojaParam && !perfil.lojas.includes(lojaParam)){
-    perfil.lojas.push(lojaParam);
-    perfil.loja_ativa = lojaParam;
-    await sb.from("clientes_profile")
-      .update({lojas:perfil.lojas,loja_ativa:lojaParam})
-      .eq("id",user.id);
-  }
-
-  const lojaId = perfil.loja_ativa || lojaParam;
-  if(!lojaId){
-    alert("Nenhuma loja vinculada");
-    return;
-  }
-
-  // NOME DA LOJA (somente assinaturas ativas)
-  const { data:loja } = await sb
+/* ===== LOAD LOJA ===== */
+(async()=>{
+  const { data } = await sb
     .from("user_profile")
-    .select("negocio,assinatura_ativa")
+    .select("negocio,logo_url,capa_url")
     .eq("user_id",lojaId)
-    .eq("assinatura_ativa",true)
     .single();
 
-  if(!loja){
-    alert("Loja não disponível");
+  if(data){
+    nomeLoja.innerText = data.negocio;
+    if(data.logo_url) logoLoja.src = data.logo_url;
+    if(data.capa_url) bg.style.backgroundImage = `url('${data.capa_url}')`;
+  }
+
+  const { data:{session} } = await sb.auth.getSession();
+  if(session){
+    location.href = `app.html?l=${lojaId}`;
+  }
+})();
+
+/* ===== LOGIN / CADASTRO ===== */
+async function entrar(){
+  const nomeVal = nome.value.trim().toUpperCase();
+  const whatsVal = whats.value.replace(/\D/g,"");
+  const emailVal = email.value.trim();
+  const senhaVal = senha.value;
+
+  if(nomeVal.length<3 || whatsVal.length<10 || !emailVal || senhaVal.length<6){
+    alert("Preencha todos os campos corretamente");
     return;
   }
 
-  nomeLoja.innerText = loja.negocio;
-  avatar.innerText = user.email[0].toUpperCase();
-  frame.src = `homeclientes.html?l=${lojaId}`;
-}
+  let { error } = await sb.auth.signInWithPassword({
+    email: emailVal,
+    password: senhaVal
+  });
 
-function go(el,page){
-  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
-  el.classList.add("active");
-  frame.src = `${page}?l=${new URLSearchParams(location.search).get("l")}`;
-}
+  if(error){
+    const { error:err2 } = await sb.auth.signUp({
+      email: emailVal,
+      password: senhaVal
+    });
+    if(err2){ alert(err2.message); return; }
+  }
 
-init();
+  const { data:{user} } = await sb.auth.getUser();
+
+  await sb.from("clientes_profile")
+    .upsert({
+      id:user.id,
+      nome:nomeVal,
+      whatsapp:whatsVal,
+      email:emailVal,
+      loja_ativa:lojaId
+    });
+
+  location.href = `app.html?l=${lojaId}`;
+}
 </script>
 
 </body>
