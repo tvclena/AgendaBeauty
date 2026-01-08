@@ -216,10 +216,13 @@ let clienteWhats = null;
 const lista = document.getElementById("lista");
 try {
   const cliente = JSON.parse(localStorage.getItem("CLIENTE_LOJA"));
-  clienteWhats = cliente?.whatsapp || null;
-} catch (e) {
+  clienteWhats = cliente?.whatsapp
+    ? cliente.whatsapp.replace(/\D/g, "")
+    : null;
+} catch {
   clienteWhats = null;
 }
+
 
 /* ===== UTILS ===== */
 const toMin = h => { const [a,b]=h.split(":").map(Number); return a*60+b; }
@@ -266,7 +269,7 @@ async function carregar(){
 
   lista.innerHTML = ags.map(a=>{
     const mins = minutosAte(a.data, a.hora_inicio);
-    const bloqueado = mins < 40;
+const bloqueado = mins < 40 && mins >= 0;
 
     return `
       <div class="card">
@@ -306,6 +309,12 @@ async function cancelar(id){
 
 /* ===== INIT ===== */
 carregar();
+
+  function alterar(id, servicoId){
+  window.location.href =
+    `agendar.html?l=${lojaId}&servico=${servicoId}&alterar=${id}`;
+}
+
 </script>
 
 </body>
