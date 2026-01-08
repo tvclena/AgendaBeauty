@@ -5,7 +5,7 @@
 <title>Agenda Fácil • Escolha sua loja</title>
 
 <meta name="viewport"
-  content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
 <meta name="theme-color" content="#ff6a00">
 
@@ -22,56 +22,24 @@
   --text:#111827;
   --muted:#6b7280;
 }
-
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-body{
-  background:var(--bg);
-  color:var(--text);
-  overflow-x:hidden;
-}
+body{background:var(--bg);color:var(--text);overflow-x:hidden}
 
 /* HEADER */
-header{
-  background:#fff;
-  border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:20;
-}
-.header{
-  max-width:1200px;
-  margin:auto;
-  padding:16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
+header{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.header{max-width:1200px;margin:auto;padding:16px;display:flex;justify-content:space-between;align-items:center}
 .header h1{font-size:18px;font-weight:800}
-.location{
-  font-size:13px;
-  color:var(--muted);
-  display:flex;
-  align-items:center;
-  gap:6px;
-  cursor:pointer;
-}
+.location{font-size:13px;color:var(--muted);cursor:pointer;display:flex;gap:6px;align-items:center}
 
 /* HERO */
-.hero{
-  max-width:1200px;
-  margin:20px auto;
-  padding:0 16px;
-  display:grid;
-  gap:16px;
-}
+.hero{max-width:1200px;margin:20px auto;padding:0 16px}
 .hero-box{
   background:linear-gradient(135deg,#ff6a00,#ff9a57);
-  border-radius:24px;
-  padding:24px;
   color:#fff;
+  border-radius:22px;
+  padding:22px;
 }
-.hero-box h2{
-  font-size:26px;
-  margin-bottom:8px;
-}
+.hero-box h2{font-size:24px;margin-bottom:6px}
 
 /* FILTERS */
 .filters{
@@ -88,7 +56,7 @@ header{
   border:1px solid var(--border);
 }
 
-/* LIST GRID */
+/* GRID */
 .list{
   max-width:1200px;
   margin:20px auto 60px;
@@ -97,13 +65,9 @@ header{
   grid-template-columns:repeat(2,1fr);
   gap:14px;
 }
-
-/* 3 por linha em celulares grandes */
 @media(min-width:480px){
   .list{grid-template-columns:repeat(3,1fr)}
 }
-
-/* Desktop */
 @media(min-width:900px){
   .list{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
 }
@@ -113,36 +77,17 @@ header{
   background:var(--card);
   border-radius:22px;
   padding:14px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  box-shadow:0 10px 28px rgba(0,0,0,.08);
 }
 .logo{
-  width:52px;height:52px;
-  border-radius:50%;
-  background:#eee;
-  background-size:cover;
-  background-position:center;
+  width:52px;height:52px;border-radius:50%;
+  background:#eee;background-size:cover;background-position:center;
   margin-bottom:8px;
 }
-.card h3{
-  font-size:14px;
-  font-weight:800;
-}
-.card small{
-  font-size:12px;
-  color:var(--muted);
-}
-.badges{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-  margin:8px 0;
-}
-.badge{
-  font-size:11px;
-  padding:5px 8px;
-  border-radius:999px;
-  font-weight:700;
-}
+.card h3{font-size:14px;font-weight:800}
+.card small{font-size:12px;color:var(--muted)}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.badge{font-size:11px;padding:5px 8px;border-radius:999px;font-weight:700}
 .open{background:#dcfce7;color:#166534}
 .closed{background:#fee2e2;color:#991b1b}
 .prod{background:#ede9fe;color:#5b21b6}
@@ -150,7 +95,6 @@ header{
 
 .card button{
   width:100%;
-  margin-top:6px;
   padding:10px;
   border:none;
   border-radius:999px;
@@ -160,11 +104,7 @@ header{
 }
 
 /* EMPTY */
-.empty{
-  text-align:center;
-  color:var(--muted);
-  margin-top:40px;
-}
+.empty{text-align:center;color:var(--muted);margin-top:40px}
 </style>
 </head>
 
@@ -182,8 +122,8 @@ header{
 
 <section class="hero">
   <div class="hero-box">
-    <h2>Agende perto de você</h2>
-    <p>Use um único cadastro em todas as lojas disponíveis.</p>
+    <h2>Agende com os melhores perto de você</h2>
+    <p>Um único cadastro funciona em todas as lojas.</p>
   </div>
 </section>
 
@@ -201,52 +141,66 @@ header{
 <div class="empty" id="empty" style="display:none">Nenhuma loja encontrada</div>
 
 <script>
-const sb = supabase.createClient(
- "https://egxjgmzukjyyxmkukwub.supabase.co",
- "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+const sb=supabase.createClient(
+"https://egxjgmzukjyyxmkukwub.supabase.co",
+"sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
 let lojas=[];
 
-/* ===== STATUS DA AGENDA ===== */
-async function statusAgenda(lojaId){
-  const hoje = new Date();
-  const dataHoje = hoje.toISOString().slice(0,10);
-  const horaAtual = hoje.toTimeString().slice(0,5);
+/* ===== LOCALIZAÇÃO ===== */
+function pedirLocalizacao(){
+  navigator.geolocation.getCurrentPosition(async p=>{
+    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${p.coords.latitude}&lon=${p.coords.longitude}&format=json`);
+    const j=await r.json();
+    const c=j.address.city||j.address.town||j.address.village;
+    if(c){cidadeAtual.innerText=c;fCidade.value=c;render()}
+  });
+}
 
-  const { data } = await sb
+/* ===== STATUS AGENDA ===== */
+async function statusAgenda(lojaId){
+  const now=new Date();
+  const hoje=now.toISOString().slice(0,10);
+  const hora=now.toTimeString().slice(0,5);
+
+  const {data}=await sb
     .from("agenda_loja")
     .select("data,fechado,horarios")
     .eq("user_id",lojaId)
     .order("data",{ascending:true});
 
-  if(!data || !data.length) return { aberta:false };
+  if(!data||!data.length) return {aberta:false};
 
-  // HOJE
-  const hojeAgenda = data.find(d=>d.data===dataHoje);
-  if(hojeAgenda && !hojeAgenda.fechado){
-    for(const h of hojeAgenda.horarios||[]){
-      if(horaAtual>=h.inicio && horaAtual<=h.fim){
-        return { aberta:true };
-      }
+  const dHoje=data.find(d=>d.data===hoje);
+  if(dHoje && !dHoje.fechado){
+    for(const h of dHoje.horarios||[]){
+      if(hora>=h.inicio && hora<=h.fim) return {aberta:true};
     }
   }
 
-  // PRÓXIMA ABERTURA
-  const prox = data.find(d=>!d.fechado && d.horarios?.length);
-  if(prox){
-    return {
-      aberta:false,
-      abre:`${prox.data} às ${prox.horarios[0].inicio}`
-    };
-  }
+  const prox=data.find(d=>!d.fechado && d.horarios?.length);
+  if(prox) return {aberta:false,abre:`${prox.data} às ${prox.horarios[0].inicio}`};
 
-  return { aberta:false };
+  return {aberta:false};
+}
+
+/* ===== PRODUTO OU SERVIÇO ===== */
+async function tipoLoja(id){
+  const {data}=await sb
+    .from("produtos_servicos")
+    .select("tipo")
+    .eq("user_id",id)
+    .eq("ativo",true);
+  return data?.some(p=>p.tipo==="PRODUTO")?"PRODUTO":"SERVICO";
 }
 
 /* ===== LOAD ===== */
-async function carregarLojas(){
-  const { data } = await sb
+async function carregar(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){location.href="login.html";return}
+
+  const {data}=await sb
     .from("user_profile")
     .select("user_id,negocio,tipo,cidade,uf,avatar_url")
     .eq("status","active");
@@ -264,9 +218,11 @@ async function render(){
     if(fNome.value && !l.negocio.toLowerCase().includes(fNome.value.toLowerCase())) continue;
     if(fCidade.value && l.cidade?.toLowerCase()!==fCidade.value.toLowerCase()) continue;
 
-    const st = await statusAgenda(l.user_id);
+    const st=await statusAgenda(l.user_id);
     if(fStatus.value==="open" && !st.aberta) continue;
     if(fStatus.value==="closed" && st.aberta) continue;
+
+    const t=await tipoLoja(l.user_id);
 
     ok=true;
     lista.innerHTML+=`
@@ -279,36 +235,35 @@ async function render(){
           <div class="badge ${st.aberta?"open":"closed"}">
             ${st.aberta?"Aberta agora":st.abre?`Abre ${st.abre}`:"Fechada"}
           </div>
-          <div class="badge serv">✂️ Serviço</div>
+          <div class="badge ${t==="PRODUTO"?"prod":"serv"}">
+            ${t==="PRODUTO"?"🛒 Produto":"✂️ Serviço"}
+          </div>
         </div>
 
         <button onclick="entrar('${l.user_id}')">Acessar</button>
       </div>
     `;
   }
-
-  empty.style.display = ok?"none":"block";
+  empty.style.display=ok?"none":"block";
 }
 
 /* ===== ENTRAR ===== */
-async function entrar(lojaId){
-  const { data:{user} } = await sb.auth.getUser();
-  const { data:p } = await sb.from("clientes_profile").select("lojas").eq("id",user.id).single();
+async function entrar(id){
+  const {data:{user}}=await sb.auth.getUser();
+  const {data:p}=await sb.from("clientes_profile").select("lojas").eq("id",user.id).single();
   const arr=p?.lojas||[];
-  if(!arr.includes(lojaId)) arr.push(lojaId);
+  if(!arr.includes(id)) arr.push(id);
 
   await sb.from("clientes_profile").update({
     lojas:arr,
-    loja_ativa:lojaId
+    loja_ativa:id
   }).eq("id",user.id);
 
-  location.href=`app.html?l=${lojaId}`;
+  location.href=`app.html?l=${id}`;
 }
 
-/* FILTROS */
 [fNome,fCidade,fStatus].forEach(e=>e.addEventListener("input",render));
-
-carregarLojas();
+carregar();
 </script>
 
 </body>
