@@ -5,42 +5,32 @@
 <title>Escolha uma loja • Agenda Clena</title>
 
 <meta name="viewport"
-  content="width=device-width,
-  initial-scale=1,
-  maximum-scale=1,
-  user-scalable=no,
-  viewport-fit=cover">
+  content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
 <meta name="theme-color" content="#ff6a00">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
   --primary:#ff6a00;
-  --accent:#b8ff65;
   --bg:#f6f7fb;
-  --card:#fff;
-  --text:#1f2937;
-  --muted:#6b7280;
+  --card:#ffffff;
   --border:#e5e7eb;
-  --success:#16a34a;
-  --danger:#dc2626;
-  --radius:22px;
+  --text:#111827;
+  --muted:#6b7280;
+  --radius:20px;
 }
 
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-body{background:var(--bg);color:var(--text)}
+html,body{background:var(--bg);overflow-x:hidden}
 
 /* HEADER */
 header{
   background:#fff;
   border-bottom:1px solid var(--border);
-  position:sticky;
-  top:0;
-  z-index:50;
 }
 .header{
   max-width:1200px;
@@ -52,143 +42,121 @@ header{
 }
 .logo{
   font-size:22px;
-  font-weight:800;
+  font-weight:900;
   color:var(--primary);
 }
 
-/* HERO */
-.hero{
-  max-width:1200px;
-  margin:40px auto 20px;
-  padding:0 20px;
-  display:grid;
-  grid-template-columns:1.1fr .9fr;
-  gap:50px;
-}
-.hero h1{
-  font-size:44px;
-  line-height:1.1;
-  margin-bottom:16px;
-}
-.hero h1 span{color:var(--primary)}
-.hero p{
-  font-size:18px;
-  color:var(--muted);
-}
-.hero-box{
-  background:linear-gradient(135deg,#f3f4f6,#e5e7eb);
-  border-radius:40px;
-  padding:30px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-/* FILTERS */
+/* FILTROS */
 .filters{
   max-width:1200px;
-  margin:30px auto 10px;
+  margin:20px auto;
   padding:0 20px;
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:14px;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:12px;
 }
-.filters input,.filters select{
+.filters input,
+.filters select{
   padding:14px;
   border-radius:14px;
   border:1px solid var(--border);
   font-size:14px;
 }
 
-/* LIST */
-.list{
+/* GRID */
+.grid{
   max-width:1200px;
-  margin:20px auto 80px;
+  margin:20px auto 60px;
   padding:0 20px;
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-  gap:22px;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:18px;
 }
 
+/* CARD */
 .card{
-  background:#fff;
-  border-radius:28px;
+  background:var(--card);
+  border-radius:22px;
   padding:18px;
-  box-shadow:0 20px 50px rgba(0,0,0,.08);
-  display:flex;
-  gap:14px;
-}
-
-.logo-box{
-  width:72px;
-  height:72px;
-  border-radius:18px;
-  background:#eee;
-  background-size:cover;
-  background-position:center;
-  flex-shrink:0;
-}
-
-.info{
-  flex:1;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
   display:flex;
   flex-direction:column;
+  gap:12px;
 }
 
-.info strong{
-  font-size:17px;
+.card-top{
+  display:flex;
+  gap:14px;
+  align-items:center;
+}
+
+.avatar{
+  width:54px;height:54px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
+  color:#fff;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  background-size:cover;
+  background-position:center;
+}
+
+.card h3{
+  font-size:16px;
+  font-weight:800;
+}
+.card small{
+  color:var(--muted);
 }
 
 .badges{
   display:flex;
-  gap:6px;
+  gap:8px;
   flex-wrap:wrap;
-  margin:6px 0;
 }
 
 .badge{
-  font-size:11px;
-  padding:5px 10px;
+  padding:6px 10px;
   border-radius:999px;
-  background:#f3f4f6;
+  font-size:11px;
   font-weight:700;
 }
-.open{background:#dcfce7;color:var(--success)}
-.closed{background:#fee2e2;color:var(--danger)}
 
-.icons{
+.open{background:#dcfce7;color:#166534}
+.closed{background:#fee2e2;color:#991b1b}
+
+.actions{
+  margin-top:auto;
   display:flex;
-  gap:8px;
-  font-size:20px;
-  color:var(--primary);
-  margin-top:4px;
+  gap:10px;
 }
 
-.card button{
-  margin-top:10px;
-  padding:12px;
-  border-radius:999px;
+.actions button{
+  flex:1;
+  padding:14px;
   border:none;
-  background:var(--primary);
-  color:#fff;
+  border-radius:999px;
   font-weight:800;
   cursor:pointer;
 }
 
-/* EMPTY */
-.empty{
-  grid-column:1/-1;
-  text-align:center;
-  color:var(--muted);
-  padding:60px 20px;
+.btn-enter{
+  background:var(--primary);
+  color:#fff;
 }
 
-/* RESPONSIVE */
-@media(max-width:900px){
-  .hero{
-    grid-template-columns:1fr;
-  }
-  .hero h1{font-size:34px}
+.empty{
+  text-align:center;
+  padding:80px;
+  color:var(--muted);
+}
+
+/* RESPONSIVO */
+@media(max-width:600px){
+  .filters{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
@@ -201,137 +169,146 @@ header{
   </div>
 </header>
 
-<section class="hero">
-  <div>
-    <h1>Escolha uma <span>loja</span> para continuar</h1>
-    <p>
-      Seu cadastro funciona em todas as lojas.<br>
-      Ao acessar, o login será automático.
-    </p>
-  </div>
-  <div class="hero-box">
-    <strong>📍 Lojas com agenda disponível hoje</strong>
-  </div>
-</section>
-
 <div class="filters">
-  <input id="search" placeholder="Buscar loja">
-  <input id="city" placeholder="Cidade">
-  <input id="hour" type="time">
-  <select id="status">
+  <input id="fNome" placeholder="Buscar loja">
+  <input id="fCidade" placeholder="Cidade">
+  <input id="fHora" type="time">
+  <select id="fStatus">
     <option value="">Aberta ou fechada</option>
     <option value="open">Abertas</option>
     <option value="closed">Fechadas</option>
   </select>
 </div>
 
-<div class="list" id="lista"></div>
+<div class="grid" id="grid"></div>
 
 <script>
 const sb = supabase.createClient(
-  "https://egxjgmzukjyyxmkukwub.supabase.co",
-  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+ "https://egxjgmzukjyyxmkukwub.supabase.co",
+ "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-let user, perfil, lojas=[], agendas=[];
+let lojas = [];
+let user = null;
 
-async function init(){
-  const { data:{ session } } = await sb.auth.getSession();
-  if(!session){ location.href="login.html"; return }
-  user=session.user;
+/* AUTH */
+(async()=>{
+  const { data:{session} } = await sb.auth.getSession();
+  if(!session){
+    alert("Faça login para continuar");
+    location.href="login.html";
+    return;
+  }
+  user = session.user;
+  carregarLojas();
+})();
 
-  perfil = (await sb.from("clientes_profile").select("*").eq("id",user.id).single()).data;
-
-  lojas = (await sb
+/* BUSCAR LOJAS */
+async function carregarLojas(){
+  const { data } = await sb
     .from("user_profile")
-    .select("user_id,negocio,avatar_url,cidade,uf,tipo_negocio,status")
-    .eq("status","active")
-  ).data || [];
+    .select("id,negocio,tipo,cidade,uf,avatar_url,status");
 
-  agendas = (await sb
-    .from("agenda_loja")
-    .select("user_id,data,fechado,horarios")
-  ).data || [];
-
+  lojas = data || [];
   aplicarFiltros();
 }
 
-["search","city","hour","status"].forEach(id=>{
-  document.getElementById(id).addEventListener("input",aplicarFiltros);
+/* FILTROS */
+["fNome","fCidade","fHora","fStatus"].forEach(id=>{
+  document.getElementById(id).addEventListener("input", aplicarFiltros);
 });
 
-function aplicarFiltros(){
-  const n=search.value.toLowerCase();
-  const c=city.value.toLowerCase();
-  const h=hour.value;
-  const s=status.value;
-  const hoje=new Date().toISOString().slice(0,10);
+async function lojaAberta(lojaId){
+  const hoje = new Date().toISOString().slice(0,10);
+  const { data } = await sb
+    .from("agenda_loja")
+    .select("fechado,horarios")
+    .eq("user_id", lojaId)
+    .eq("data", hoje)
+    .maybeSingle();
 
-  const res = lojas.filter(l=>{
-    if(n && !l.negocio?.toLowerCase().includes(n)) return false;
-    if(c && !l.cidade?.toLowerCase().includes(c)) return false;
-
-    const ag=agendas.find(a=>a.user_id===l.user_id && a.data===hoje);
-    const aberta=ag && !ag.fechado;
-
-    if(s==="open" && !aberta) return false;
-    if(s==="closed" && aberta) return false;
-
-    if(h && ag){
-      const blocos=JSON.parse(ag.horarios||"[]");
-      if(!blocos.some(b=>h>=b.inicio && h<=b.fim)) return false;
-    }
-    return true;
-  });
-
-  render(res);
+  if(!data || data.fechado) return false;
+  return data.horarios?.length > 0;
 }
 
-function render(list){
-  if(!list.length){
-    lista.innerHTML=`<div class="empty">Nenhuma loja encontrada</div>`;
+async function aplicarFiltros(){
+  grid.innerHTML = "";
+  let lista = [...lojas];
+
+  const nome = fNome.value.toLowerCase();
+  const cidade = fCidade.value.toLowerCase();
+
+  lista = lista.filter(l =>
+    (!nome || l.negocio?.toLowerCase().includes(nome)) &&
+    (!cidade || l.cidade?.toLowerCase().includes(cidade))
+  );
+
+  if(!lista.length){
+    grid.innerHTML = `<div class="empty">Nenhuma loja encontrada</div>`;
     return;
   }
 
-  lista.innerHTML=list.map(l=>{
-    const ag=agendas.find(a=>a.user_id===l.user_id);
-    const aberta=ag && !ag.fechado;
+  for(const l of lista){
+    const aberta = await lojaAberta(l.id);
+    if(fStatus.value==="open" && !aberta) continue;
+    if(fStatus.value==="closed" && aberta) continue;
+    renderLoja(l,aberta);
+  }
+}
 
-    return `
-      <div class="card">
-        <div class="logo-box" style="background-image:url('${l.avatar_url||""}')"></div>
-        <div class="info">
-          <strong>${l.negocio}</strong>
-          <div class="badges">
-            <span class="badge">${l.cidade||""} ${l.uf||""}</span>
-            <span class="badge ${aberta?'open':'closed'}">
-              ${aberta?'Aberta':'Fechada'}
-            </span>
-          </div>
-          <div class="icons">
-            <i class="ri-scissors-line"></i>
-          </div>
-          <button onclick="acessar('${l.user_id}')">Acessar loja</button>
-        </div>
+/* RENDER */
+function renderLoja(l, aberta){
+  const div = document.createElement("div");
+  div.className="card";
+
+  div.innerHTML=`
+    <div class="card-top">
+      <div class="avatar" style="${l.avatar_url?`background-image:url(${l.avatar_url})`:``}">
+        ${!l.avatar_url ? l.negocio?.[0] || "L" : ""}
       </div>
-    `;
-  }).join("");
+      <div>
+        <h3>${l.negocio}</h3>
+        <small>${l.cidade||""} • ${l.uf||""}</small>
+      </div>
+    </div>
+
+    <div class="badges">
+      <span class="badge ${aberta?"open":"closed"}">
+        ${aberta?"Aberta":"Fechada"}
+      </span>
+      <span class="badge">${l.tipo||"Serviços"}</span>
+    </div>
+
+    <div class="actions">
+      <button class="btn-enter" onclick="acessar('${l.id}')">
+        Acessar loja
+      </button>
+    </div>
+  `;
+  grid.appendChild(div);
 }
 
+/* ACESSAR LOJA */
 async function acessar(lojaId){
-  const lojasAtuais = perfil.lojas || [];
-  if(!lojasAtuais.includes(lojaId)) lojasAtuais.push(lojaId);
+  const { data:perfil } = await sb
+    .from("clientes_profile")
+    .select("lojas")
+    .eq("id", user.id)
+    .single();
 
-  await sb.from("clientes_profile").update({
-    lojas:lojasAtuais,
-    loja_ativa:lojaId
-  }).eq("id",user.id);
+  const lojas = perfil?.lojas || [];
+  if(!lojas.includes(lojaId)) lojas.push(lojaId);
 
-  alert("Login automático. Seu cadastro funciona em todas as lojas.");
-  location.href=`app.html?l=${lojaId}`;
+  await sb
+    .from("clientes_profile")
+    .update({
+      lojas,
+      loja_ativa: lojaId
+    })
+    .eq("id", user.id);
+
+  location.href = `app.html?l=${lojaId}`;
 }
-
-init();
 </script>
 
 </body>
