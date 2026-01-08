@@ -17,7 +17,6 @@
   --border:#e5e7eb;
   --text:#111827;
   --muted:#6b7280;
-  --blue:#2563eb;
   --danger:#ef4444;
 }
 
@@ -44,7 +43,6 @@ html,body{margin:0;background:var(--bg)}
   gap:18px;
 }
 
-/* ===== CARD ===== */
 .card{
   background:var(--card);
   border-radius:22px;
@@ -83,7 +81,6 @@ html,body{margin:0;background:var(--bg)}
 .time{
   font-size:16px;
   font-weight:700;
-  color:var(--text);
 }
 
 .actions{
@@ -116,84 +113,11 @@ button:disabled{
   cursor:not-allowed;
 }
 
-/* ===== BLOQUEIO ===== */
 .lock{
   color:var(--danger);
   font-size:13px;
   font-weight:700;
 }
-
-/* ===== OVERLAY ===== */
-.overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.55);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-}
-
-.hidden{display:none}
-
-.modal{
-  background:#fff;
-  width:100%;
-  max-width:420px;
-  max-height:88vh;
-  overflow-y:auto;
-  border-radius:24px;
-  padding:18px;
-}
-
-/* ===== SERVIÇOS ===== */
-.services{
-  display:flex;
-  gap:14px;
-  overflow-x:auto;
-  margin-top:14px;
-}
-.services::-webkit-scrollbar{display:none}
-
-.service{
-  min-width:200px;
-  border-radius:18px;
-  overflow:hidden;
-  border:2px solid transparent;
-  cursor:pointer;
-}
-.service.selected{border-color:var(--blue)}
-
-.service img{
-  width:100%;
-  height:120px;
-  object-fit:cover;
-}
-
-.service-info{
-  padding:10px;
-}
-.service-name{font-weight:800}
-.service-price{color:var(--primary);font-weight:700}
-
-/* ===== GRID ===== */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;
-  margin-top:16px;
-}
-
-.item{
-  background:#fff;
-  border:2px solid var(--border);
-  border-radius:16px;
-  padding:14px 0;
-  text-align:center;
-  font-weight:800;
-  cursor:pointer;
-}
-.item.selected{border-color:var(--blue)}
 </style>
 </head>
 
@@ -203,35 +127,24 @@ button:disabled{
 <div class="container" id="lista"></div>
 
 <script>
-/* ===== SUPABASE ===== */
+/* ================= SUPABASE ================= */
 const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
 const lojaId = new URLSearchParams(location.search).get("l");
-
-  
-let clienteWhats = null;
 const lista = document.getElementById("lista");
-try {
-  const cliente = JSON.parse(localStorage.getItem("CLIENTE_LOJA"));
-  clienteWhats = cliente?.whatsapp
-    ? cliente.whatsapp.replace(/\D/g, "")
-    : null;
-} catch {
-  clienteWhats = null;
-}
 
+let usuario = null;
+let whatsapp = null;
 
-/* ===== UTILS ===== */
-const toMin = h => { const [a,b]=h.split(":").map(Number); return a*60+b; }
-const toHour = m => String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
-
+/* ================= UTILS ================= */
 function dateLocal(dataISO){
   const [y,m,d] = dataISO.split("-");
   return new Date(y, m-1, d);
 }
+
 function minutosAte(data, hora){
   const [h,m] = hora.split(":").map(Number);
   const d = dateLocal(data);
@@ -239,26 +152,56 @@ function minutosAte(data, hora){
   return Math.floor((d - new Date()) / 60000);
 }
 
-/* ===== LOAD ===== */
-async function carregar(){
-  if(!clienteWhats){
-  lista.innerHTML = `
-    <div class="card">
-      <div class="title">Nenhum agendamento encontrado</div>
-      <div class="info">
-        Volte pelo link da loja e faça um novo agendamento.
+/* ================= AUTH ================= */
+async function carregarUsuario(){
+  const { data } = await sb.auth.getUser();
+  usuario = data?.user || null;
+
+  if(!usuario){
+    lista.innerHTML = `
+      <div class="card">
+        <div class="title">Você não está logado</div>
+        <div class="info">Entre na sua conta para ver seus agendamentos.</div>
       </div>
-    </div>
-  `;
-  return;
+    `;
+    return false;
+  }
+
+  whatsapp = usuario.user_metadata?.whatsapp?.replace(/\D/g,"") || null;
+
+  if(!whatsapp){
+    lista.innerHTML = `
+      <div class="card">
+        <div class="title">WhatsApp não encontrado</div>
+        <div class="info">Seu cadastro não possui WhatsApp.</div>
+      </div>
+    `;
+    return false;
+  }
+
+  return true;
 }
 
- const { data: ags } = await sb
-  .from("agendamentos")
-  .select("id,data,hora_inicio,hora_fim,servico_id,status")
-  .eq("loja_id", lojaId)
-  .eq("cliente_whatsapp", clienteWhats)
-  .in("status", ["CONFIRMADO"]);
+/* ================= LOAD ================= */
+async function carregarAgendamentos(){
+
+  const { data: ags } = await sb
+    .from("agendamentos")
+    .select("id,data,hora_inicio,hora_fim,servico_id,status")
+    .eq("loja_id", lojaId)
+    .eq("cliente_whatsapp", whatsapp)
+    .eq("status", "CONFIRMADO")
+    .order("data", { ascending: true });
+
+  if(!ags || ags.length === 0){
+    lista.innerHTML = `
+      <div class="card">
+        <div class="title">Nenhum agendamento encontrado</div>
+        <div class="info">Você ainda não possui agendamentos.</div>
+      </div>
+    `;
+    return;
+  }
 
   const { data: servs } = await sb
     .from("produtos_servicos")
@@ -269,7 +212,7 @@ async function carregar(){
 
   lista.innerHTML = ags.map(a=>{
     const mins = minutosAte(a.data, a.hora_inicio);
-const bloqueado = mins < 40 && mins >= 0;
+    const bloqueado = mins < 40 && mins >= 0;
 
     return `
       <div class="card">
@@ -283,22 +226,31 @@ const bloqueado = mins < 40 && mins >= 0;
 
         <div class="actions">
           <button class="btn-outline"
-            ${bloqueado?"disabled":""}
+            ${bloqueado ? "disabled" : ""}
             onclick="alterar('${a.id}','${a.servico_id}')">
             Alterar
           </button>
 
           <button class="btn-danger"
-            ${bloqueado?"disabled":""}
+            ${bloqueado ? "disabled" : ""}
             onclick="cancelar('${a.id}')">
             Cancelar
           </button>
         </div>
 
-        ${bloqueado?`<div class="lock">🔒 Alterações permitidas até 40 minutos antes</div>`:""}
+        ${bloqueado
+          ? `<div class="lock">🔒 Alterações permitidas até 40 minutos antes</div>`
+          : ""
+        }
       </div>
     `;
   }).join("");
+}
+
+/* ================= ACTIONS ================= */
+function alterar(id, servico){
+  window.location.href =
+    `agendar.html?l=${lojaId}&servico=${servico}&alterar=${id}`;
 }
 
 async function cancelar(id){
@@ -306,9 +258,9 @@ async function cancelar(id){
 
   const { error } = await sb
     .from("agendamentos")
-    .update({ status: "cancelado" })
+    .update({ status:"cancelado" })
     .eq("id", id)
-    .eq("cliente_whatsapp", clienteWhats)
+    .eq("cliente_whatsapp", whatsapp)
     .eq("loja_id", lojaId);
 
   if(error){
@@ -317,18 +269,14 @@ async function cancelar(id){
     return;
   }
 
-  carregar();
+  carregarAgendamentos();
 }
 
-
-function alterar(id, servicoId){
-  window.location.href =
-    `agendar.html?l=${lojaId}&servico=${servicoId}&alterar=${id}`;
-}
-
-/* ===== INIT ===== */
-carregar();
-
+/* ================= INIT ================= */
+(async ()=>{
+  const ok = await carregarUsuario();
+  if(ok) carregarAgendamentos();
+})();
 </script>
 
 </body>
