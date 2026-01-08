@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-<!-- 🎨 APLICA TEMA ANTES DE RENDERIZAR -->
+<!-- THEMA LOAD (ANTES DE TUDO) -->
 <script>
 (function(){
   const params = new URLSearchParams(location.search);
@@ -26,111 +26,97 @@
 })();
 </script>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
-  --primary:#ff6a00;
-  --primary-2:#ff9a57;
+  --primary: var(--primary, #ff6a00);
+  --primary-2: var(--primary-2, #ff9a57);
   --bg:#f4f6fb;
   --card:#ffffff;
   --border:#e5e7eb;
-  --text:#111827;
+  --text: var(--text, #111827);
   --muted:#6b7280;
   --danger:#ef4444;
 }
 
 *{box-sizing:border-box;font-family:Inter}
-html,body{margin:0;background:var(--bg);color:var(--text)}
+body{margin:0;background:var(--bg);padding:16px}
 
+/* HEADER */
 .header{
-  height:58px;
-  background:var(--primary);
-  color:#fff;
   display:flex;
   align-items:center;
-  justify-content:center;
-  font-weight:800;
-  position:sticky;
-  top:0;
-  z-index:10;
+  gap:12px;
+  font-size:18px;
+  font-weight:900;
+  margin-bottom:14px;
 }
 
-.container{
-  padding:18px 14px 28px;
-  display:flex;
-  flex-direction:column;
-  gap:18px;
-}
-
-/* ===== CARD ===== */
+/* CARD */
 .card{
   background:var(--card);
-  border-radius:24px;
-  padding:18px;
-  box-shadow:0 14px 40px rgba(0,0,0,.14);
-  display:flex;
-  flex-direction:column;
-  gap:14px;
+  border-radius:22px;
+  padding:16px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+  margin-bottom:14px;
 }
 
-.row{
+.card-top{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  gap:10px;
-}
-
-.title{
-  font-weight:800;
-  font-size:18px;
 }
 
 .badge{
-  background:color-mix(in srgb, var(--primary) 20%, transparent);
+  background:rgba(255,106,0,.15);
   color:var(--primary);
   padding:6px 14px;
   border-radius:999px;
   font-size:12px;
   font-weight:800;
-  white-space:nowrap;
+}
+
+.title{
+  font-weight:900;
+  font-size:17px;
 }
 
 .info{
-  font-size:13px;
   color:var(--muted);
+  font-size:13px;
+  margin-top:6px;
 }
 
 .time{
-  font-size:16px;
-  font-weight:700;
+  font-weight:800;
+  margin-top:6px;
 }
 
 .actions{
   display:flex;
-  gap:12px;
-  margin-top:6px;
+  gap:10px;
+  margin-top:12px;
 }
 
 button{
   flex:1;
-  padding:14px;
-  border-radius:16px;
+  padding:12px;
+  border-radius:999px;
   border:none;
-  font-weight:800;
+  font-weight:900;
   cursor:pointer;
-  font-size:14px;
 }
 
 .btn-outline{
   background:#fff;
   border:1px solid var(--border);
-  color:var(--text);
 }
 
 .btn-danger{
-  background:color-mix(in srgb, var(--danger) 15%, #fff);
+  background:#fee2e2;
   color:var(--danger);
 }
 
@@ -140,32 +126,31 @@ button:disabled{
 }
 
 .lock{
-  margin-top:4px;
+  margin-top:10px;
+  font-size:12px;
   color:var(--danger);
-  font-size:13px;
   font-weight:700;
 }
 
-/* ===== EMPTY ===== */
+/* EMPTY */
 .empty{
+  background:var(--card);
+  border-radius:22px;
+  padding:20px;
   text-align:center;
-  padding:26px 18px;
-}
-.empty h2{
-  font-size:18px;
-  margin-bottom:6px;
-}
-.empty p{
   color:var(--muted);
-  font-size:14px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">Meus Agendamentos</div>
-<div class="container" id="lista"></div>
+<div class="header">
+  <i class="ri-calendar-event-fill"></i>
+  Meus Agendamentos
+</div>
+
+<div id="lista"></div>
 
 <script>
 /* ================= SUPABASE ================= */
@@ -176,9 +161,6 @@ const sb = supabase.createClient(
 
 const lojaId = new URLSearchParams(location.search).get("l");
 const lista = document.getElementById("lista");
-
-let usuario = null;
-let whatsapp = null;
 
 /* ================= UTILS ================= */
 function dateLocal(dataISO){
@@ -193,54 +175,29 @@ function minutosAte(data, hora){
   return Math.floor((d - new Date()) / 60000);
 }
 
-/* ================= AUTH ================= */
-async function carregarUsuario(){
-  const { data } = await sb.auth.getUser();
-  usuario = data?.user || null;
-
-  if(!usuario){
-    lista.innerHTML = `
-      <div class="card empty">
-        <h2>Você não está logado</h2>
-        <p>Entre na sua conta para visualizar seus agendamentos.</p>
-      </div>
-    `;
-    return false;
-  }
-
-  whatsapp = usuario.user_metadata?.whatsapp?.replace(/\D/g,"") || null;
-
-  if(!whatsapp){
-    lista.innerHTML = `
-      <div class="card empty">
-        <h2>Cadastro incompleto</h2>
-        <p>Seu usuário não possui WhatsApp cadastrado.</p>
-      </div>
-    `;
-    return false;
-  }
-
-  return true;
-}
-
 /* ================= LOAD ================= */
-async function carregarAgendamentos(){
+async function carregar(){
+
+  const { data:auth } = await sb.auth.getUser();
+  if(!auth?.user){
+    lista.innerHTML = `<div class="empty">Faça login para ver seus agendamentos</div>`;
+    return;
+  }
 
   const { data: ags } = await sb
     .from("agendamentos")
-    .select("id,data,hora_inicio,hora_fim,servico_id,status")
+    .select("id,data,hora_inicio,hora_fim,servico_id")
     .eq("loja_id", lojaId)
-    .eq("cliente_whatsapp", whatsapp)
-    .eq("status", "CONFIRMADO")
-    .order("data", { ascending: true });
+    .eq("user_id", auth.user.id)
+    .eq("status","CONFIRMADO")
+    .order("data");
 
-  if(!ags || ags.length === 0){
+  if(!ags || !ags.length){
     lista.innerHTML = `
-      <div class="card empty">
-        <h2>Nenhum agendamento encontrado</h2>
-        <p>Você ainda não possui agendamentos ativos.</p>
-      </div>
-    `;
+      <div class="empty">
+        Nenhum agendamento encontrado<br>
+        <small>Agende um serviço pela loja</small>
+      </div>`;
     return;
   }
 
@@ -257,7 +214,7 @@ async function carregarAgendamentos(){
 
     return `
       <div class="card">
-        <div class="row">
+        <div class="card-top">
           <div class="title">${mapa[a.servico_id] || "Serviço"}</div>
           <div class="badge">${dateLocal(a.data).toLocaleDateString()}</div>
         </div>
@@ -267,22 +224,19 @@ async function carregarAgendamentos(){
 
         <div class="actions">
           <button class="btn-outline"
-            ${bloqueado ? "disabled" : ""}
+            ${bloqueado?"disabled":""}
             onclick="alterar('${a.id}','${a.servico_id}')">
             Alterar
           </button>
 
           <button class="btn-danger"
-            ${bloqueado ? "disabled" : ""}
+            ${bloqueado?"disabled":""}
             onclick="cancelar('${a.id}')">
             Cancelar
           </button>
         </div>
 
-        ${bloqueado
-          ? `<div class="lock">🔒 Alterações permitidas até 40 minutos antes</div>`
-          : ""
-        }
+        ${bloqueado?`<div class="lock">🔒 Alterações permitidas até 40 minutos antes</div>`:""}
       </div>
     `;
   }).join("");
@@ -290,34 +244,22 @@ async function carregarAgendamentos(){
 
 /* ================= ACTIONS ================= */
 function alterar(id, servico){
-  window.location.href =
+  location.href =
     `agendar.html?l=${lojaId}&servico=${servico}&alterar=${id}`;
 }
 
 async function cancelar(id){
   if(!confirm("Deseja cancelar este agendamento?")) return;
 
-  const { error } = await sb
-    .from("agendamentos")
+  await sb.from("agendamentos")
     .update({ status:"cancelado" })
-    .eq("id", id)
-    .eq("cliente_whatsapp", whatsapp)
-    .eq("loja_id", lojaId);
+    .eq("id",id);
 
-  if(error){
-    alert("Erro ao cancelar. Atualize a página.");
-    console.error(error);
-    return;
-  }
-
-  carregarAgendamentos();
+  carregar();
 }
 
 /* ================= INIT ================= */
-(async ()=>{
-  const ok = await carregarUsuario();
-  if(ok) carregarAgendamentos();
-})();
+carregar();
 </script>
 
 </body>
