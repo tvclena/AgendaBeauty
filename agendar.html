@@ -208,6 +208,15 @@ const sb = supabase.createClient(
  "https://egxjgmzukjyyxmkukwub.supabase.co",
  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
+let usuarioLogado = null;
+
+async function verificarLogin(){
+  const { data } = await sb.auth.getUser();
+  usuarioLogado = data?.user || null;
+}
+sb.auth.onAuthStateChange((_event, session) => {
+  usuarioLogado = session?.user || null;
+});
 
 const lojaId = new URLSearchParams(location.search).get("l");
 const servicoPreSelecionado =
@@ -565,8 +574,17 @@ async function confirmar(h){
   `);
 }
 
-/* ✅ CHAMA UMA ÚNICA VEZ */
-carregarServicos();
+(async ()=>{
+  await verificarLogin();
+  carregarServicos();
+
+  // Só abre modal se NÃO estiver logado
+  if(!usuarioLogado && !clienteValido()){
+    abrirModal();
+  }
+})();
+
+  
 function fecharOverlay(){
   document.getElementById("overlayConfirm")?.remove();
 }
@@ -581,12 +599,24 @@ document.getElementById("days").addEventListener("scroll", e=>{
     carregarDiasLazy();
   }
 });
+
+  
 function getCliente(){
+  // 1️⃣ Usuário logado (app)
+  if(usuarioLogado){
+    return {
+      nome: usuarioLogado.user_metadata?.nome || "CLIENTE",
+      whatsapp: usuarioLogado.user_metadata?.whatsapp || null,
+      email: usuarioLogado.email || null
+    };
+  }
+
+  // 2️⃣ Cliente público (link da loja)
   try{
     const raw = localStorage.getItem("CLIENTE_LOJA");
     if(!raw) return null;
     const c = JSON.parse(raw);
-    if(!c?.nome || !c?.whatsapp) return null;
+    if(!c?.whatsapp) return null;
     return c;
   }catch{
     return null;
@@ -652,9 +682,8 @@ function salvarCliente(){
 
   fecharModal();
 }
-if(!clienteValido()){
-  abrirModal();
-}
+
+
 
 </script>
 <!-- MODAL CLIENTE -->
