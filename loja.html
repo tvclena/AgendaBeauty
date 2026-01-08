@@ -3,15 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Agenda Fácil</title>
-
-<meta name="viewport"
-  content="width=device-width,
-  initial-scale=1,
-  maximum-scale=1,
-  user-scalable=no,
-  viewport-fit=cover">
-
-  
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ff6a00">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -19,63 +11,44 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+/* ===== ESTILO ===== */
 :root{
   --primary:#ff6a00;
-  --primary-soft:rgba(255,106,0,.14);
-  --bg:#f4f6fb;
   --border:#e5e7eb;
+  --bg:#f4f6fb;
   --text:#111827;
   --muted:#6b7280;
-
-  --topbar-h:64px;
-  --navbar-h:72px;
 }
+*{box-sizing:border-box;font-family:Inter}
+html,body{margin:0;height:100%;background:var(--bg)}
 
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-html,body{width:100%;height:100%;background:var(--bg);overflow:hidden}
-
-/* TOPBAR */
 .topbar{
-  position:fixed;top:0;left:0;right:0;
-  height:var(--topbar-h);
-  padding:0 18px;
+  height:64px;
   background:#fff;
   border-bottom:1px solid var(--border);
   display:flex;
   align-items:center;
   justify-content:space-between;
-  z-index:100;
-}
-.topbar h1{
-  font-size:17px;
-  font-weight:800;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  padding:0 18px;
 }
 .avatar{
-  width:38px;height:38px;border-radius:50%;
+  width:40px;height:40px;border-radius:50%;
   background:linear-gradient(135deg,#ff6a00,#ff9a57);
   color:#fff;font-weight:800;
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;
 }
-
-/* CONTENT */
 .content{
   position:fixed;
-  top:var(--topbar-h);
-  bottom:var(--navbar-h);
-  left:0;right:0;
+  top:64px;bottom:72px;left:0;right:0;
   background:#fff;
 }
 iframe{width:100%;height:100%;border:none}
 
-/* NAVBAR */
 .navbar{
   position:fixed;
   bottom:0;left:0;right:0;
-  height:var(--navbar-h);
+  height:72px;
   background:#fff;
   border-top:1px solid var(--border);
   display:flex;
@@ -89,76 +62,8 @@ iframe{width:100%;height:100%;border:none}
   flex-direction:column;
   align-items:center;
   gap:4px;
-  cursor:pointer;
 }
-.nav-item i{
-  font-size:22px;
-  padding:10px;
-  border-radius:14px;
-  transition:.25s;
-}
-
-.nav-item.active{
-  color:var(--primary);
-}
-.nav-item.active i{
-  background:linear-gradient(135deg,#ff6a00,#ff9a57);
-  color:#fff;
-  box-shadow:0 6px 18px rgba(255,106,0,.35);
-}
-.nav-item:active i{
-  transform:scale(.92);
-}
-
-
-/* MODAL CLIENTE */
-#clienteModal{
-  position:fixed;
-  inset:0;
-  display:none;
-  z-index:9999;
-}
-.modal-bg{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.45);
-}
-.modal{
-  position:absolute;
-  left:50%;top:50%;
-  transform:translate(-50%,-50%);
-  width:90%;max-width:380px;
-  background:#fff;
-  border-radius:22px;
-  padding:22px;
-}
-.modal h2{
-  font-size:20px;
-  font-weight:800;
-}
-.modal p{
-  font-size:14px;
-  color:var(--muted);
-  margin-bottom:10px;
-}
-.modal input{
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  border:1px solid var(--border);
-  font-size:15px;
-  margin-bottom:10px;
-}
-.modal button{
-  width:100%;
-  padding:14px;
-  border-radius:16px;
-  border:none;
-  background:var(--primary);
-  color:#fff;
-  font-weight:800;
-  font-size:16px;
-}
+.nav-item.active{color:var(--primary)}
 </style>
 </head>
 
@@ -166,7 +71,7 @@ iframe{width:100%;height:100%;border:none}
 
 <div class="topbar">
   <h1 id="nomeLoja">Agenda Fácil</h1>
-  <div class="avatar" id="avatar" onclick="abrirModal()">?</div>
+  <div class="avatar" id="avatar">?</div>
 </div>
 
 <div class="content">
@@ -180,149 +85,94 @@ iframe{width:100%;height:100%;border:none}
   <div class="nav-item" onclick="go(this,'agendar.html')">
     <i class="ri-calendar-check-line"></i>Agendar
   </div>
-  <div class="nav-item" id="navLoja" onclick="go(this,'lojacliente.html')">
-    <i class="ri-store-2-line"></i>Loja
-  </div>
   <div class="nav-item" onclick="go(this,'agendamentosclientes.html')">
     <i class="ri-user-3-line"></i>Meu espaço
   </div>
 </nav>
 
-<!-- MODAL CLIENTE -->
-<div id="clienteModal">
-  <div class="modal-bg" onclick="fecharModal()"></div>
-  <div class="modal">
-    <h2>Seus dados</h2>
-    <p>Usamos essas informações para seus agendamentos</p>
-
-    <input id="nome" placeholder="NOME COMPLETO" style="text-transform:uppercase">
-    <input id="whats" placeholder="WHATSAPP" inputmode="numeric">
-    <input id="email" placeholder="E-MAIL (opcional)">
-
-    <button onclick="salvarCliente()">Salvar</button>
-  </div>
-</div>
-
 <script>
+/* ===== SUPABASE ===== */
 const sb = supabase.createClient(
  "https://egxjgmzukjyyxmkukwub.supabase.co",
  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-const lojaId = new URLSearchParams(location.search).get("l");
 const frame = document.getElementById("frame");
 const avatar = document.getElementById("avatar");
-const navLoja = document.getElementById("navLoja");
+const lojaParam = new URLSearchParams(location.search).get("l");
 
-/* ================= MÁSCARA WHATS ================= */
-whats.addEventListener("input",()=>{
-  let v = whats.value.replace(/\D/g,"").slice(0,11);
-  if(v.length > 6)
-    v = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
-  else if(v.length > 2)
-    v = `(${v.slice(0,2)}) ${v.slice(2)}`;
-  whats.value = v;
-});
+/* ===== AUTH FLOW ===== */
+async function init(){
+  const { data:{session} } = await sb.auth.getSession();
 
-/* ================= CLIENTE ================= */
-function getCliente(){
-  return JSON.parse(localStorage.getItem("CLIENTE_LOJA"));
-}
-
-function clienteValido(){
-  const c = getCliente();
-  return c?.nome && c?.whatsapp;
-}
-
-function atualizarAvatar(nome){
-  const p = nome.split(" ");
-  avatar.innerText = (p[0][0] + (p[1]?.[0]||"")).toUpperCase();
-}
-
-function abrirModal(){
-  clienteModal.style.display="block";
-}
-
-function fecharModal(){
-  if(!clienteValido()) return;
-  clienteModal.style.display="none";
-}
-
-async function salvarCliente(){
-  const nomeVal = nome.value.trim().toUpperCase();
-  const whatsVal = whats.value.replace(/\D/g,"");
-  const emailVal = email.value.trim() || null;
-
-  if(nomeVal.length < 3 || whatsVal.length < 10){
-    alert("Nome e WhatsApp são obrigatórios");
+  if(!session){
+    // login simples (email magic link)
+    const email = prompt("Digite seu e-mail");
+    await sb.auth.signInWithOtp({ email });
+    alert("Enviamos um link para seu e-mail");
     return;
   }
 
-  const cliente = { nome:nomeVal, whatsapp:whatsVal, email:emailVal };
-  localStorage.setItem("CLIENTE_LOJA", JSON.stringify(cliente));
-  atualizarAvatar(nomeVal);
+  const user = session.user;
 
-  const { data } = await sb
-    .from("clientes_loja")
-    .select("id")
-    .eq("loja_id", lojaId)
-    .eq("whatsapp", whatsVal)
-    .maybeSingle();
+  // PERFIL
+  let { data:perfil } = await sb
+    .from("clientes_profile")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
-  if(!data){
-    await sb.from("clientes_loja").insert({
-      loja_id: lojaId,
-      nome_completo: nomeVal,
-      whatsapp: whatsVal,
-      email: emailVal
-    });
+  if(!perfil){
+    perfil = {
+      id:user.id,
+      nome:"CLIENTE",
+      whatsapp:"",
+      lojas:[],
+      loja_ativa:null
+    };
+    await sb.from("clientes_profile").insert(perfil);
   }
 
-  fecharModal();
+  // DEFINIR LOJA ATIVA
+  if(lojaParam && !perfil.lojas.includes(lojaParam)){
+    perfil.lojas.push(lojaParam);
+    perfil.loja_ativa = lojaParam;
+    await sb.from("clientes_profile")
+      .update({lojas:perfil.lojas,loja_ativa:lojaParam})
+      .eq("id",user.id);
+  }
+
+  const lojaId = perfil.loja_ativa || lojaParam;
+  if(!lojaId){
+    alert("Nenhuma loja vinculada");
+    return;
+  }
+
+  // NOME DA LOJA (somente assinaturas ativas)
+  const { data:loja } = await sb
+    .from("user_profile")
+    .select("negocio,assinatura_ativa")
+    .eq("user_id",lojaId)
+    .eq("assinatura_ativa",true)
+    .single();
+
+  if(!loja){
+    alert("Loja não disponível");
+    return;
+  }
+
+  nomeLoja.innerText = loja.negocio;
+  avatar.innerText = user.email[0].toUpperCase();
   frame.src = `homeclientes.html?l=${lojaId}`;
 }
 
-/* ================= REGRA LOJA (SÓ PRODUTO) ================= */
-async function verificarProdutos(){
-  const { count } = await sb
-    .from("produtos_servicos")
-    .select("id",{count:"exact",head:true})
-    .eq("user_id",lojaId)
-    .eq("tipo","PRODUTO")
-    .eq("ativo",true);
-
-  navLoja.style.display = count > 0 ? "flex" : "none";
-}
-
-/* ================= NAV ================= */
 function go(el,page){
-  if(!clienteValido()){
-    abrirModal();
-    return;
-  }
-  document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
   el.classList.add("active");
-  frame.src = `${page}?l=${lojaId}`;
+  frame.src = `${page}?l=${new URLSearchParams(location.search).get("l")}`;
 }
 
-/* ================= LOAD ================= */
-(async()=>{
-  const { data } = await sb
-    .from("user_profile")
-    .select("negocio")
-    .eq("user_id",lojaId)
-    .single();
-
-  nomeLoja.innerText = data?.negocio || "Agenda Fácil";
-  verificarProdutos();
-
-  if(clienteValido()){
-    atualizarAvatar(getCliente().nome);
-    frame.src = `homeclientes.html?l=${lojaId}`;
-  }else{
-    abrirModal();
-  }
-})();
+init();
 </script>
 
 </body>
