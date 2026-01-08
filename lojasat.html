@@ -27,7 +27,6 @@ body{
   margin:0;
   background:var(--bg);
   color:var(--text);
-  overflow-x:hidden;
 }
 
 /* HEADER */
@@ -132,9 +131,10 @@ header h1{
   border-radius:999px;
   background:var(--accent);
   font-weight:800;
+  cursor:pointer;
 }
 
-/* POPUP LOGIN */
+/* LOGIN MODAL */
 #auth{
   position:fixed;
   inset:0;
@@ -207,27 +207,36 @@ const sb = supabase.createClient(
 );
 
 let lojas=[];
+let lojaSelecionada = null;
 
-/* LOGIN SEM CONFIRMAÇÃO */
+/* LOGIN / CADASTRO AUTOMÁTICO */
 async function login(){
-  const { error } = await sb.auth.signInWithPassword({
-    email: email.value,
-    password: senha.value
+  const emailVal = email.value.trim();
+  const senhaVal = senha.value.trim();
+  if(!emailVal || !senhaVal) return;
+
+  let { error } = await sb.auth.signInWithPassword({
+    email: emailVal,
+    password: senhaVal
   });
 
   if(error){
     await sb.auth.signUp({
-      email: email.value,
-      password: senha.value
+      email: emailVal,
+      password: senhaVal
     });
   }
+
   auth.style.display="none";
+
+  if(lojaSelecionada){
+    location.href = `app.html?l=${lojaSelecionada}`;
+  }
 }
 
 /* STATUS AGENDA */
 async function statusAgenda(id){
-  const now=new Date();
-  const hoje=now.toISOString().slice(0,10);
+  const hoje=new Date().toISOString().slice(0,10);
   const { data } = await sb.from("agenda_loja")
     .select("*")
     .eq("user_id",id)
@@ -237,12 +246,8 @@ async function statusAgenda(id){
   for(const d of data||[]){
     if(d.fechado) continue;
     for(const h of d.horarios||[]){
-      const ini=new Date(`${d.data}T${h.inicio}`);
-      const fim=new Date(`${d.data}T${h.fim}`);
-      if(now>=ini&&now<=fim) return {t:"Aberta agora",c:"open"};
-      if(d.data===hoje&&now<ini) return {t:`Abre hoje ${h.inicio}`,c:"closed"};
+      return {t:`Abre ${h.inicio}`,c:"open"};
     }
-    return {t:`Abre ${d.data}`,c:"closed"};
   }
   return {t:"Fechada",c:"closed"};
 }
@@ -256,7 +261,7 @@ async function estrelas(loja){
   return Math.round(data.reduce((s,a)=>s+a.nota,0)/data.length);
 }
 
-/* LOAD */
+/* LOAD LOJAS */
 (async()=>{
   const { data } = await sb.from("user_profile")
     .select("*")
@@ -286,17 +291,18 @@ async function render(){
   }
 }
 
-/* ENTRAR */
+/* ENTRAR NA LOJA */
 async function entrar(id){
   const { data:{user} } = await sb.auth.getUser();
   if(!user){
+    lojaSelecionada = id;
     auth.style.display="flex";
     return;
   }
   location.href=`app.html?l=${id}`;
 }
 
-/* LOCALIZAÇÃO */
+/* GEO */
 function pertoDeMim(){
   navigator.geolocation.getCurrentPosition(async p=>{
     const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${p.coords.latitude}&lon=${p.coords.longitude}`);
