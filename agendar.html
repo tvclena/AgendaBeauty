@@ -698,8 +698,9 @@ async function confirmar(h){
 query = query.insert({
   ...payload,
 
-  loja_id: lojaId,              // dono da agenda
-  cliente_id: usuarioLogado.id, // 🔥 CLIENTE CORRETO
+  user_id: lojaId,          // 🔥 OBRIGATÓRIO (dono da agenda)
+  loja_id: lojaId,          // loja
+  cliente_id: usuarioLogado?.id || null // cliente (se logado)
 });
 
   }
