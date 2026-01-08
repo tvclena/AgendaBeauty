@@ -187,40 +187,65 @@ whats.addEventListener("input",()=>{
 
 /* ===== LOGIN / CADASTRO ===== */
 async function entrar(){
-  const nomeVal = nome.value.trim().toUpperCase();
+  const nomeVal  = nome.value.trim().toUpperCase();
   const whatsVal = whats.value.replace(/\D/g,"");
   const emailVal = email.value.trim();
   const senhaVal = senha.value;
 
-  if(nomeVal.length<3 || whatsVal.length<10 || !emailVal || senhaVal.length<6){
-    alert("Preencha todos os campos corretamente");
+  if(!emailVal || senhaVal.length < 6){
+    alert("Informe email e senha válidos");
     return;
   }
 
+  // 1️⃣ tenta login
   let { error } = await sb.auth.signInWithPassword({
     email: emailVal,
     password: senhaVal
   });
 
+  // 2️⃣ se não existir, cria conta
   if(error){
-    const { error:err2 } = await sb.auth.signUp({
+    const { error: signupError } = await sb.auth.signUp({
       email: emailVal,
       password: senhaVal
     });
-    if(err2){ alert(err2.message); return; }
+    if(signupError){
+      alert(signupError.message);
+      return;
+    }
   }
 
-  const { data:{user} } = await sb.auth.getUser();
+  // 3️⃣ pega usuário logado
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){
+    alert("Erro ao autenticar");
+    return;
+  }
 
-  await sb.from("clientes_profile")
-    .upsert({
-      id:user.id,
-      nome:nomeVal,
-      whatsapp:whatsVal,
-      email:emailVal,
-      loja_ativa:lojaId
+  // 4️⃣ busca perfil (SEM single)
+  const { data: perfil } = await sb
+    .from("clientes_profile")
+    .select("*")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  // 5️⃣ se não existe perfil, cria
+  if(!perfil){
+    await sb.from("clientes_profile").insert({
+      id: user.id,
+      nome: nomeVal || user.email,
+      whatsapp: whatsVal || null,
+      email: emailVal,
+      loja_ativa: lojaId
     });
+  } else {
+    // só atualiza loja ativa
+    await sb.from("clientes_profile")
+      .update({ loja_ativa: lojaId })
+      .eq("id", user.id);
+  }
 
+  // 6️⃣ segue o fluxo SEM POPUP
   location.href = `app.html?l=${lojaId}`;
 }
 </script>
