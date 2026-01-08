@@ -210,8 +210,16 @@ const sb = supabase.createClient(
 );
 
 const lojaId = new URLSearchParams(location.search).get("l");
-const clienteWhats = localStorage.getItem("WHATS_CLIENTE");
+
+  
+let clienteWhats = null;
 const lista = document.getElementById("lista");
+try {
+  const cliente = JSON.parse(localStorage.getItem("CLIENTE_LOJA"));
+  clienteWhats = cliente?.whatsapp || null;
+} catch (e) {
+  clienteWhats = null;
+}
 
 /* ===== UTILS ===== */
 const toMin = h => { const [a,b]=h.split(":").map(Number); return a*60+b; }
@@ -230,12 +238,24 @@ function minutosAte(data, hora){
 
 /* ===== LOAD ===== */
 async function carregar(){
-  const { data: ags } = await sb
-    .from("agendamentos")
-    .select("id,data,hora_inicio,hora_fim,servico_id,status")
-    .eq("loja_id",lojaId)
-    .eq("cliente_whatsapp",clienteWhats)
-    .neq("status","cancelado");
+  if(!clienteWhats){
+  lista.innerHTML = `
+    <div class="card">
+      <div class="title">Nenhum agendamento encontrado</div>
+      <div class="info">
+        Volte pelo link da loja e faça um novo agendamento.
+      </div>
+    </div>
+  `;
+  return;
+}
+
+ const { data: ags } = await sb
+  .from("agendamentos")
+  .select("id,data,hora_inicio,hora_fim,servico_id,status")
+  .eq("loja_id", lojaId)
+  .eq("cliente_whatsapp", clienteWhats)
+  .in("status", ["CONFIRMADO"]);
 
   const { data: servs } = await sb
     .from("produtos_servicos")
