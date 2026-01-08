@@ -2,11 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Agenda Fácil • Escolha sua loja</title>
+<title>Agenda Fácil</title>
 
-<meta name="viewport"
-  content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#ff6a00">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,348 +14,324 @@
 <style>
 :root{
   --primary:#ff6a00;
-  --bg:#f5f6fa;
-  --card:#ffffff;
+  --primary-soft:rgba(255,106,0,.14);
+  --bg:#f4f6fb;
   --border:#e5e7eb;
   --text:#111827;
   --muted:#6b7280;
-  --radius:22px;
+  --danger:#dc2626;
+  --topbar-h:56px;
+  --navbar-h:68px;
 }
+*{box-sizing:border-box;font-family:Inter}
+html,body{margin:0;width:100%;height:100%;background:var(--bg);overflow:hidden}
 
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-body{background:var(--bg);color:var(--text);overflow-x:hidden}
-
-/* HEADER */
-header{
+/* TOPBAR */
+.topbar{
+  position:fixed;top:0;left:0;right:0;
+  height:var(--topbar-h);
   background:#fff;
   border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:20;
-}
-.header{
-  max-width:1200px;
-  margin:auto;
-  padding:16px 20px;
+  padding:0 16px;
   display:flex;
   align-items:center;
   justify-content:space-between;
+  z-index:10;
 }
-.header h1{
-  font-size:20px;
-  font-weight:800;
+.topbar h1{font-size:18px;font-weight:800}
+
+/* AVATAR */
+.avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:800;
+  cursor:pointer;
+  background-size:cover;
+  background-position:center;
 }
-.location{
-  font-size:13px;
+
+/* CONTENT */
+.content{
+  position:fixed;
+  top:var(--topbar-h);
+  bottom:var(--navbar-h);
+  left:0;right:0;
+  background:#fff;
+}
+iframe{width:100%;height:100%;border:none}
+
+/* NAVBAR */
+.navbar{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  height:var(--navbar-h);
+  background:#fff;
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+}
+.nav-item{
+  font-size:11px;
   color:var(--muted);
   display:flex;
+  flex-direction:column;
   align-items:center;
-  gap:6px;
   cursor:pointer;
 }
+.nav-item i{font-size:22px}
+.nav-item.active{color:var(--primary)}
 
-/* HERO */
-.hero{
-  max-width:1200px;
-  margin:30px auto 20px;
-  padding:0 20px;
-  display:grid;
-  grid-template-columns:1.1fr .9fr;
-  gap:30px;
-}
-.hero-box{
-  background:linear-gradient(135deg,#ff6a00,#ff9a57);
-  border-radius:36px;
-  padding:40px;
-  color:#fff;
-}
-.hero-box h2{
-  font-size:36px;
-  line-height:1.1;
-  margin-bottom:12px;
-}
-.hero-box p{
-  opacity:.95;
-  font-size:16px;
-}
-.hero-image{
-  background:#fff;
-  border-radius:36px;
-  display:flex;
+/* OVERLAY PERFIL */
+#profileOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
   align-items:center;
   justify-content:center;
-  box-shadow:0 30px 80px rgba(0,0,0,.12);
-}
-.hero-image i{
-  font-size:120px;
-  color:var(--primary);
+  z-index:9999;
 }
 
-/* FILTERS */
-.filters{
-  max-width:1200px;
-  margin:10px auto 10px;
-  padding:0 20px;
-  display:grid;
-  grid-template-columns:2fr 1fr 1fr 1fr;
-  gap:10px;
-}
-.filters input,.filters select{
-  padding:14px;
-  border-radius:14px;
-  border:1px solid var(--border);
-  font-size:14px;
+/* MODAL PERFIL */
+.profile-modal{
+  width:92%;
+  max-width:420px;
+  background:#fff;
+  border-radius:22px;
+  padding:20px;
+  max-height:90vh;
+  overflow:auto;
+  box-shadow:0 30px 90px rgba(0,0,0,.35);
 }
 
-/* LIST */
-.list{
-  max-width:1200px;
-  margin:10px auto 60px;
-  padding:0 20px;
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-  gap:22px;
-}
-
-/* CARD */
-.card{
-  background:var(--card);
-  border-radius:26px;
-  padding:18px;
-  box-shadow:0 14px 40px rgba(0,0,0,.08);
-  transition:.3s;
-  cursor:pointer;
-  position:relative;
-}
-.card:hover{
-  transform:translateY(-6px);
-}
-.card .logo{
-  width:56px;height:56px;
-  border-radius:50%;
+/* FOTO */
+.profile-img{
+  width:88px;height:88px;border-radius:50%;
   background:#eee;
   background-size:cover;
   background-position:center;
-  margin-bottom:12px;
+  margin:0 auto 10px;
+  position:relative;
 }
-.card h3{
-  font-size:16px;
-  font-weight:800;
-}
-.card small{
-  color:var(--muted);
-  font-size:12px;
-}
-.badges{
-  display:flex;
-  gap:8px;
-  margin:10px 0;
-}
-.badge{
-  font-size:11px;
-  padding:6px 10px;
-  border-radius:999px;
-  font-weight:700;
-}
-.badge.open{background:#dcfce7;color:#166534}
-.badge.closed{background:#fee2e2;color:#991b1b}
-.badge.prod{background:#ede9fe;color:#5b21b6}
-.badge.serv{background:#e0f2fe;color:#075985}
-
-.card button{
-  width:100%;
-  margin-top:12px;
-  padding:12px;
-  border:none;
-  border-radius:999px;
-  background:var(--primary);
+.profile-img .cam{
+  position:absolute;
+  right:-4px;bottom:-4px;
+  width:34px;height:34px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
+  display:flex;align-items:center;justify-content:center;
   color:#fff;
-  font-weight:800;
+  border:3px solid #fff;
   cursor:pointer;
 }
 
-/* EMPTY */
-.empty{
-  text-align:center;
-  color:var(--muted);
-  margin-top:60px;
+/* FORM */
+.field{margin-bottom:10px}
+.field input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--border);
 }
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-/* RESPONSIVE */
-@media(max-width:900px){
-  .hero{grid-template-columns:1fr}
-  .hero-box h2{font-size:30px}
-  .filters{grid-template-columns:1fr 1fr}
+.btn{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:999px;
+  font-weight:800;
+  cursor:pointer;
+}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-danger{background:#fee2e2;color:var(--danger);margin-top:8px}
+
+/* LOJAS */
+.lojas-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.loja-item{
+  padding:12px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  cursor:pointer;
+}
+.loja-item.active{border-color:var(--primary)}
+.small-btn{
+  margin-top:8px;
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  border:1px solid var(--border);
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <div class="header">
-    <h1>Escolha uma loja</h1>
-    <div class="location" onclick="pedirLocalizacao()">
-      <i class="ri-map-pin-line"></i>
-      <span id="cidadeAtual">Detectar localização</span>
+<div class="topbar">
+  <h1 id="nomeLoja">Agenda Fácil</h1>
+  <div class="avatar" id="avatar" onclick="openProfile()">A</div>
+</div>
+
+<div class="content">
+  <iframe id="frame"></iframe>
+</div>
+
+<nav class="navbar">
+  <div class="nav-item active" onclick="go(this,'homeclientes.html')"><i class="ri-home-5-line"></i>Início</div>
+  <div class="nav-item" onclick="go(this,'agendar.html')"><i class="ri-calendar-line"></i>Agendar</div>
+  <div class="nav-item" onclick="go(this,'agendamentosclientes.html')"><i class="ri-user-line"></i>Meu espaço</div>
+</nav>
+
+<!-- PERFIL -->
+<div id="profileOverlay" onclick="closeProfile(event)">
+  <div class="profile-modal" onclick="event.stopPropagation()">
+
+    <div class="profile-img" id="profileImg">
+      <div class="cam" onclick="foto.click()"><i class="ri-camera-line"></i></div>
     </div>
-  </div>
-</header>
+    <input type="file" id="foto" hidden accept="image/*">
 
-<section class="hero">
-  <div class="hero-box">
-    <h2>Agende com<br>os melhores perto de você</h2>
-    <p>
-      Um único cadastro funciona em todas as lojas disponíveis.
-      Escolha, entre e agende em segundos.
-    </p>
-  </div>
-  <div class="hero-image">
-    <i class="ri-store-2-line"></i>
-  </div>
-</section>
+    <div class="field"><input id="pNome" placeholder="Nome completo"></div>
+    <div class="field"><input id="pWhats" placeholder="WhatsApp"></div>
 
-<section class="filters">
-  <input id="fNome" placeholder="Buscar por nome">
-  <input id="fCidade" placeholder="Cidade">
-  <input id="fHora" type="time">
-  <select id="fStatus">
-    <option value="">Aberta ou fechada</option>
-    <option value="open">Aberta</option>
-    <option value="closed">Fechada</option>
-  </select>
-</section>
+    <div class="row">
+      <div class="field"><input id="pCep" placeholder="CEP"></div>
+      <div class="field"><input id="pNumero" placeholder="Número"></div>
+    </div>
 
-<section class="list" id="lista"></section>
-<div class="empty" id="empty" style="display:none">
-  Nenhuma loja encontrada
+    <div class="field"><input id="pRua" placeholder="Rua"></div>
+
+    <div class="row">
+      <div class="field"><input id="pCidade" placeholder="Cidade"></div>
+      <div class="field"><input id="pUf" placeholder="UF"></div>
+    </div>
+
+    <button class="btn btn-primary" onclick="salvarPerfil()">Salvar</button>
+
+    <h4 style="margin:14px 0 6px">Minhas lojas</h4>
+    <div class="lojas-list" id="listaLojas"></div>
+
+    <div style="display:flex;justify-content:center">
+      <div class="small-btn" onclick="location.href='lojasat.html'">
+        <i class="ri-store-2-line"></i>+
+      </div>
+    </div>
+
+    <button class="btn btn-danger" onclick="sair()">Sair</button>
+  </div>
 </div>
 
 <script>
 const sb = supabase.createClient(
- "https://egxjgmzukjyyxmkukwub.supabase.co",
- "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+  "https://egxjgmzukjyyxmkukwub.supabase.co",
+  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-let lojas = [];
-let cidadeDetectada = null;
+const lojaParam = new URLSearchParams(location.search).get("l");
+const frame = document.getElementById("frame");
+let user, perfil;
 
-/* ================= LOCALIZAÇÃO ================= */
-function pedirLocalizacao(){
-  if(!navigator.geolocation){
-    alert("Localização não suportada");
-    return;
+/* INIT */
+(async()=>{
+  const { data:{session} } = await sb.auth.getSession();
+  if(!session){ location.href=`index.html?l=${lojaParam}`; return; }
+  user = session.user;
+
+  const { data:p } = await sb.from("clientes_profile").select("*").eq("id",user.id).single();
+  perfil = p;
+
+  if(lojaParam && perfil.loja_ativa !== lojaParam){
+    await sb.from("clientes_profile").update({loja_ativa:lojaParam}).eq("id",user.id);
+    perfil.loja_ativa = lojaParam;
   }
-  navigator.geolocation.getCurrentPosition(async pos=>{
-    const lat = pos.coords.latitude;
-    const lon = pos.coords.longitude;
-    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
-    const j = await r.json();
-    cidadeDetectada = j.address.city || j.address.town || j.address.village;
-    cidadeAtual.innerText = cidadeDetectada;
-    fCidade.value = cidadeDetectada;
-    render();
+
+  frame.src = `homeclientes.html?l=${perfil.loja_ativa}`;
+  carregarPerfil();
+})();
+
+function carregarPerfil(){
+  if(perfil.avatar_url){
+    avatar.style.backgroundImage = `url(${perfil.avatar_url})`;
+    avatar.textContent="";
+    profileImg.style.backgroundImage = `url(${perfil.avatar_url})`;
+  }else{
+    avatar.textContent = perfil.nome?.[0] || "A";
+  }
+
+  pNome.value = perfil.nome || "";
+  pWhats.value = perfil.whatsapp || "";
+  pCep.value = perfil.cep || "";
+  pRua.value = perfil.rua || "";
+  pNumero.value = perfil.numero || "";
+  pCidade.value = perfil.cidade || "";
+  pUf.value = perfil.uf || "";
+
+  renderLojas();
+}
+
+function renderLojas(){
+  listaLojas.innerHTML="";
+  (perfil.lojas||[]).forEach(l=>{
+    const div=document.createElement("div");
+    div.className="loja-item"+(l===perfil.loja_ativa?" active":"");
+    div.innerHTML=`<span>${l}</span><span>Entrar</span>`;
+    div.onclick=async()=>{
+      await sb.from("clientes_profile").update({loja_ativa:l}).eq("id",user.id);
+      location.href=`app.html?l=${l}`;
+    };
+    listaLojas.appendChild(div);
   });
 }
 
-/* ================= LOAD LOJAS ================= */
-async function carregarLojas(){
-  const { data } = await sb
-    .from("user_profile")
-    .select("user_id,negocio,tipo,cidade,uf,avatar_url,status")
-    .eq("status","active");
+/* SALVAR PERFIL */
+async function salvarPerfil(){
+  let avatarUrl = perfil.avatar_url;
 
-  lojas = data || [];
-  render();
-}
-
-/* ================= AGENDA ================= */
-async function agendaAberta(lojaId){
-  const hoje = new Date().toISOString().slice(0,10);
-  const { data } = await sb
-    .from("agenda_loja")
-    .select("fechado,horarios")
-    .eq("user_id",lojaId)
-    .eq("data",hoje)
-    .maybeSingle();
-
-  if(!data || data.fechado) return false;
-  return Array.isArray(data.horarios) && data.horarios.length>0;
-}
-
-/* ================= PROD/SERV ================= */
-async function tipoLoja(lojaId){
-  const { data } = await sb
-    .from("produtos_servicos")
-    .select("tipo")
-    .eq("user_id",lojaId)
-    .eq("ativo",true);
-
-  return data?.some(p=>p.tipo==="PRODUTO") ? "PRODUTO" : "SERVICO";
-}
-
-/* ================= RENDER ================= */
-async function render(){
-  lista.innerHTML="";
-  let achou=false;
-
-  for(const l of lojas){
-    if(fNome.value && !l.negocio.toLowerCase().includes(fNome.value.toLowerCase())) continue;
-    if(fCidade.value && l.cidade?.toLowerCase() !== fCidade.value.toLowerCase()) continue;
-
-    const aberta = await agendaAberta(l.user_id);
-    if(fStatus.value==="open" && !aberta) continue;
-    if(fStatus.value==="closed" && aberta) continue;
-
-    const tipo = await tipoLoja(l.user_id);
-
-    achou=true;
-    lista.innerHTML+=`
-      <div class="card">
-        <div class="logo" style="background-image:url('${l.avatar_url||""}')"></div>
-        <h3>${l.negocio}</h3>
-        <small>${l.tipo} • ${l.cidade}/${l.uf}</small>
-
-        <div class="badges">
-          <div class="badge ${aberta?"open":"closed"}">
-            ${aberta?"Aberta":"Fechada"}
-          </div>
-          <div class="badge ${tipo==="PRODUTO"?"prod":"serv"}">
-            ${tipo==="PRODUTO"?"🛒 Produto":"✂️ Serviço"}
-          </div>
-        </div>
-
-        <button onclick="entrar('${l.user_id}')">
-          Acessar loja
-        </button>
-      </div>
-    `;
+  if(foto.files.length){
+    const path = `perfil/${user.id}.jpg`;
+    await sb.storage.from("avatars").upload(path,foto.files[0],{upsert:true});
+    avatarUrl = sb.storage.from("avatars").getPublicUrl(path).data.publicUrl;
   }
 
-  empty.style.display = achou ? "none" : "block";
-}
-
-/* ================= ENTRAR ================= */
-async function entrar(lojaId){
-  const { data:perfil } = await sb
-    .from("clientes_profile")
-    .select("lojas")
-    .eq("id",(await sb.auth.getUser()).data.user.id)
-    .single();
-
-  const lojasCliente = perfil?.lojas || [];
-  if(!lojasCliente.includes(lojaId)) lojasCliente.push(lojaId);
-
   await sb.from("clientes_profile").update({
-    lojas: lojasCliente,
-    loja_ativa: lojaId
-  }).eq("id",(await sb.auth.getUser()).data.user.id);
+    nome:pNome.value,
+    whatsapp:pWhats.value,
+    cep:pCep.value,
+    rua:pRua.value,
+    numero:pNumero.value,
+    cidade:pCidade.value,
+    uf:pUf.value,
+    avatar_url:avatarUrl
+  }).eq("id",user.id);
 
-  location.href = `app.html?l=${lojaId}`;
+  location.reload();
 }
 
-/* EVENTS */
-[fNome,fCidade,fHora,fStatus].forEach(i=>i.addEventListener("input",render));
+/* NAV */
+function go(el,page){
+  document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
+  el.classList.add("active");
+  frame.src = `${page}?l=${perfil.loja_ativa}`;
+}
 
-carregarLojas();
+/* PROFILE */
+function openProfile(){ profileOverlay.style.display="flex"; }
+function closeProfile(e){ if(!e || e.target.id==="profileOverlay") profileOverlay.style.display="none"; }
+
+/* LOGOUT */
+async function sair(){
+  await sb.auth.signOut();
+  location.href=`index.html?l=${perfil.loja_ativa}`;
+}
 </script>
 
 </body>
