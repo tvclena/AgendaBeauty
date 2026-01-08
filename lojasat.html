@@ -4,10 +4,12 @@
 <meta charset="UTF-8">
 <title>Agenda Clena • Escolha sua loja</title>
 
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport"
+  content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
 <meta name="theme-color" content="#ff6a00">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -20,145 +22,160 @@
   --border:#e5e7eb;
   --text:#1f2937;
   --muted:#6b7280;
-  --radius:22px;
+  --radius:18px;
 }
+
 *{box-sizing:border-box;font-family:Inter}
-body{margin:0;background:var(--bg);color:var(--text);overflow-x:hidden}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+}
 
 /* HEADER */
 header{
   background:#fff;
   border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:10;
+  padding:14px 16px;
+  position:sticky;
+  top:0;
+  z-index:10;
 }
-.header{
-  max-width:1200px;
-  margin:auto;
-  padding:18px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+header h1{
+  font-size:18px;
+  font-weight:800;
 }
-.header h1{font-size:20px;font-weight:800}
 
-/* HERO */
+/* HERO (MOBILE COMPACTO) */
 .hero{
-  max-width:1200px;
-  margin:30px auto;
-  padding:0 20px;
-  display:grid;
-  grid-template-columns:1.2fr .8fr;
-  gap:30px;
-}
-.hero-box{
+  margin:14px;
   background:linear-gradient(135deg,#ff6a00,#ff9a57);
   color:#fff;
-  border-radius:36px;
-  padding:40px;
+  border-radius:20px;
+  padding:18px;
 }
-.hero-box h2{font-size:40px;margin-bottom:12px}
-.hero-box p{font-size:16px;opacity:.95}
-.hero-img{
-  background:#fff;
-  border-radius:36px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 30px 80px rgba(0,0,0,.12);
+.hero h2{
+  font-size:20px;
+  line-height:1.2;
+  margin-bottom:6px;
 }
-.hero-img i{font-size:120px;color:var(--primary)}
+.hero p{
+  font-size:13px;
+  opacity:.95;
+}
 
 /* FILTERS */
 .filters{
-  max-width:1200px;
-  margin:auto;
-  padding:0 20px;
   display:grid;
-  grid-template-columns:2fr 1fr auto 1fr;
-  gap:10px;
-}
-.filters input,.filters select{
+  grid-template-columns:1fr 1fr;
+  gap:8px;
   padding:14px;
-  border-radius:14px;
+}
+.filters input,.filters select,.filters button{
+  padding:12px;
+  border-radius:12px;
   border:1px solid var(--border);
   font-size:14px;
 }
-.perto{
-  padding:14px;
-  border-radius:14px;
-  border:none;
+.filters button{
   background:var(--primary);
   color:#fff;
-  font-weight:800;
-  cursor:pointer;
+  font-weight:700;
+  border:none;
 }
 
-/* LIST */
+/* LISTA */
 .list{
-  max-width:1200px;
-  margin:30px auto 80px;
-  padding:0 20px;
+  padding:14px;
   display:grid;
-  gap:20px;
-}
-@media(max-width:600px){
-  .list{grid-template-columns:repeat(2,1fr)}
-}
-@media(min-width:601px){
-  .list{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
 }
 
 /* CARD */
 .card{
   background:var(--card);
-  border-radius:26px;
-  padding:18px;
-  box-shadow:0 14px 40px rgba(0,0,0,.08);
+  border-radius:16px;
+  padding:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+  display:flex;
+  flex-direction:column;
 }
 .logo{
-  width:64px;height:64px;
+  width:48px;height:48px;
   border-radius:50%;
   background:#eee center/cover;
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
-.card h3{font-size:16px;font-weight:800}
-.card small{color:var(--muted);font-size:12px}
-.badges{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
-.badge{
+.card h3{
+  font-size:14px;
+  font-weight:800;
+  margin-bottom:2px;
+}
+.card small{
   font-size:11px;
-  padding:6px 10px;
+  color:var(--muted);
+}
+.stars{
+  color:#facc15;
+  font-size:12px;
+  margin:4px 0;
+}
+.badge{
+  font-size:10px;
+  padding:4px 8px;
   border-radius:999px;
   font-weight:700;
+  display:inline-block;
 }
 .open{background:#dcfce7;color:#166534}
 .closed{background:#fee2e2;color:#991b1b}
 .dist{background:#e0f2fe;color:#075985}
 
 .card button{
-  width:100%;
-  padding:12px;
-  border:none;
+  margin-top:auto;
+  padding:10px;
   border-radius:999px;
+  border:none;
   background:var(--accent);
   font-weight:800;
+  font-size:13px;
   cursor:pointer;
 }
 
-/* POPUP */
-#popup{
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.45);
+/* POPUPS */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
   display:none;
   align-items:center;
   justify-content:center;
   z-index:999;
 }
-#popup .box{
+.popup{
   background:#fff;
-  padding:22px;
-  border-radius:22px;
+  padding:18px;
+  border-radius:18px;
+  width:90%;
   max-width:320px;
-  text-align:center;
+}
+.popup input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  margin-bottom:10px;
+}
+.popup button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:999px;
+  background:var(--primary);
+  color:#fff;
+  font-weight:800;
 }
 </style>
 </head>
@@ -166,39 +183,33 @@ header{
 <body>
 
 <header>
-  <div class="header">
-    <h1>Escolha uma loja</h1>
-  </div>
+  <h1>Escolha uma loja</h1>
 </header>
 
 <section class="hero">
-  <div class="hero-box">
-    <h2>Agende com os melhores perto de você</h2>
-    <p>Um único cadastro funciona em todas as lojas disponíveis.</p>
-  </div>
-  <div class="hero-img">
-    <i class="ri-store-2-line"></i>
-  </div>
+  <h2>Agende perto de você</h2>
+  <p>Um cadastro funciona em todas as lojas</p>
 </section>
 
 <section class="filters">
   <input id="fNome" placeholder="Buscar loja">
   <input id="fCidade" placeholder="Cidade">
-  <button class="perto" onclick="pertoDeMim()">📍 Perto de mim</button>
+  <button onclick="pertoDeMim()">📍 Perto de mim</button>
   <select id="fStatus">
     <option value="">Aberta ou fechada</option>
-    <option value="open">Aberta agora</option>
+    <option value="open">Aberta</option>
     <option value="closed">Fechada</option>
   </select>
 </section>
 
 <section class="list" id="lista"></section>
 
-<div id="popup">
-  <div class="box">
-    <h3>Cidade detectada</h3>
-    <p id="cidadeDetectada"></p>
-    <button class="perto" onclick="confirmarCidade()">Confirmar</button>
+<!-- LOGIN -->
+<div class="overlay" id="auth">
+  <div class="popup">
+    <h3>Entrar</h3>
+    <input id="email" placeholder="seu@email.com">
+    <button onclick="login()">Continuar</button>
   </div>
 </div>
 
@@ -208,103 +219,84 @@ const sb = supabase.createClient(
  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-let lojas=[], userLat=null, userLon=null, cidadeGeo=null;
+let lojas=[], userLat=null, userLon=null;
 
-/* DISTÂNCIA */
-function km(lat1,lon1,lat2,lon2){
-  const R=6371;
-  const dLat=(lat2-lat1)*Math.PI/180;
-  const dLon=(lon2-lon1)*Math.PI/180;
-  const a=Math.sin(dLat/2)**2+
-    Math.cos(lat1*Math.PI/180)*
-    Math.cos(lat2*Math.PI/180)*
-    Math.sin(dLon/2)**2;
-  return (R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))).toFixed(1);
+/* STARS */
+function stars(n){
+  return "★★★★★☆☆☆☆☆".slice(5-n,10-n);
 }
 
-/* STATUS AGENDA */
-async function statusAgenda(lojaId){
-  const agora=new Date();
-  const hoje=agora.toISOString().slice(0,10);
-
-  const { data } = await sb
-    .from("agenda_loja")
+/* STATUS REAL */
+async function statusAgenda(id){
+  const now=new Date();
+  const hoje=now.toISOString().slice(0,10);
+  const {data}=await sb.from("agenda_loja")
     .select("*")
-    .eq("user_id",lojaId)
+    .eq("user_id",id)
     .gte("data",hoje)
     .order("data",{ascending:true});
-
   for(const d of data||[]){
     if(d.fechado) continue;
     for(const h of d.horarios||[]){
-      const ini=new Date(`${d.data}T${h.inicio}`);
-      const fim=new Date(`${d.data}T${h.fim}`);
-      if(agora>=ini && agora<=fim)
-        return {txt:"Aberta agora",cls:"open"};
-      if(d.data===hoje && agora<ini)
-        return {txt:`Abre hoje ${h.inicio}`,cls:"closed"};
+      const i=new Date(`${d.data}T${h.inicio}`);
+      const f=new Date(`${d.data}T${h.fim}`);
+      if(now>=i && now<=f) return {t:"Aberta",c:"open"};
+      if(d.data===hoje && now<i) return {t:`Abre ${h.inicio}`,c:"closed"};
     }
-    return {txt:`Abre ${d.data} ${d.horarios?.[0]?.inicio||""}`,cls:"closed"};
+    return {t:`Abre ${d.data}`,c:"closed"};
   }
-  return {txt:"Fechada",cls:"closed"};
+  return {t:"Fechada",c:"closed"};
 }
 
-/* PERTO DE MIM */
+/* GEO */
 function pertoDeMim(){
-  navigator.geolocation.getCurrentPosition(async p=>{
+  navigator.geolocation.getCurrentPosition(p=>{
     userLat=p.coords.latitude;
     userLon=p.coords.longitude;
-    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLon}`);
-    const j=await r.json();
-    cidadeGeo=j.address.city||j.address.town||j.address.village;
-    cidadeDetectada.innerText=cidadeGeo;
-    popup.style.display="flex";
   });
-}
-function confirmarCidade(){
-  fCidade.value=cidadeGeo;
-  popup.style.display="none";
-  render();
 }
 
 /* LOAD */
 (async()=>{
-  const { data } = await sb.from("user_profile")
-    .select("*")
-    .eq("status","active");
+  const {data}=await sb.from("user_profile").select("*").eq("status","active");
   lojas=data||[];
   render();
 })();
 
 async function render(){
   lista.innerHTML="";
-  let arr=[...lojas];
-
-  for(const l of arr){
+  for(const l of lojas){
     if(fNome.value && !l.negocio.toLowerCase().includes(fNome.value.toLowerCase())) continue;
     if(fCidade.value && l.cidade?.toLowerCase()!==fCidade.value.toLowerCase()) continue;
 
     const st=await statusAgenda(l.user_id);
-    if(fStatus.value==="open" && st.cls!=="open") continue;
-    if(fStatus.value==="closed" && st.cls!=="closed") continue;
-
-    let dist="";
-    if(userLat && l.latitude){
-      dist=`${km(userLat,userLon,l.latitude,l.longitude)} km`;
-    }
+    if(fStatus.value==="open" && st.c!=="open") continue;
+    if(fStatus.value==="closed" && st.c!=="closed") continue;
 
     lista.innerHTML+=`
       <div class="card">
         <div class="logo" style="background-image:url('${l.avatar_url||""}')"></div>
         <h3>${l.negocio}</h3>
-        <small>${l.tipo} • ${l.cidade}/${l.uf}</small>
-        <div class="badges">
-          <div class="badge ${st.cls}">${st.txt}</div>
-          ${dist?`<div class="badge dist">${dist}</div>`:""}
-        </div>
-        <button onclick="location.href='app.html?l=${l.user_id}'">Entrar</button>
+        <small>${l.cidade}/${l.uf}</small>
+        <div class="stars">${stars(4)}</div>
+        <span class="badge ${st.c}">${st.t}</span>
+        <button onclick="entrar('${l.user_id}')">Entrar</button>
       </div>`;
   }
+}
+
+async function entrar(loja){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){
+    auth.style.display="flex";
+    return;
+  }
+  location.href=`app.html?l=${loja}`;
+}
+
+async function login(){
+  await sb.auth.signInWithOtp({email:email.value});
+  alert("Verifique seu e-mail");
 }
 
 [fNome,fCidade,fStatus].forEach(i=>i.addEventListener("input",render));
