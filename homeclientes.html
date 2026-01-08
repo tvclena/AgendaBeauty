@@ -5,21 +5,42 @@
 <title>Agenda Fácil</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+(function(){
+  const params = new URLSearchParams(location.search);
+  const lojaId = params.get("l");
+  if(!lojaId) return;
+
+  const tema = localStorage.getItem("loja_tema_" + lojaId);
+  if(!tema) return;
+
+  try{
+    const cfg = JSON.parse(tema);
+    const root = document.documentElement;
+
+    if(cfg.primary) root.style.setProperty("--primary", cfg.primary);
+    if(cfg.secondary) root.style.setProperty("--primary-2", cfg.secondary);
+    if(cfg.text) root.style.setProperty("--text", cfg.text);
+  }catch(e){}
+})();
+</script>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+  
 :root{
-  --primary:#ff6a00;
-  --primary-2:#ff9a57;
+  --primary: var(--primary, #ff6a00);
+  --primary-2: var(--primary-2, #ff9a57);
   --bg:#f4f6fb;
   --card:#ffffff;
   --border:#e5e7eb;
-  --text:#111827;
+  --text: var(--text, #111827);
   --muted:#6b7280;
 }
+
 
 *{box-sizing:border-box;font-family:Inter}
 body{margin:0;background:var(--bg);padding:16px}
@@ -230,9 +251,10 @@ async function load(){
     .eq("user_id",lojaId)
     .maybeSingle();
 
-  if(config?.primary_color){
-    document.documentElement.style.setProperty("--primary",config.primary_color);
-  }
+if(config?.primary_color && !localStorage.getItem("loja_tema_" + lojaId)){
+  document.documentElement.style.setProperty("--primary",config.primary_color);
+}
+
   if(config?.secondary_color){
     document.documentElement.style.setProperty("--primary-2",config.secondary_color);
   }
