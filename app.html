@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <title>Agenda Fácil</title>
 
-<link rel="manifest" href="/manifest.json">
-
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#ff6a00">
 
@@ -85,31 +83,36 @@ iframe{width:100%;height:100%;border:none}
 .nav-item i{font-size:22px}
 .nav-item.active{color:var(--primary)}
 
-/* OVERLAY */
-.overlay{
+/* OVERLAY PERFIL */
+#profileOverlay{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.45);
   display:none;
-  align-items:flex-end;
+  align-items:center;
+  justify-content:center;
   z-index:9999;
 }
 
-/* PROFILE */
-.profile-box{
-  width:100%;
+/* MODAL PERFIL */
+.profile-modal{
+  width:92%;
+  max-width:420px;
   background:#fff;
-  border-radius:22px 22px 0 0;
-  padding:18px;
-  max-height:92vh;
+  border-radius:22px;
+  padding:20px;
+  max-height:90vh;
   overflow:auto;
+  box-shadow:0 30px 90px rgba(0,0,0,.35);
 }
+
+/* FOTO */
 .profile-img{
-  width:86px;height:86px;border-radius:50%;
+  width:88px;height:88px;border-radius:50%;
   background:#eee;
   background-size:cover;
   background-position:center;
-  margin:0 auto;
+  margin:0 auto 10px;
   position:relative;
 }
 .profile-img .cam{
@@ -121,7 +124,10 @@ iframe{width:100%;height:100%;border:none}
   display:flex;align-items:center;justify-content:center;
   color:#fff;
   border:3px solid #fff;
+  cursor:pointer;
 }
+
+/* FORM */
 .field{margin-bottom:10px}
 .field input{
   width:100%;
@@ -129,6 +135,8 @@ iframe{width:100%;height:100%;border:none}
   border-radius:12px;
   border:1px solid var(--border);
 }
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
 .btn{
   width:100%;
   padding:14px;
@@ -140,13 +148,8 @@ iframe{width:100%;height:100%;border:none}
 .btn-primary{background:var(--primary);color:#fff}
 .btn-danger{background:#fee2e2;color:var(--danger);margin-top:8px}
 
-/* MINHAS LOJAS */
-.lojas-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  margin-top:10px;
-}
+/* LOJAS */
+.lojas-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .loja-item{
   padding:12px;
   border-radius:14px;
@@ -156,6 +159,18 @@ iframe{width:100%;height:100%;border:none}
   cursor:pointer;
 }
 .loja-item.active{border-color:var(--primary)}
+.small-btn{
+  margin-top:8px;
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  border:1px solid var(--border);
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
 </style>
 </head>
 
@@ -176,31 +191,40 @@ iframe{width:100%;height:100%;border:none}
   <div class="nav-item" onclick="go(this,'agendamentosclientes.html')"><i class="ri-user-line"></i>Meu espaço</div>
 </nav>
 
-<!-- PROFILE -->
-<div class="overlay" id="profileModal" onclick="closeProfile(event)">
-  <div class="profile-box" onclick="event.stopPropagation()">
+<!-- PERFIL -->
+<div id="profileOverlay" onclick="closeProfile(event)">
+  <div class="profile-modal" onclick="event.stopPropagation()">
 
     <div class="profile-img" id="profileImg">
       <div class="cam" onclick="foto.click()"><i class="ri-camera-line"></i></div>
     </div>
     <input type="file" id="foto" hidden accept="image/*">
 
-    <div class="field"><input id="pNome" placeholder="Nome"></div>
+    <div class="field"><input id="pNome" placeholder="Nome completo"></div>
     <div class="field"><input id="pWhats" placeholder="WhatsApp"></div>
-    <div class="field"><input id="pCep" placeholder="CEP"></div>
+
+    <div class="row">
+      <div class="field"><input id="pCep" placeholder="CEP"></div>
+      <div class="field"><input id="pNumero" placeholder="Número"></div>
+    </div>
+
     <div class="field"><input id="pRua" placeholder="Rua"></div>
-    <div class="field"><input id="pNumero" placeholder="Número"></div>
-    <div class="field"><input id="pCidade" placeholder="Cidade"></div>
-    <div class="field"><input id="pUf" placeholder="UF"></div>
+
+    <div class="row">
+      <div class="field"><input id="pCidade" placeholder="Cidade"></div>
+      <div class="field"><input id="pUf" placeholder="UF"></div>
+    </div>
 
     <button class="btn btn-primary" onclick="salvarPerfil()">Salvar</button>
 
-    <h4 style="margin-top:14px">Minhas lojas</h4>
+    <h4 style="margin:14px 0 6px">Minhas lojas</h4>
     <div class="lojas-list" id="listaLojas"></div>
 
-    <button class="btn" onclick="location.href='lojasat.html'" style="margin-top:10px">
-      <i class="ri-store-2-line"></i> +
-    </button>
+    <div style="display:flex;justify-content:center">
+      <div class="small-btn" onclick="location.href='lojasat.html'">
+        <i class="ri-store-2-line"></i>+
+      </div>
+    </div>
 
     <button class="btn btn-danger" onclick="sair()">Sair</button>
   </div>
@@ -212,22 +236,25 @@ const sb = supabase.createClient(
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-const lojaId = new URLSearchParams(location.search).get("l");
+const lojaParam = new URLSearchParams(location.search).get("l");
 const frame = document.getElementById("frame");
-
 let user, perfil;
 
 /* INIT */
 (async()=>{
   const { data:{session} } = await sb.auth.getSession();
-  if(!session){ location.href=`index.html?l=${lojaId}`; return; }
+  if(!session){ location.href=`index.html?l=${lojaParam}`; return; }
   user = session.user;
 
   const { data:p } = await sb.from("clientes_profile").select("*").eq("id",user.id).single();
   perfil = p;
 
-  frame.src = `homeclientes.html?l=${perfil.loja_ativa || lojaId}`;
+  if(lojaParam && perfil.loja_ativa !== lojaParam){
+    await sb.from("clientes_profile").update({loja_ativa:lojaParam}).eq("id",user.id);
+    perfil.loja_ativa = lojaParam;
+  }
 
+  frame.src = `homeclientes.html?l=${perfil.loja_ativa}`;
   carregarPerfil();
 })();
 
@@ -252,19 +279,20 @@ function carregarPerfil(){
 }
 
 function renderLojas(){
-  listaLojas.innerHTML = "";
-  (perfil.lojas || []).forEach(l=>{
-    const div = document.createElement("div");
-    div.className = "loja-item" + (l===perfil.loja_ativa?" active":"");
-    div.innerHTML = `<span>${l}</span><span>Entrar</span>`;
-    div.onclick = async ()=>{
+  listaLojas.innerHTML="";
+  (perfil.lojas||[]).forEach(l=>{
+    const div=document.createElement("div");
+    div.className="loja-item"+(l===perfil.loja_ativa?" active":"");
+    div.innerHTML=`<span>${l}</span><span>Entrar</span>`;
+    div.onclick=async()=>{
       await sb.from("clientes_profile").update({loja_ativa:l}).eq("id",user.id);
-      location.href = `app.html?l=${l}`;
+      location.href=`app.html?l=${l}`;
     };
     listaLojas.appendChild(div);
   });
 }
 
+/* SALVAR PERFIL */
 async function salvarPerfil(){
   let avatarUrl = perfil.avatar_url;
 
@@ -288,18 +316,21 @@ async function salvarPerfil(){
   location.reload();
 }
 
+/* NAV */
 function go(el,page){
   document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
   el.classList.add("active");
   frame.src = `${page}?l=${perfil.loja_ativa}`;
 }
 
-function openProfile(){ profileModal.style.display="flex"; }
-function closeProfile(e){ if(!e || e.target.id==="profileModal") profileModal.style.display="none"; }
+/* PROFILE */
+function openProfile(){ profileOverlay.style.display="flex"; }
+function closeProfile(e){ if(!e || e.target.id==="profileOverlay") profileOverlay.style.display="none"; }
 
+/* LOGOUT */
 async function sair(){
   await sb.auth.signOut();
-  location.href = `index.html?l=${lojaId}`;
+  location.href=`index.html?l=${perfil.loja_ativa}`;
 }
 </script>
 
