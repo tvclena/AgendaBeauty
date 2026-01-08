@@ -2,233 +2,230 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Agenda Fácil</title>
+<title>Escolha uma loja • Agenda Clena</title>
 
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport"
+  content="width=device-width,
+  initial-scale=1,
+  maximum-scale=1,
+  user-scalable=no,
+  viewport-fit=cover">
+
 <meta name="theme-color" content="#ff6a00">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
   --primary:#ff6a00;
-  --primary-soft:rgba(255,106,0,.14);
-  --bg:#f4f6fb;
-  --border:#e5e7eb;
-  --text:#111827;
+  --accent:#b8ff65;
+  --bg:#f6f7fb;
+  --card:#fff;
+  --text:#1f2937;
   --muted:#6b7280;
+  --border:#e5e7eb;
+  --success:#16a34a;
   --danger:#dc2626;
-  --topbar-h:56px;
-  --navbar-h:68px;
+  --radius:22px;
 }
-*{box-sizing:border-box;font-family:Inter}
-html,body{margin:0;width:100%;height:100%;background:var(--bg);overflow:hidden}
 
-/* TOPBAR */
-.topbar{
-  position:fixed;top:0;left:0;right:0;
-  height:var(--topbar-h);
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
+body{background:var(--bg);color:var(--text)}
+
+/* HEADER */
+header{
   background:#fff;
   border-bottom:1px solid var(--border);
-  padding:0 16px;
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+.header{
+  max-width:1200px;
+  margin:auto;
+  padding:16px 20px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  z-index:10;
 }
-.topbar h1{font-size:18px;font-weight:800}
-
-/* AVATAR */
-.avatar{
-  width:36px;height:36px;border-radius:50%;
-  background:linear-gradient(135deg,#ff6a00,#ff9a57);
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;font-weight:800;
-  cursor:pointer;
-  background-size:cover;
-  background-position:center;
+.logo{
+  font-size:22px;
+  font-weight:800;
+  color:var(--primary);
 }
 
-/* CONTENT */
-.content{
-  position:fixed;
-  top:var(--topbar-h);
-  bottom:var(--navbar-h);
-  left:0;right:0;
-  background:#fff;
+/* HERO */
+.hero{
+  max-width:1200px;
+  margin:40px auto 20px;
+  padding:0 20px;
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:50px;
 }
-iframe{width:100%;height:100%;border:none}
-
-/* NAVBAR */
-.navbar{
-  position:fixed;
-  bottom:0;left:0;right:0;
-  height:var(--navbar-h);
-  background:#fff;
-  border-top:1px solid var(--border);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
+.hero h1{
+  font-size:44px;
+  line-height:1.1;
+  margin-bottom:16px;
 }
-.nav-item{
-  font-size:11px;
+.hero h1 span{color:var(--primary)}
+.hero p{
+  font-size:18px;
   color:var(--muted);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  cursor:pointer;
 }
-.nav-item i{font-size:22px}
-.nav-item.active{color:var(--primary)}
-
-/* OVERLAY PERFIL */
-#profileOverlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  display:none;
+.hero-box{
+  background:linear-gradient(135deg,#f3f4f6,#e5e7eb);
+  border-radius:40px;
+  padding:30px;
+  display:flex;
   align-items:center;
   justify-content:center;
-  z-index:9999;
 }
 
-/* MODAL PERFIL */
-.profile-modal{
-  width:92%;
-  max-width:420px;
+/* FILTERS */
+.filters{
+  max-width:1200px;
+  margin:30px auto 10px;
+  padding:0 20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:14px;
+}
+.filters input,.filters select{
+  padding:14px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  font-size:14px;
+}
+
+/* LIST */
+.list{
+  max-width:1200px;
+  margin:20px auto 80px;
+  padding:0 20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:22px;
+}
+
+.card{
   background:#fff;
-  border-radius:22px;
-  padding:20px;
-  max-height:90vh;
-  overflow:auto;
-  box-shadow:0 30px 90px rgba(0,0,0,.35);
+  border-radius:28px;
+  padding:18px;
+  box-shadow:0 20px 50px rgba(0,0,0,.08);
+  display:flex;
+  gap:14px;
 }
 
-/* FOTO */
-.profile-img{
-  width:88px;height:88px;border-radius:50%;
+.logo-box{
+  width:72px;
+  height:72px;
+  border-radius:18px;
   background:#eee;
   background-size:cover;
   background-position:center;
-  margin:0 auto 10px;
-  position:relative;
-}
-.profile-img .cam{
-  position:absolute;
-  right:-4px;bottom:-4px;
-  width:34px;height:34px;
-  border-radius:50%;
-  background:linear-gradient(135deg,#ff6a00,#ff9a57);
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;
-  border:3px solid #fff;
-  cursor:pointer;
+  flex-shrink:0;
 }
 
-/* FORM */
-.field{margin-bottom:10px}
-.field input{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid var(--border);
+.info{
+  flex:1;
+  display:flex;
+  flex-direction:column;
 }
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-.btn{
-  width:100%;
-  padding:14px;
-  border:none;
+.info strong{
+  font-size:17px;
+}
+
+.badges{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin:6px 0;
+}
+
+.badge{
+  font-size:11px;
+  padding:5px 10px;
   border-radius:999px;
+  background:#f3f4f6;
+  font-weight:700;
+}
+.open{background:#dcfce7;color:var(--success)}
+.closed{background:#fee2e2;color:var(--danger)}
+
+.icons{
+  display:flex;
+  gap:8px;
+  font-size:20px;
+  color:var(--primary);
+  margin-top:4px;
+}
+
+.card button{
+  margin-top:10px;
+  padding:12px;
+  border-radius:999px;
+  border:none;
+  background:var(--primary);
+  color:#fff;
   font-weight:800;
   cursor:pointer;
 }
-.btn-primary{background:var(--primary);color:#fff}
-.btn-danger{background:#fee2e2;color:var(--danger);margin-top:8px}
 
-/* LOJAS */
-.lojas-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-.loja-item{
-  padding:12px;
-  border-radius:14px;
-  border:1px solid var(--border);
-  display:flex;
-  justify-content:space-between;
-  cursor:pointer;
+/* EMPTY */
+.empty{
+  grid-column:1/-1;
+  text-align:center;
+  color:var(--muted);
+  padding:60px 20px;
 }
-.loja-item.active{border-color:var(--primary)}
-.small-btn{
-  margin-top:8px;
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  border:1px solid var(--border);
-  background:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .hero{
+    grid-template-columns:1fr;
+  }
+  .hero h1{font-size:34px}
 }
 </style>
 </head>
 
 <body>
 
-<div class="topbar">
-  <h1 id="nomeLoja">Agenda Fácil</h1>
-  <div class="avatar" id="avatar" onclick="openProfile()">A</div>
-</div>
-
-<div class="content">
-  <iframe id="frame"></iframe>
-</div>
-
-<nav class="navbar">
-  <div class="nav-item active" onclick="go(this,'homeclientes.html')"><i class="ri-home-5-line"></i>Início</div>
-  <div class="nav-item" onclick="go(this,'agendar.html')"><i class="ri-calendar-line"></i>Agendar</div>
-  <div class="nav-item" onclick="go(this,'agendamentosclientes.html')"><i class="ri-user-line"></i>Meu espaço</div>
-</nav>
-
-<!-- PERFIL -->
-<div id="profileOverlay" onclick="closeProfile(event)">
-  <div class="profile-modal" onclick="event.stopPropagation()">
-
-    <div class="profile-img" id="profileImg">
-      <div class="cam" onclick="foto.click()"><i class="ri-camera-line"></i></div>
-    </div>
-    <input type="file" id="foto" hidden accept="image/*">
-
-    <div class="field"><input id="pNome" placeholder="Nome completo"></div>
-    <div class="field"><input id="pWhats" placeholder="WhatsApp"></div>
-
-    <div class="row">
-      <div class="field"><input id="pCep" placeholder="CEP"></div>
-      <div class="field"><input id="pNumero" placeholder="Número"></div>
-    </div>
-
-    <div class="field"><input id="pRua" placeholder="Rua"></div>
-
-    <div class="row">
-      <div class="field"><input id="pCidade" placeholder="Cidade"></div>
-      <div class="field"><input id="pUf" placeholder="UF"></div>
-    </div>
-
-    <button class="btn btn-primary" onclick="salvarPerfil()">Salvar</button>
-
-    <h4 style="margin:14px 0 6px">Minhas lojas</h4>
-    <div class="lojas-list" id="listaLojas"></div>
-
-    <div style="display:flex;justify-content:center">
-      <div class="small-btn" onclick="location.href='lojasat.html'">
-        <i class="ri-store-2-line"></i>+
-      </div>
-    </div>
-
-    <button class="btn btn-danger" onclick="sair()">Sair</button>
+<header>
+  <div class="header">
+    <div class="logo">AGENDA CLENA</div>
   </div>
+</header>
+
+<section class="hero">
+  <div>
+    <h1>Escolha uma <span>loja</span> para continuar</h1>
+    <p>
+      Seu cadastro funciona em todas as lojas.<br>
+      Ao acessar, o login será automático.
+    </p>
+  </div>
+  <div class="hero-box">
+    <strong>📍 Lojas com agenda disponível hoje</strong>
+  </div>
+</section>
+
+<div class="filters">
+  <input id="search" placeholder="Buscar loja">
+  <input id="city" placeholder="Cidade">
+  <input id="hour" type="time">
+  <select id="status">
+    <option value="">Aberta ou fechada</option>
+    <option value="open">Abertas</option>
+    <option value="closed">Fechadas</option>
+  </select>
 </div>
+
+<div class="list" id="lista"></div>
 
 <script>
 const sb = supabase.createClient(
@@ -236,102 +233,105 @@ const sb = supabase.createClient(
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-const lojaParam = new URLSearchParams(location.search).get("l");
-const frame = document.getElementById("frame");
-let user, perfil;
+let user, perfil, lojas=[], agendas=[];
 
-/* INIT */
-(async()=>{
-  const { data:{session} } = await sb.auth.getSession();
-  if(!session){ location.href=`index.html?l=${lojaParam}`; return; }
-  user = session.user;
+async function init(){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ location.href="login.html"; return }
+  user=session.user;
 
-  const { data:p } = await sb.from("clientes_profile").select("*").eq("id",user.id).single();
-  perfil = p;
+  perfil = (await sb.from("clientes_profile").select("*").eq("id",user.id).single()).data;
 
-  if(lojaParam && perfil.loja_ativa !== lojaParam){
-    await sb.from("clientes_profile").update({loja_ativa:lojaParam}).eq("id",user.id);
-    perfil.loja_ativa = lojaParam;
-  }
+  lojas = (await sb
+    .from("user_profile")
+    .select("user_id,negocio,avatar_url,cidade,uf,tipo_negocio,status")
+    .eq("status","active")
+  ).data || [];
 
-  frame.src = `homeclientes.html?l=${perfil.loja_ativa}`;
-  carregarPerfil();
-})();
+  agendas = (await sb
+    .from("agenda_loja")
+    .select("user_id,data,fechado,horarios")
+  ).data || [];
 
-function carregarPerfil(){
-  if(perfil.avatar_url){
-    avatar.style.backgroundImage = `url(${perfil.avatar_url})`;
-    avatar.textContent="";
-    profileImg.style.backgroundImage = `url(${perfil.avatar_url})`;
-  }else{
-    avatar.textContent = perfil.nome?.[0] || "A";
-  }
-
-  pNome.value = perfil.nome || "";
-  pWhats.value = perfil.whatsapp || "";
-  pCep.value = perfil.cep || "";
-  pRua.value = perfil.rua || "";
-  pNumero.value = perfil.numero || "";
-  pCidade.value = perfil.cidade || "";
-  pUf.value = perfil.uf || "";
-
-  renderLojas();
+  aplicarFiltros();
 }
 
-function renderLojas(){
-  listaLojas.innerHTML="";
-  (perfil.lojas||[]).forEach(l=>{
-    const div=document.createElement("div");
-    div.className="loja-item"+(l===perfil.loja_ativa?" active":"");
-    div.innerHTML=`<span>${l}</span><span>Entrar</span>`;
-    div.onclick=async()=>{
-      await sb.from("clientes_profile").update({loja_ativa:l}).eq("id",user.id);
-      location.href=`app.html?l=${l}`;
-    };
-    listaLojas.appendChild(div);
+["search","city","hour","status"].forEach(id=>{
+  document.getElementById(id).addEventListener("input",aplicarFiltros);
+});
+
+function aplicarFiltros(){
+  const n=search.value.toLowerCase();
+  const c=city.value.toLowerCase();
+  const h=hour.value;
+  const s=status.value;
+  const hoje=new Date().toISOString().slice(0,10);
+
+  const res = lojas.filter(l=>{
+    if(n && !l.negocio?.toLowerCase().includes(n)) return false;
+    if(c && !l.cidade?.toLowerCase().includes(c)) return false;
+
+    const ag=agendas.find(a=>a.user_id===l.user_id && a.data===hoje);
+    const aberta=ag && !ag.fechado;
+
+    if(s==="open" && !aberta) return false;
+    if(s==="closed" && aberta) return false;
+
+    if(h && ag){
+      const blocos=JSON.parse(ag.horarios||"[]");
+      if(!blocos.some(b=>h>=b.inicio && h<=b.fim)) return false;
+    }
+    return true;
   });
+
+  render(res);
 }
 
-/* SALVAR PERFIL */
-async function salvarPerfil(){
-  let avatarUrl = perfil.avatar_url;
-
-  if(foto.files.length){
-    const path = `perfil/${user.id}.jpg`;
-    await sb.storage.from("avatars").upload(path,foto.files[0],{upsert:true});
-    avatarUrl = sb.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+function render(list){
+  if(!list.length){
+    lista.innerHTML=`<div class="empty">Nenhuma loja encontrada</div>`;
+    return;
   }
+
+  lista.innerHTML=list.map(l=>{
+    const ag=agendas.find(a=>a.user_id===l.user_id);
+    const aberta=ag && !ag.fechado;
+
+    return `
+      <div class="card">
+        <div class="logo-box" style="background-image:url('${l.avatar_url||""}')"></div>
+        <div class="info">
+          <strong>${l.negocio}</strong>
+          <div class="badges">
+            <span class="badge">${l.cidade||""} ${l.uf||""}</span>
+            <span class="badge ${aberta?'open':'closed'}">
+              ${aberta?'Aberta':'Fechada'}
+            </span>
+          </div>
+          <div class="icons">
+            <i class="ri-scissors-line"></i>
+          </div>
+          <button onclick="acessar('${l.user_id}')">Acessar loja</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function acessar(lojaId){
+  const lojasAtuais = perfil.lojas || [];
+  if(!lojasAtuais.includes(lojaId)) lojasAtuais.push(lojaId);
 
   await sb.from("clientes_profile").update({
-    nome:pNome.value,
-    whatsapp:pWhats.value,
-    cep:pCep.value,
-    rua:pRua.value,
-    numero:pNumero.value,
-    cidade:pCidade.value,
-    uf:pUf.value,
-    avatar_url:avatarUrl
+    lojas:lojasAtuais,
+    loja_ativa:lojaId
   }).eq("id",user.id);
 
-  location.reload();
+  alert("Login automático. Seu cadastro funciona em todas as lojas.");
+  location.href=`app.html?l=${lojaId}`;
 }
 
-/* NAV */
-function go(el,page){
-  document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
-  el.classList.add("active");
-  frame.src = `${page}?l=${perfil.loja_ativa}`;
-}
-
-/* PROFILE */
-function openProfile(){ profileOverlay.style.display="flex"; }
-function closeProfile(e){ if(!e || e.target.id==="profileOverlay") profileOverlay.style.display="none"; }
-
-/* LOGOUT */
-async function sair(){
-  await sb.auth.signOut();
-  location.href=`index.html?l=${perfil.loja_ativa}`;
-}
+init();
 </script>
 
 </body>
