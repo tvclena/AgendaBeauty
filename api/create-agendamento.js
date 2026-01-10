@@ -8,21 +8,26 @@ const supabase = createClient(
 
 export default async function handler(req, res) {
 
+  // 🔓 CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  if (req.method === "OPTIONS") return res.status(200).end();
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método não permitido" });
   }
 
   try {
-    const body = typeof req.body === "string"
-      ? JSON.parse(req.body)
-      : req.body;
+    const body =
+      typeof req.body === "string"
+        ? JSON.parse(req.body)
+        : req.body;
 
-    console.log("📩 PAYLOAD:", body);
+    console.log("📩 PAYLOAD RECEBIDO:", body);
 
     const {
       loja_id,
@@ -37,6 +42,13 @@ export default async function handler(req, res) {
       cliente_email,
       cliente_id
     } = body;
+
+    // 🔎 Validação mínima
+    if (!loja_id || !servico_id || !data || !hora_inicio || !hora_fim) {
+      return res.status(400).json({
+        error: "Dados obrigatórios ausentes"
+      });
+    }
 
     // 1️⃣ SALVA AGENDAMENTO
     const { error: insertError } = await supabase
@@ -55,11 +67,16 @@ export default async function handler(req, res) {
       });
 
     if (insertError) {
-      console.error("❌ ERRO INSERT:", insertError);
-      throw insertError;
+      console.error("❌ ERRO AO INSERIR AGENDAMENTO:", insertError);
+      return res.status(500).json({
+        error: "Erro ao salvar agendamento",
+        detail: insertError.message
+      });
     }
 
-    // 2️⃣ BUSCA EMAIL DA LOJA
+    console.log("✅ Agendamento salvo com sucesso");
+
+    // 2️⃣ BUSCA EMAIL DA LOJA (CORRETO)
     const { data: loja, error: lojaError } = await supabase
       .from("user_profile")
       .select("email_contato, negocio")
@@ -67,32 +84,48 @@ export default async function handler(req, res) {
       .single();
 
     if (lojaError) {
-      console.warn("⚠️ Loja sem email:", lojaError.message);
+      console.warn("⚠️ Erro ao buscar loja:", lojaError.message);
     }
 
-    // 3️⃣ ENVIA EMAIL
+    // 3️⃣ ENVIA EMAIL (SEM QUEBRAR A API)
     if (loja?.email_contato) {
-      await enviarEmail({
-        to: loja.email_contato,
-        subject: "📅 Novo agendamento realizado",
-        html: `
-          <h2>Novo agendamento</h2>
-          <p><strong>Negócio:</strong> ${loja.negocio}</p>
-          <p><strong>Cliente:</strong> ${cliente_nome}</p>
-          <p><strong>WhatsApp:</strong> ${cliente_whatsapp}</p>
-          <p><strong>Serviço:</strong> ${servico_nome}</p>
-          <p><strong>Data:</strong> ${data}</p>
-          <p><strong>Horário:</strong> ${hora_inicio} - ${hora_fim}</p>
-        `
-      });
+      try {
+        console.log("📧 Enviando email para:", loja.email_contato);
+
+        await enviarEmail({
+          to: loja.email_contato,
+          subject: "📅 Novo agendamento realizado",
+          html: `
+            <h2>Novo agendamento</h2>
+            <p><strong>Negócio:</strong> ${loja.negocio}</p>
+            <p><strong>Cliente:</strong> ${cliente_nome}</p>
+            <p><strong>WhatsApp:</strong> ${cliente_whatsapp}</p>
+            <p><strong>Serviço:</strong> ${servico_nome}</p>
+            <p><strong>Data:</strong> ${data}</p>
+            <p><strong>Horário:</strong> ${hora_inicio} - ${hora_fim}</p>
+          `
+        });
+
+        console.log("✅ Email enviado com sucesso");
+
+      } catch (emailError) {
+        console.error("❌ ERRO AO ENVIAR EMAIL:", emailError);
+        // ⚠️ NÃO quebra a API
+      }
+    } else {
+      console.warn("⚠️ Loja não possui email_contato cadastrado");
     }
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({
+      success: true,
+      message: "Agendamento criado com sucesso"
+    });
 
   } catch (err) {
-    console.error("❌ ERRO GERAL:", err);
+    console.error("🔥 ERRO GERAL NA API:", err);
     return res.status(500).json({
-      error: err.message || "Erro interno"
+      error: "Erro interno no servidor",
+      detail: err.message
     });
   }
 }
