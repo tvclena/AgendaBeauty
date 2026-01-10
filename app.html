@@ -343,11 +343,18 @@ if (!lojaId && perfil.loja_ativa) {
 frame.src = `homeclientes.html?l=${lojaId}`;
 // 🔄 sincroniza loja ativa em memória e no banco
 if (lojaId !== perfil.loja_ativa) {
+
+  await sb.from("clientes_loja").upsert({
+    cliente_id: user.id,
+    loja_id: lojaId
+  });
+
   perfil.loja_ativa = lojaId;
   await sb.from("clientes_profile")
     .update({ loja_ativa: lojaId })
     .eq("id", user.id);
 }
+
 
 carregarPerfil();
 
@@ -396,9 +403,21 @@ function toggleEdit(){
 }
 
 async function trocarLoja(id){
-  await sb.from("clientes_profile").update({loja_ativa:id}).eq("id",user.id);
-  location.href=`app.html?l=${id}`;
+
+  // 🔗 garante vínculo cliente ↔ loja
+  await sb.from("clientes_loja").upsert({
+    cliente_id: user.id,
+    loja_id: id
+  });
+
+  // 🔄 atualiza loja ativa
+  await sb.from("clientes_profile")
+    .update({ loja_ativa: id })
+    .eq("id", user.id);
+
+  location.href = `app.html?l=${id}`;
 }
+
 
 async function confirmRemove(){
   perfil.lojas=perfil.lojas.filter(l=>l!==removeId);
