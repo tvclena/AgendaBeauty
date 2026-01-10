@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { enviarEmail } from "../../lib/email.js";
+import { enviarEmail } from "../lib/email.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -37,18 +37,18 @@ export default async function handler(req, res) {
       hora_fim,
       cliente_nome,
       cliente_whatsapp,
+      cliente_email,
       cliente_id
     } = body;
 
-    // 🔍 Validação básica
-    if (!loja_id || !data || !hora_inicio || !cliente_nome) {
+    if (!loja_id || !servico_id || !data || !hora_inicio || !cliente_nome) {
       return res.status(400).json({
-        error: "Campos obrigatórios não enviados",
-        body
+        error: "Payload incompleto",
+        received: body
       });
     }
 
-    // 1️⃣ SALVA AGENDAMENTO (igual ao que funcionava antes)
+    // 1️⃣ SALVA AGENDAMENTO (ISSO NÃO PODE FALHAR)
     const { error: insertError } = await supabase
       .from("agendamentos")
       .insert({
@@ -67,23 +67,19 @@ export default async function handler(req, res) {
     if (insertError) {
       console.error("❌ ERRO INSERT:", insertError);
       return res.status(500).json({
-        error: "Erro ao salvar no banco",
-        details: insertError
+        error: "Erro ao salvar agendamento",
+        details: insertError.message
       });
     }
 
     // 2️⃣ BUSCA EMAIL DA LOJA
-    const { data: loja, error: lojaError } = await supabase
+    const { data: loja } = await supabase
       .from("user_profile")
       .select("email, negocio")
       .eq("user_id", loja_id)
       .single();
 
-    if (lojaError) {
-      console.warn("⚠️ Loja sem email:", lojaError);
-    }
-
-    // 3️⃣ ENVIA EMAIL (não bloqueia o agendamento)
+    // 3️⃣ EMAIL (SE FALHAR, NÃO QUEBRA)
     if (loja?.email) {
       try {
         await enviarEmail({
@@ -91,7 +87,7 @@ export default async function handler(req, res) {
           subject: "📅 Novo agendamento realizado",
           html: `
             <h2>Novo agendamento</h2>
-            <p><strong>Loja:</strong> ${loja.negocio}</p>
+            <p><strong>Loja:</strong> ${loja.negocio || "Loja"}</p>
             <p><strong>Cliente:</strong> ${cliente_nome}</p>
             <p><strong>WhatsApp:</strong> ${cliente_whatsapp}</p>
             <p><strong>Serviço:</strong> ${servico_nome}</p>
@@ -99,19 +95,21 @@ export default async function handler(req, res) {
             <p><strong>Horário:</strong> ${hora_inicio} - ${hora_fim}</p>
           `
         });
-      } catch (emailError) {
-        console.error("⚠️ Erro ao enviar email:", emailError);
+      } catch (emailErr) {
+        console.warn("⚠️ Email não enviado:", emailErr.message);
       }
     }
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({
+      success: true,
+      message: "Agendamento criado com sucesso"
+    });
 
   } catch (err) {
-    console.error("❌ ERRO GERAL:", err);
+    console.error("🔥 ERRO GERAL API:", err);
     return res.status(500).json({
-      error: "Erro interno",
-      message: err.message,
-      stack: err.stack
+      error: "Erro interno no servidor",
+      details: err.message
     });
   }
 }
