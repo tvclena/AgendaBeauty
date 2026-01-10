@@ -269,9 +269,30 @@ function alterar(id, servico){
 async function cancelar(id){
   if(!confirm("Deseja cancelar este agendamento?")) return;
 
-  await sb.from("agendamentos")
-    .update({ status:"CANCELADO" })
-    .eq("id",id);
+async function cancelar(id){
+  if(!confirm("Deseja cancelar este agendamento?")) return;
+
+  const res = await fetch("/api/update-agendamento", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      agendamento_id: id,
+      loja_id: lojaId,
+      novo_status: "CANCELADO",
+      motivo: "CANCELAMENTO_CLIENTE"
+    })
+  });
+
+  const json = await res.json();
+
+  if(!res.ok){
+    alert("Erro ao cancelar agendamento");
+    console.error(json);
+    return;
+  }
+
+  carregar();
+}
 
   carregar();
 }
