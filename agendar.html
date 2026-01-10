@@ -690,30 +690,49 @@ async function confirmar(h){
     cliente_whatsapp: cliente.whatsapp
   };
 
- const response = await fetch("/api/create-agendamento", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    loja_id: lojaId,
-    servico_id: dados.servico,
-    servico_nome: dados.servico_nome,
-    valor_servico: dados.valor_servico,
-    data: dados.data,
-    hora_inicio: h,
-    hora_fim: fim,
-    cliente_nome: cliente.nome,
-    cliente_whatsapp: cliente.whatsapp,
-    cliente_email: cliente.email || null,
-    cliente_id: usuarioLogado?.id || null
-  })
-});
+ let response;
+let result;
 
-if(!response.ok){
-  alert("❌ Erro ao salvar o agendamento.");
+try {
+  response = await fetch("/api/create-agendamento", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      loja_id: lojaId,
+      servico_id: dados.servico,
+      servico_nome: dados.servico_nome,
+      valor_servico: dados.valor_servico,
+      data: dados.data,
+      hora_inicio: h,
+      hora_fim: fim,
+      cliente_nome: cliente.nome,
+      cliente_whatsapp: cliente.whatsapp,
+      cliente_email: cliente.email || null,
+      cliente_id: usuarioLogado?.id || null
+    })
+  });
+
+  result = await response.json();
+
+} catch (networkError) {
+  console.error("❌ ERRO DE REDE:", networkError);
+  alert("❌ Falha de conexão com o servidor.");
   return;
 }
+
+if (!response.ok) {
+  console.error("❌ ERRO API:", result);
+
+  alert(
+    "❌ Erro ao salvar o agendamento:\n\n" +
+    (result?.message || result?.error || "Erro desconhecido")
+  );
+
+  return;
+}
+
 
   document.body.insertAdjacentHTML("beforeend", `
     <div class="overlay" id="overlayConfirm">
