@@ -680,73 +680,46 @@ async function confirmar(h){
 
   const fim = toHour(toMin(h) + duracao);
 
-  const payload = {
-    servico_id: dados.servico,
-    valor_servico: dados.valor_servico,
-    data: dados.data,
-    hora_inicio: h,
-    hora_fim: fim,
-    cliente_nome: cliente.nome,
-    cliente_whatsapp: cliente.whatsapp
-  };
+  let response;
 
- let response;
-let result;
+  try {
+    response = await fetch("/api/create-agendamento", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        loja_id: lojaId,
+        servico_id: dados.servico,
+        servico_nome: dados.servico_nome,
+        valor_servico: dados.valor_servico,
+        data: dados.data,
+        hora_inicio: h,
+        hora_fim: fim,
+        cliente_nome: cliente.nome,
+        cliente_whatsapp: cliente.whatsapp,
+        cliente_email: cliente.email || null,
+        cliente_id: usuarioLogado?.id || null
+      })
+    });
+  } catch (err) {
+    console.error("❌ ERRO DE REDE:", err);
+    alert("❌ Falha de conexão com o servidor.");
+    return;
+  }
 
-let response;
+  if (!response.ok) {
+    const erroTexto = await response.text();
+    console.error("❌ ERRO API:", erroTexto);
+    alert("❌ Erro ao salvar o agendamento.");
+    return;
+  }
 
-try {
-  response = await fetch("/api/create-agendamento", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      loja_id: lojaId,
-      servico_id: dados.servico,
-      servico_nome: dados.servico_nome,
-      valor_servico: dados.valor_servico,
-      data: dados.data,
-      hora_inicio: h,
-      hora_fim: fim,
-      cliente_nome: cliente.nome,
-      cliente_whatsapp: cliente.whatsapp,
-      cliente_email: cliente.email || null,
-      cliente_id: usuarioLogado?.id || null
-    })
-  });
-} catch (err) {
-  console.error("❌ ERRO DE REDE:", err);
-  alert("❌ Falha de conexão com o servidor.");
-  return;
-}
-
-// 🔒 SE NÃO FOR 200, LÊ COMO TEXTO
-if (!response.ok) {
-  const erroTexto = await response.text();
-  console.error("❌ ERRO API:", erroTexto);
-  alert("❌ Erro ao salvar o agendamento.");
-  return;
-}
-
-// ✅ NÃO TENTA JSON — NÃO PRECISA
-
-if (!response.ok) {
-  console.error("❌ ERRO API:", result);
-
-  alert(
-    "❌ Erro ao salvar o agendamento:\n\n" +
-    (result?.message || result?.error || "Erro desconhecido")
-  );
-
-  return;
-}
-
-
+  // ✅ SUCESSO
   document.body.insertAdjacentHTML("beforeend", `
     <div class="overlay" id="overlayConfirm">
       <div class="msg-final">
-        ✅ <strong>${alterarId ? "Agendamento atualizado!" : "Agendamento confirmado!"}</strong><br><br>
+        ✅ <strong>Agendamento confirmado!</strong><br><br>
 
         Serviço: <b>${dados.servico_nome}</b><br>
         Data: <b>${dados.data}</b><br>
