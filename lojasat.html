@@ -212,6 +212,12 @@ const sb = supabase.createClient(
  "https://egxjgmzukjyyxmkukwub.supabase.co",
  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
+let userLogado = null;
+
+(async()=>{
+  const { data:{ user } } = await sb.auth.getUser();
+  userLogado = user || null;
+})();
 
 let lojas=[];
 let lojaSelecionada = null;
@@ -268,14 +274,33 @@ async function estrelas(loja){
   return Math.round(data.reduce((s,a)=>s+a.nota,0)/data.length);
 }
 
-/* LOAD LOJAS */
 (async()=>{
+  // carrega todas as lojas ativas
   const { data } = await sb.from("user_profile")
     .select("*")
     .eq("status","active");
-  lojas=data||[];
+
+  lojas = data || [];
+
+  // se usuário estiver logado, carrega "minhas lojas"
+  if(userLogado){
+    const { data: minhas } = await sb
+      .from("clientes_loja")
+      .select("loja_id")
+      .eq("cliente_id", userLogado.id);
+
+    const idsMinhas = (minhas||[]).map(l => l.loja_id);
+
+    // marca as lojas do usuário
+    lojas = lojas.map(l => ({
+      ...l,
+      minha: idsMinhas.includes(l.user_id)
+    }));
+  }
+
   render();
 })();
+
 
 async function render(){
   lista.innerHTML="";
@@ -286,8 +311,8 @@ async function render(){
     const st=await statusAgenda(l.user_id);
     const star=await estrelas(l.user_id);
 
-    lista.innerHTML+=`
-    <div class="card">
+lista.innerHTML+=`
+    <div class="card" style="${l.minha ? 'border:2px solid var(--primary)' : ''}">
       <div class="logo" style="background-image:url('${l.avatar_url||""}')"></div>
       <h3>${l.negocio}</h3>
       <small>${l.tipo} • ${l.cidade}/${l.uf}</small>
