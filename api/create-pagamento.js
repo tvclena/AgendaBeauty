@@ -106,17 +106,6 @@ export default async function handler(req, res) {
 
 
 
-    /* ===== 🔔 NOTIFICA LOJA (NOVA COMPRA) ===== */
-await supabase.rpc("fn_enqueue_push", {
-  p_user_id: loja.user_id,
-  p_tipo: "COMPRA",
-  p_titulo: "Nova venda 💰",
-  p_mensagem: `Novo pedido no valor de R$ ${total.toFixed(2).replace(".", ",")}`,
-  p_url: "/pedidos.html"
-});
-
-
-
 
     
 
