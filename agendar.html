@@ -693,6 +693,8 @@ async function confirmar(h){
  let response;
 let result;
 
+let response;
+
 try {
   response = await fetch("/api/create-agendamento", {
     method: "POST",
@@ -713,14 +715,21 @@ try {
       cliente_id: usuarioLogado?.id || null
     })
   });
-
-  result = await response.json();
-
-} catch (networkError) {
-  console.error("❌ ERRO DE REDE:", networkError);
+} catch (err) {
+  console.error("❌ ERRO DE REDE:", err);
   alert("❌ Falha de conexão com o servidor.");
   return;
 }
+
+// 🔒 SE NÃO FOR 200, LÊ COMO TEXTO
+if (!response.ok) {
+  const erroTexto = await response.text();
+  console.error("❌ ERRO API:", erroTexto);
+  alert("❌ Erro ao salvar o agendamento.");
+  return;
+}
+
+// ✅ NÃO TENTA JSON — NÃO PRECISA
 
 if (!response.ok) {
   console.error("❌ ERRO API:", result);
