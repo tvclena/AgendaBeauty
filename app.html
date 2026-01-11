@@ -414,22 +414,27 @@ function toggleEdit(){
   renderLojas();
 }
 
-async function trocarLoja(id){
-
-  // 🔗 garante vínculo cliente ↔ loja
+async function trocarLoja(lojaId){
+  // salva como recente (não duplica)
   await sb.from("clientes_loja").upsert({
     cliente_id: user.id,
-    loja_id: id
+    loja_id: lojaId
   });
 
-  // 🔄 atualiza loja ativa
+  // atualiza loja ativa
   await sb.from("clientes_profile")
-    .update({ loja_ativa: id })
+    .update({ loja_ativa: lojaId })
     .eq("id", user.id);
 
-  location.href = `app.html?l=${id}`;
-}
+  // atualiza URL sem recarregar tudo
+  history.replaceState(null, "", `app.html?l=${lojaId}`);
 
+  // recarrega iframe corretamente
+  frame.src = `homeclientes.html?l=${lojaId}`;
+
+  // re-renderiza as lojas (ordem correta)
+  renderLojas();
+}
 
 async function confirmRemove(){
   perfil.lojas=perfil.lojas.filter(l=>l!==removeId);
