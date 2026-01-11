@@ -687,8 +687,9 @@ async function confirmar(h){
 
   const fim = toHour(toMin(h) + duracao);
 
-  // 🔁 DEFINE ENDPOINT CORRETO
-const endpoint = "/api/update-agendamento";
+const endpoint = alterarId
+  ? "/api/update-agendamento"
+  : "/api/create-agendamento";
 
 
  const payload = alterarId
