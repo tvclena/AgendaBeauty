@@ -2,12 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Agenda Clena • Encontre sua loja</title>
+<title>Agenda Clena • Perto de você</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#ff6a00">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
@@ -28,14 +27,10 @@
 }
 
 *{box-sizing:border-box;font-family:Inter}
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-}
+body{margin:0;background:var(--bg);color:var(--text)}
 
-/* ===== FIXED HEADER ===== */
-.header{
+/* FIXED TOP */
+.top{
   position:fixed;
   top:0;left:0;right:0;
   background:#fff;
@@ -43,44 +38,44 @@ body{
   border-bottom:1px solid var(--border);
 }
 
-.header h1{
-  margin:0;
+/* HEADER */
+.header{
   padding:14px 16px 6px;
   font-size:18px;
   font-weight:800;
 }
 
-/* ===== HERO ===== */
+/* HERO */
 .hero{
   padding:12px 16px 14px;
 }
-
 .banner{
+  position:relative;
   border-radius:22px;
   padding:20px;
   background:linear-gradient(135deg,#ff6a00,#ff9a57);
   color:#fff;
-  margin-bottom:12px;
+}
+.banner h2{margin:0 0 4px;font-size:20px}
+.banner p{margin:0;font-size:13px;opacity:.95}
+
+/* LOCATION */
+.location{
+  position:absolute;
+  top:14px;
+  right:14px;
+  background:rgba(255,255,255,.18);
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:11px;
+  display:flex;
+  align-items:center;
+  gap:4px;
 }
 
-.banner h2{
-  margin:0 0 4px;
-  font-size:20px;
-}
-
-.banner p{
-  margin:0;
-  font-size:13px;
-  opacity:.95;
-}
-
-/* ===== SEARCH + FILTERS ===== */
-.search-box{
-  display:grid;
-  gap:10px;
-}
-
+/* SEARCH */
 .search{
+  margin-top:12px;
   display:flex;
   align-items:center;
   gap:10px;
@@ -89,9 +84,7 @@ body{
   padding:14px 18px;
   box-shadow:0 10px 28px rgba(0,0,0,.15);
 }
-
 .search i{font-size:20px;color:#9ca3af}
-
 .search input{
   border:none;
   outline:none;
@@ -99,32 +92,19 @@ body{
   font-size:15px;
 }
 
-.filters{
-  display:flex;
-  gap:8px;
-}
-
-.filters input{
-  flex:1;
-  padding:12px 14px;
-  border-radius:14px;
-  border:1px solid var(--border);
-  font-size:14px;
-}
-
-/* ===== CONTENT ===== */
+/* CONTENT */
 .content{
   padding:260px 16px 120px;
 }
 
-/* ===== LIST ===== */
+/* LIST */
 .list{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:14px;
 }
 
-/* ===== CARD ===== */
+/* CARD */
 .card{
   background:#fff;
   border-radius:22px;
@@ -133,39 +113,31 @@ body{
   display:flex;
   flex-direction:column;
 }
-
 .logo{
   width:56px;height:56px;
   border-radius:50%;
   background:#eee center/cover;
   margin-bottom:8px;
 }
-
-.card h3{
-  font-size:14px;
-  font-weight:800;
-  margin:0;
+.card h3{font-size:14px;font-weight:800;margin:0}
+.card small{font-size:12px;color:var(--muted)}
+.distance{
+  font-size:11px;
+  margin:4px 0;
+  color:#059669;
 }
-
-.card small{
-  font-size:12px;
-  color:var(--muted);
-}
-
 .tags{
   display:flex;
   gap:6px;
   flex-wrap:wrap;
   margin:6px 0;
 }
-
 .tag{
   font-size:11px;
   padding:5px 10px;
   border-radius:999px;
   background:#f3f4f6;
 }
-
 .card button{
   margin-top:auto;
   padding:10px;
@@ -173,17 +145,16 @@ body{
   border-radius:999px;
   background:var(--accent);
   font-weight:800;
-  cursor:pointer;
 }
 
-/* ===== LOADER ===== */
+/* LOADER */
 .loader{
   text-align:center;
   padding:16px;
   color:var(--muted);
 }
 
-/* ===== SCROLL TOP ===== */
+/* TOP BUTTON */
 #topBtn{
   position:fixed;
   right:16px;
@@ -203,30 +174,25 @@ body{
 
 <body>
 
-<!-- HEADER FIXO -->
-<div class="header">
-  <h1>Agenda Clena</h1>
+<div class="top">
+  <div class="header">Agenda Clena</div>
 
   <div class="hero">
     <div class="banner">
-      <h2>Agende com quem você confia</h2>
-      <p>Busque por lojas, serviços ou produtos</p>
+      <div class="location" id="localizacao">
+        <i class="ri-map-pin-line"></i> Localizando…
+      </div>
+      <h2>Perto de você</h2>
+      <p>Agende com lojas, serviços e profissionais</p>
     </div>
 
-    <div class="search-box">
-      <div class="search">
-        <i class="ri-search-line"></i>
-        <input id="busca" placeholder="Buscar serviço, produto ou loja">
-      </div>
-
-      <div class="filters">
-        <input id="cidade" placeholder="Filtrar por cidade">
-      </div>
+    <div class="search">
+      <i class="ri-search-line"></i>
+      <input id="busca" placeholder="Buscar loja, serviço ou produto">
     </div>
   </div>
 </div>
 
-<!-- CONTENT -->
 <div class="content">
   <div class="list" id="lista"></div>
   <div class="loader" id="loader">Carregando mais lojas…</div>
@@ -242,65 +208,86 @@ const sb = supabase.createClient(
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-let lojas = [];
-let servicos = [];
-let produtos = [];
+let lojas=[],servicos=[],produtos=[];
+let offset=0,limit=20,carregando=false,acabou=false;
+let userLat=null,userLng=null;
 
-let offset = 0;
-const limit = 20;
-let carregando = false;
-let acabou = false;
+/* DISTÂNCIA */
+function km(lat1,lon1,lat2,lon2){
+  const R=6371;
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+
+          Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+          Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
 
-/* ===== LOAD DATA ===== */
-async function carregarDados(){
-  if(carregando || acabou) return;
-  carregando = true;
+/* GEO */
+navigator.geolocation.getCurrentPosition(async pos=>{
+  userLat=pos.coords.latitude;
+  userLng=pos.coords.longitude;
+
+  const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}`);
+  const j=await r.json();
+  localizacao.innerHTML=`<i class="ri-map-pin-line"></i> ${j.address.suburb||j.address.neighbourhood||j.address.city||"Sua região"}`;
+
+  carregar();
+},()=>carregar());
+
+async function carregar(){
+  if(carregando||acabou) return;
+  carregando=true;
 
   const { data } = await sb
     .from("user_profile")
     .select("*")
     .eq("status","active")
-    .range(offset, offset + limit - 1);
+    .range(offset,offset+limit-1);
 
-  if(!data || data.length < limit) acabou = true;
+  if(!data||data.length<limit) acabou=true;
 
-  lojas.push(...(data || []));
-  offset += limit;
+  lojas.push(...(data||[]));
+  offset+=limit;
 
-  if(servicos.length === 0){
-    const { data:s } = await sb.from("servicos_loja").select("loja_id,nome");
-    const { data:p } = await sb.from("produtos_loja").select("loja_id,nome");
-    servicos = s || [];
-    produtos = p || [];
+  if(servicos.length===0){
+    servicos=(await sb.from("servicos_loja").select("loja_id,nome")).data||[];
+    produtos=(await sb.from("produtos_loja").select("loja_id,nome")).data||[];
   }
 
   render();
-  carregando = false;
+  carregando=false;
 }
 
-/* ===== RENDER ===== */
 function render(){
-  lista.innerHTML = "";
+  lista.innerHTML="";
+  const termo=busca.value.toLowerCase();
 
-  const termo = busca.value.toLowerCase().trim();
-  const city = cidade.value.toLowerCase().trim();
+  let listaOrdenada=[...lojas];
+  if(userLat){
+    listaOrdenada.forEach(l=>{
+      if(l.lat&&l.lng){
+        l.dist=km(userLat,userLng,l.lat,l.lng);
+      }else l.dist=999;
+    });
+    listaOrdenada.sort((a,b)=>a.dist-b.dist);
+  }
 
-  for(const l of lojas){
-
-    if(city && l.cidade?.toLowerCase() !== city) continue;
-
+  for(const l of listaOrdenada){
     if(termo){
-      const lojaMatch = l.negocio?.toLowerCase().includes(termo);
-      const servMatch = servicos.some(s => s.loja_id === l.user_id && s.nome.toLowerCase().includes(termo));
-      const prodMatch = produtos.some(p => p.loja_id === l.user_id && p.nome.toLowerCase().includes(termo));
-      if(!lojaMatch && !servMatch && !prodMatch) continue;
+      const ok=
+        l.negocio?.toLowerCase().includes(termo)||
+        servicos.some(s=>s.loja_id===l.user_id&&s.nome.toLowerCase().includes(termo))||
+        produtos.some(p=>p.loja_id===l.user_id&&p.nome.toLowerCase().includes(termo));
+      if(!ok) continue;
     }
 
-    lista.innerHTML += `
+    lista.innerHTML+=`
       <div class="card">
         <div class="logo" style="background-image:url('${l.avatar_url||""}')"></div>
         <h3>${l.negocio}</h3>
-        <small>${l.cidade||""}/${l.uf||""}</small>
+        <small>${l.bairro||""} • ${l.cidade||""}</small>
+        ${l.dist<900?`<div class="distance">${l.dist.toFixed(1)} km de você</div>`:""}
         <div class="tags">
           ${servicos.filter(s=>s.loja_id===l.user_id).slice(0,2).map(s=>`<span class="tag">${s.nome}</span>`).join("")}
         </div>
@@ -309,24 +296,18 @@ function render(){
     `;
   }
 
-  loader.style.display = acabou ? "none" : "block";
+  loader.style.display=acabou?"none":"block";
 }
 
-/* ===== EVENTS ===== */
+/* SCROLL */
 window.addEventListener("scroll",()=>{
-  if(window.scrollY > 300) topBtn.style.display="block";
-  else topBtn.style.display="none";
-
-  if(window.innerHeight + window.scrollY > document.body.offsetHeight - 300){
-    carregarDados();
+  topBtn.style.display=window.scrollY>300?"block":"none";
+  if(window.innerHeight+window.scrollY>document.body.offsetHeight-300){
+    carregar();
   }
 });
 
-busca.addEventListener("input", render);
-cidade.addEventListener("input", render);
-
-/* INIT */
-carregarDados();
+busca.addEventListener("input",render);
 </script>
 
 </body>
