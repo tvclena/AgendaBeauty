@@ -97,12 +97,42 @@ body{margin:0;background:var(--bg);color:var(--text)}
   padding:260px 16px 120px;
 }
 
-/* LIST */
+/* LISTA RESPONSIVA */
 .list{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
+  grid-template-columns:repeat(2,1fr); /* celular */
   gap:14px;
 }
+
+/* tablets */
+@media (min-width: 640px){
+  .list{
+    grid-template-columns:repeat(3,1fr);
+  }
+}
+
+/* notebooks */
+@media (min-width: 900px){
+  .list{
+    grid-template-columns:repeat(4,1fr);
+  }
+}
+
+/* desktops grandes */
+@media (min-width: 1200px){
+  .list{
+    grid-template-columns:repeat(7,1fr);
+  }
+}
+@media (min-width: 1200px){
+  .card{
+    padding:16px;
+  }
+  .card h3{
+    font-size:15px;
+  }
+}
+
 
 /* CARD */
 .card{
