@@ -502,11 +502,18 @@ async function selecionarDia(index){
     : dia.horarios;
 
   /* ===== AGENDAMENTOS JÁ OCUPADOS ===== */
-  const { data: ag } = await sb
-    .from("agendamentos")
-    .select("hora_inicio,hora_fim")
-    .eq("user_id", lojaId)
-    .eq("data", dia.data);
+ let query = sb
+  .from("agendamentos")
+  .select("id,hora_inicio,hora_fim")
+  .eq("user_id", lojaId)
+  .eq("data", dia.data);
+
+if (alterarId) {
+  query = query.neq("id", alterarId);
+}
+
+const { data: ag } = await query;
+
 
   const ocupados = ag.map(a => [
     toMin(a.hora_inicio),
@@ -681,26 +688,26 @@ async function confirmar(h){
   const fim = toHour(toMin(h) + duracao);
 
   // 🔁 DEFINE ENDPOINT CORRETO
-  const endpoint = alterarId
-    ? "/api/update-agendamento"
-    : "/api/create-agendamento";
+const endpoint = "/api/update-agendamento";
 
-  // 🔁 DEFINE PAYLOAD CORRETO
-  const payload = alterarId
-    ? {
-        agendamento_id: alterarId,
-        loja_id: lojaId,
-        servico_id: dados.servico,
-        servico_nome: dados.servico_nome,
-        valor_servico: dados.valor_servico,
-        data: dados.data,
-        hora_inicio: h,
-        hora_fim: fim,
-        cliente_nome: cliente.nome,
-        cliente_whatsapp: cliente.whatsapp,
-        cliente_email: cliente.email || null,
-        motivo: "ALTERACAO_CLIENTE"
-      }
+
+ const payload = alterarId
+  ? {
+      agendamento_id: alterarId,
+      loja_id: lojaId,
+      servico_id: dados.servico,
+      servico_nome: dados.servico_nome,
+      valor_servico: dados.valor_servico,
+      data: dados.data,
+      hora_inicio: h,
+      hora_fim: fim,
+      cliente_nome: cliente.nome,
+      cliente_whatsapp: cliente.whatsapp,
+      cliente_email: cliente.email || null,
+      cliente_id: usuarioLogado?.id || null, // ✅ ESSENCIAL
+      motivo: "ALTERACAO_CLIENTE"
+    }
+
     : {
         loja_id: lojaId,
         servico_id: dados.servico,
