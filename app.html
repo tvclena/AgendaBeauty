@@ -462,6 +462,36 @@ function go(el,p){
 function openProfile(){ profileOverlay.style.display="flex"; }
 function closeProfile(e){ if(!e || e.target.id==="profileOverlay") profileOverlay.style.display="none"; }
 async function sair(){ await sb.auth.signOut(); location.href="index.html"; }
+  async function salvarPerfil(){
+  const dados = {
+    nome: pNome.value.trim(),
+    whatsapp: pWhats.value.trim(),
+    cep: pCep.value.trim(),
+    rua: pRua.value.trim(),
+    numero: pNumero.value.trim(),
+    cidade: pCidade.value.trim(),
+    uf: pUf.value.trim()
+  };
+
+  const { error } = await sb
+    .from("clientes_profile")
+    .update(dados)
+    .eq("id", user.id);
+
+  if(error){
+    alert("Erro ao salvar perfil");
+    console.error(error);
+    return;
+  }
+
+  // Atualiza memória local
+  Object.assign(perfil, dados);
+
+  // Atualiza avatar inicial
+  avatar.textContent = (perfil.nome || "A")[0];
+
+  profileOverlay.style.display = "none";
+}
 </script>
 
 
