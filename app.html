@@ -492,6 +492,31 @@ async function sair(){ await sb.auth.signOut(); location.href="index.html"; }
 
   profileOverlay.style.display = "none";
 }
+let lojaParaRemover = null;
+
+function openConfirm(lojaId){
+  lojaParaRemover = lojaId;
+  confirmOverlay.style.display = "flex";
+}
+
+function closeConfirm(){
+  confirmOverlay.style.display = "none";
+  lojaParaRemover = null;
+}
+
+async function confirmRemove(){
+  if(!lojaParaRemover) return;
+
+  await sb
+    .from("clientes_loja")
+    .delete()
+    .eq("cliente_id", user.id)
+    .eq("loja_id", lojaParaRemover);
+
+  closeConfirm();
+  renderLojas();
+}
+
 </script>
 
 
