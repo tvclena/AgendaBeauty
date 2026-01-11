@@ -228,8 +228,11 @@ sb.auth.onAuthStateChange((_event, session) => {
 const lojaId = new URLSearchParams(location.search).get("l");
 const servicoPreSelecionado =
   new URLSearchParams(location.search).get("servico");
+const alterarIdRaw = new URLSearchParams(location.search).get("alterar");
 const alterarId =
-  new URLSearchParams(location.search).get("alterar");
+  alterarIdRaw && alterarIdRaw !== "null" && alterarIdRaw !== "undefined"
+    ? alterarIdRaw
+    : null;
 
 ;
 
@@ -704,9 +707,11 @@ async function confirmar(h){
   const fim = toHour(toMin(h) + duracao);
 
   // 🔁 ENDPOINT CORRETO
-  const endpoint = alterarId
+ const endpoint =
+  alterarId && alterarId.length > 10
     ? "/api/update-agendamento"
     : "/api/create-agendamento";
+
 
   // 📦 PAYLOAD 100% COMPATÍVEL COM O BACKEND
   const payload = alterarId
