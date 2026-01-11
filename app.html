@@ -391,7 +391,12 @@ async function renderLojas(){
     .order("updated_at", { ascending: false })
     .limit(5);
 
+  const idsRenderizados = new Set();
+
   for(const l of lojas || []){
+    if(idsRenderizados.has(l.loja_id)) continue;
+    idsRenderizados.add(l.loja_id);
+
     const div = document.createElement("div");
     div.className = "loja-card" + (l.loja_id === perfil.loja_ativa ? " active" : "");
     div.innerHTML = `
