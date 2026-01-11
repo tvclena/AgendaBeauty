@@ -29,10 +29,53 @@ export default async function handler(req, res) {
 
     console.log("📩 PAYLOAD RECEBIDO:", body);
 
-    const {
+const {
+  agendamento_id, // 🔥 NOVO
+  loja_id,
+  servico_id,
+  servico_nome,
+  valor_servico,
+  data,
+  hora_inicio,
+  hora_fim,
+  cliente_nome,
+  cliente_whatsapp,
+  cliente_email,
+  cliente_id
+} = body;
+
+
+if (!loja_id || !data || !hora_inicio || !hora_fim) {
+  return res.status(400).json({
+    error: "Dados obrigatórios ausentes"
+  });
+}
+}
+
+  let dbError;
+
+if (agendamento_id) {
+  // ✏️ ALTERAÇÃO DE AGENDAMENTO
+  const { error } = await supabase
+    .from("agendamentos")
+    .update({
+      data,
+      hora_inicio,
+      hora_fim
+    })
+    .eq("id", agendamento_id)
+    .eq("loja_id", loja_id);
+
+  dbError = error;
+
+} else {
+  // ➕ CRIAÇÃO DE AGENDAMENTO
+  const { error } = await supabase
+    .from("agendamentos")
+    .insert({
+      user_id: loja_id,
       loja_id,
       servico_id,
-      servico_nome,
       valor_servico,
       data,
       hora_inicio,
@@ -41,38 +84,19 @@ export default async function handler(req, res) {
       cliente_whatsapp,
       cliente_email,
       cliente_id
-    } = body;
+    });
 
-    // 🔎 Validação mínima
-    if (!loja_id || !servico_id || !data || !hora_inicio || !hora_fim) {
-      return res.status(400).json({
-        error: "Dados obrigatórios ausentes"
-      });
-    }
+  dbError = error;
+}
 
-    // 1️⃣ SALVA AGENDAMENTO
-    const { error: insertError } = await supabase
-      .from("agendamentos")
-      .insert({
-        user_id: loja_id,
-        loja_id,
-        servico_id,
-        valor_servico,
-        data,
-        hora_inicio,
-        hora_fim,
-        cliente_nome,
-        cliente_whatsapp,
-        cliente_id
-      });
+if (dbError) {
+  console.error("❌ ERRO AO SALVAR AGENDAMENTO:", dbError);
+  return res.status(500).json({
+    error: "Erro ao salvar agendamento",
+    detail: dbError.message
+  });
+}
 
-    if (insertError) {
-      console.error("❌ ERRO AO INSERIR AGENDAMENTO:", insertError);
-      return res.status(500).json({
-        error: "Erro ao salvar agendamento",
-        detail: insertError.message
-      });
-    }
 
     console.log("✅ Agendamento salvo com sucesso");
 
@@ -88,7 +112,7 @@ export default async function handler(req, res) {
     }
 
     // 3️⃣ ENVIA EMAIL (SEM QUEBRAR A API)
-    if (loja?.email_contato) {
+if (!agendamento_id && loja?.email_contato) {
       try {
         console.log("📧 Enviando email para:", loja.email_contato);
 
