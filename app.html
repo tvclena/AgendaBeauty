@@ -516,6 +516,58 @@ async function confirmRemove(){
   closeConfirm();
   renderLojas();
 }
+foto.addEventListener("change", async () => {
+  const file = foto.files[0];
+  if (!file) return;
+
+  // validação simples
+  if (!file.type.startsWith("image/")) {
+    alert("Selecione uma imagem");
+    return;
+  }
+
+  const ext = file.name.split(".").pop();
+  const filePath = `${user.id}.${ext}`;
+
+  // upload
+  const { error: uploadError } = await sb.storage
+    .from("avatars")
+    .upload(filePath, file, {
+      upsert: true,
+      cacheControl: "3600"
+    });
+
+  if (uploadError) {
+    console.error(uploadError);
+    alert("Erro ao enviar foto");
+    return;
+  }
+
+  // url pública
+  const { data } = sb.storage
+    .from("avatars")
+    .getPublicUrl(filePath);
+
+  const avatarUrl = data.publicUrl;
+
+  // salva no perfil
+  const { error: updateError } = await sb
+    .from("clientes_profile")
+    .update({ avatar_url: avatarUrl })
+    .eq("id", user.id);
+
+  if (updateError) {
+    console.error(updateError);
+    alert("Erro ao salvar foto");
+    return;
+  }
+
+  // atualiza UI imediatamente
+  perfil.avatar_url = avatarUrl;
+  avatar.style.backgroundImage = `url(${avatarUrl})`;
+  avatar.textContent = "";
+  profileImg.style.backgroundImage = `url(${avatarUrl})`;
+});
 
 </script>
 
