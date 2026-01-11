@@ -339,7 +339,7 @@ if (!lojaId && perfil.loja_ativa) {
 }
 
 // carrega iframe com a loja correta
-frame.src = `homeclientes.html?l=${lojaId}`;
+frame.src = `homeclientes.html?l=${lojaId}&t=${Date.now()}`;
 // 🔄 sincroniza loja ativa em memória e no banco
 if (lojaId !== perfil.loja_ativa) {
 
