@@ -29,62 +29,10 @@ export default async function handler(req, res) {
 
     console.log("📩 PAYLOAD RECEBIDO:", body);
 
-const {
-  agendamento_id, // 🔥 NOVO
-  loja_id,
-  servico_id,
-  servico_nome,
-  valor_servico,
-  data,
-  hora_inicio,
-  hora_fim,
-  cliente_nome,
-  cliente_whatsapp,
-  cliente_email,
-  cliente_id
-} = body;
-
-
-if (!loja_id || !data || !hora_inicio || !hora_fim) {
-  return res.status(400).json({
-    error: "Dados obrigatórios ausentes"
-  });
-}
-
-
-  let dbError;
-
-if (agendamento_id) {
-  // ✏️ ALTERAÇÃO DE AGENDAMENTO
-const { data: atualizado, error } = await supabase
-  .from("agendamentos")
-  .update({
-    data,
-    hora_inicio,
-    hora_fim
-  })
-  .eq("id", agendamento_id)
-  .eq("loja_id", loja_id)
-  .eq("status", "CONFIRMADO")
-  .select()
-  .single();
-
-if (!atualizado) {
-  return res.status(404).json({
-    error: "Agendamento não encontrado ou não pertence à loja"
-  });
-}
-
-dbError = error;
-
-} else {
-  // ➕ CRIAÇÃO DE AGENDAMENTO
-  const { error } = await supabase
-    .from("agendamentos")
-    .insert({
-      user_id: loja_id,
+    const {
       loja_id,
       servico_id,
+      servico_nome,
       valor_servico,
       data,
       hora_inicio,
@@ -93,19 +41,38 @@ dbError = error;
       cliente_whatsapp,
       cliente_email,
       cliente_id
-    });
+    } = body;
 
-  dbError = error;
-}
+    // 🔎 Validação mínima
+    if (!loja_id || !servico_id || !data || !hora_inicio || !hora_fim) {
+      return res.status(400).json({
+        error: "Dados obrigatórios ausentes"
+      });
+    }
 
-if (dbError) {
-  console.error("❌ ERRO AO SALVAR AGENDAMENTO:", dbError);
-  return res.status(500).json({
-    error: "Erro ao salvar agendamento",
-    detail: dbError.message
-  });
-}
+    // 1️⃣ SALVA AGENDAMENTO
+    const { error: insertError } = await supabase
+      .from("agendamentos")
+      .insert({
+        user_id: loja_id,
+        loja_id,
+        servico_id,
+        valor_servico,
+        data,
+        hora_inicio,
+        hora_fim,
+        cliente_nome,
+        cliente_whatsapp,
+        cliente_id
+      });
 
+    if (insertError) {
+      console.error("❌ ERRO AO INSERIR AGENDAMENTO:", insertError);
+      return res.status(500).json({
+        error: "Erro ao salvar agendamento",
+        detail: insertError.message
+      });
+    }
 
     console.log("✅ Agendamento salvo com sucesso");
 
@@ -121,7 +88,7 @@ if (dbError) {
     }
 
     // 3️⃣ ENVIA EMAIL (SEM QUEBRAR A API)
-if (!agendamento_id && loja?.email_contato) {
+    if (loja?.email_contato) {
       try {
         console.log("📧 Enviando email para:", loja.email_contato);
 
@@ -149,12 +116,10 @@ if (!agendamento_id && loja?.email_contato) {
       console.warn("⚠️ Loja não possui email_contato cadastrado");
     }
 
-return res.status(200).json({
-  success: true,
-  message: agendamento_id
-    ? "Agendamento alterado com sucesso"
-    : "Agendamento criado com sucesso"
-});
+    return res.status(200).json({
+      success: true,
+      message: "Agendamento criado com sucesso"
+    });
 
   } catch (err) {
     console.error("🔥 ERRO GERAL NA API:", err);
