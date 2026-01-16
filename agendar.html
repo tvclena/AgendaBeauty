@@ -229,6 +229,12 @@ sb.auth.onAuthStateChange((_event, session) => {
 });
 
 const lojaId = new URLSearchParams(location.search).get("l");
+  if (!lojaId) {
+  console.error("❌ lojaId não informado na URL");
+  alert("Erro: loja não identificada");
+  throw new Error("lojaId ausente");
+}
+
 const servicoPreSelecionado =
   new URLSearchParams(location.search).get("servico");
 const alterarId =
