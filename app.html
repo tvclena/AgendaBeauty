@@ -681,7 +681,7 @@ onMessage(messaging, payload => {
 });
 
 function sincronizarClienteLoja() {
-  if (!perfil) return;
+  if (!perfil || !user) return;
 
   const clienteLoja = {
     id: user.id,
@@ -696,7 +696,6 @@ function sincronizarClienteLoja() {
 
   localStorage.setItem("CLIENTE_LOJA", JSON.stringify(clienteLoja));
 }
-
 </script>
 
 
