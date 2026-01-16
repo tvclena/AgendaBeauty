@@ -78,11 +78,6 @@ body{
   outline:none;
 }
 
-.search input:focus{
-  border-color:#ffd6b8;
-  box-shadow:0 0 0 4px rgba(255,106,0,.12);
-}
-
 /* LIST */
 .list{
   padding:14px;
@@ -101,7 +96,6 @@ body{
   align-items:center;
 }
 
-/* AVATAR */
 .avatar{
   width:48px;
   height:48px;
@@ -113,15 +107,10 @@ body{
   color:#fff;
   font-weight:900;
   font-size:18px;
-  flex-shrink:0;
 }
 
-/* INFO */
 .info{
   flex:1;
-  display:flex;
-  flex-direction:column;
-  gap:4px;
 }
 
 .info strong{
@@ -133,11 +122,9 @@ body{
   color:var(--muted);
 }
 
-/* META */
 .meta{
   text-align:right;
   font-size:12px;
-  color:#111;
   font-weight:700;
 }
 
@@ -145,43 +132,32 @@ body{
   display:block;
   font-size:11px;
   color:var(--muted);
-  font-weight:500;
 }
 
-/* EMPTY */
 .empty{
   text-align:center;
   color:var(--muted);
   padding:40px 10px;
-  font-size:14px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <strong>Meus clientes</strong>
   <button onclick="window.parent.fecharClientes()">Fechar</button>
 </div>
 
-<!-- SEARCH -->
 <div class="search">
-  <input
-    id="busca"
-    placeholder="Buscar cliente por nome ou WhatsApp"
-    oninput="filtrarClientes()"
-  >
+  <input id="busca" placeholder="Buscar cliente por nome ou WhatsApp" oninput="filtrarClientes()">
 </div>
 
-<!-- LIST -->
 <div class="list" id="lista">
   <div class="empty">Carregando clientes…</div>
 </div>
 
 <script>
-/* ================= SUPABASE ================= */
 const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
@@ -190,7 +166,6 @@ const sb = supabase.createClient(
 let clientes = [];
 let clientesFiltrados = [];
 
-/* ================= LOAD ================= */
 async function carregarClientes(){
 
   const { data:{ session } } = await sb.auth.getSession();
@@ -198,16 +173,19 @@ async function carregarClientes(){
 
   const lojaId = session.user.id;
 
-  /*
-    BUSCA:
-    - nome
-    - whatsapp
-    - total de serviços
-    - último atendimento
-  */
-  const { data, error } = await sb.rpc("clientes_resumo_loja", {
-    p_loja_id: lojaId
-  });
+  const { data, error } = await sb
+    .from("clientes_profile")
+    .select(`
+      id,
+      nome,
+      whatsapp,
+      agendamentos (
+        id,
+        data
+      )
+    `)
+    .eq("loja_ativa", lojaId)
+    .order("nome");
 
   if(error){
     console.error(error);
@@ -216,15 +194,20 @@ async function carregarClientes(){
     return;
   }
 
-  clientes = data || [];
-  clientesFiltrados = clientes;
+  clientes = (data || []).map(c => ({
+    nome: c.nome,
+    whatsapp: c.whatsapp,
+    total_servicos: c.agendamentos?.length || 0,
+    ultimo_servico: c.agendamentos?.length
+      ? c.agendamentos.map(a => a.data).sort().reverse()[0]
+      : null
+  }));
 
+  clientesFiltrados = clientes;
   render();
 }
 
-/* ================= RENDER ================= */
 function render(){
-
   const box = document.getElementById("lista");
   box.innerHTML = "";
 
@@ -234,9 +217,7 @@ function render(){
   }
 
   clientesFiltrados.forEach(c => {
-
-    const letra = (c.nome?.[0] || "?").toUpperCase();
-
+    const letra = c.nome?.[0]?.toUpperCase() || "?";
     const ultima = c.ultimo_servico
       ? new Date(c.ultimo_servico).toLocaleDateString("pt-BR")
       : "—";
@@ -244,12 +225,10 @@ function render(){
     box.innerHTML += `
       <div class="card">
         <div class="avatar">${letra}</div>
-
         <div class="info">
           <strong>${c.nome}</strong>
           <small>${formatWhats(c.whatsapp)}</small>
         </div>
-
         <div class="meta">
           ${c.total_servicos} serviços
           <span>Último: ${ultima}</span>
@@ -259,19 +238,15 @@ function render(){
   });
 }
 
-/* ================= FILTER ================= */
 function filtrarClientes(){
   const q = busca.value.toLowerCase();
-
   clientesFiltrados = clientes.filter(c =>
     c.nome.toLowerCase().includes(q) ||
     (c.whatsapp || "").includes(q)
   );
-
   render();
 }
 
-/* ================= UTILS ================= */
 function formatWhats(w){
   if(!w) return "";
   return w.replace(/^(\d{2})(\d)/,"($1) $2")
