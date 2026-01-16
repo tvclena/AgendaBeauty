@@ -773,12 +773,21 @@ if (veioDoBotaoMais) {
   localStorage.removeItem("CLIENTE_LOJA");
 }
 
+// 📢 avisa o iframe pai que o agendamento foi concluído
+if (window.parent !== window) {
+  window.parent.postMessage("AGENDAMENTO_OK", "*");
+}
+
 document.body.insertAdjacentHTML("beforeend", `
   <div class="overlay" id="overlayConfirm">
     <div class="msg-final">
       ✅ <strong>
         ${alterarId ? "Agendamento atualizado!" : "Agendamento confirmado!"}
       </strong><br><br>
+
+
+
+
 
 
         Serviço: <b>${dados.servico_nome}</b><br>
