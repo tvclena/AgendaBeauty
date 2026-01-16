@@ -254,43 +254,29 @@ function renderCarrinho(){
 
 /* FINALIZAR */
 async function finalizarCompra(){
-  if(!clienteValido()){
-    alert("Identifique-se antes de pagar");
-    return;
-  }
+ if(!clienteValido()){
+   alert("Identifique-se antes de pagar");
+   return;
+ }
+ if(!carrinho.itens.length){
+   alert("Carrinho vazio");
+   return;
+ }
 
-  if(!carrinho.itens.length){
-    alert("Carrinho vazio");
-    return;
-  }
+ const res = await fetch("https://www.clena.com.br/api/create-pagamento",{
+   method:"POST",
+   headers:{ "Content-Type":"application/json" },
+   body:JSON.stringify({
+     loja_id: lojaId,
+     cliente: getCliente(),
+     itens: carrinho.itens
+   })
+ });
 
-  try{
-    const res = await fetch("https://www.clena.com.br/api/create-pagamento",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body: JSON.stringify({
-        loja_id: lojaId,          // ✅ CORRETO
-        cliente: getCliente(),    // { nome, whatsapp, email }
-        itens: carrinho.itens     // [{ id, nome, preco, quantidade }]
-      })
-    });
+ const data = await res.json();
+ if(!res.ok) return alert(data.error||"Erro no pagamento");
 
-    const data = await res.json();
-
-    if(!res.ok){
-      alert(data.error || "Erro ao iniciar pagamento");
-      return;
-    }
-
-    // 🔥 REDIRECIONA PARA O MERCADO PAGO
-    window.location.href = data.init_point;
-
-  }catch(err){
-    console.error(err);
-    alert("Erro ao conectar com pagamento");
-  }
+ window.location.href = data.init_point;
 }
 
 /* INIT */
