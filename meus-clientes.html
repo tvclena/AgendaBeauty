@@ -150,6 +150,17 @@ body{
   color:var(--muted);
   padding:40px 10px;
 }
+.whats{
+  font-size:20px;
+  color:#d4af37;
+  transition:.2s;
+}
+
+a:hover .whats{
+  transform:scale(1.15);
+  color:#25D366;
+}
+
 </style>
 </head>
 
@@ -254,7 +265,15 @@ function render(){
           <span>Último: ${ultima}</span>
         </div>
 
-        ${c.whatsapp ? `<i class="ri-whatsapp-line whats"></i>` : ``}
+${c.whatsapp ? `
+  <a
+    href="https://wa.me/55${c.whatsapp.replace(/\D/g,'')}"
+    target="_blank"
+    title="Abrir WhatsApp"
+  >
+    <i class="ri-whatsapp-line whats"></i>
+  </a>
+` : ``}
       </div>
     `;
   });
