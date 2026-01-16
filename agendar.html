@@ -230,6 +230,10 @@ const servicoPreSelecionado =
   new URLSearchParams(location.search).get("servico");
 const alterarId =
   new URLSearchParams(location.search).get("alterar");
+const veioDoBotaoMais =
+  new URLSearchParams(location.search).get("novo") === "1";
+
+  
 
 ;
 
@@ -557,10 +561,12 @@ async function selecionarDia(index){
   await carregarCliente(); // 🔥 ESSENCIAL
   carregarServicos();
 
-  if(!clienteValido()){
+  // ⚠️ SÓ ABRE MODAL SE VEIO DO BOTÃO +
+  if (veioDoBotaoMais && !clienteValido()) {
     abrirModal();
   }
 })();
+
 
   
 function fecharOverlay(){
@@ -674,11 +680,14 @@ async function salvarCliente(){
 
 async function confirmar(h){
 
-  const cliente = getCliente();
-  if(!cliente){
-    abrirModal();
-    return;
-  }
+const cliente = getCliente();
+
+// ⚠️ Só exige cliente se veio do botão +
+if (veioDoBotaoMais && !cliente) {
+  abrirModal();
+  return;
+}
+
 
   const fim = toHour(toMin(h) + duracao);
 
