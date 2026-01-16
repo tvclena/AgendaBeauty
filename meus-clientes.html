@@ -18,6 +18,7 @@
 <style>
 :root{
   --primary:#ff6a00;
+  --gold:#d4af37;
   --bg:#f6f7fb;
   --card:#ffffff;
   --muted:#6b7280;
@@ -75,7 +76,6 @@ body{
   border-radius:14px;
   border:1px solid var(--border);
   font-size:14px;
-  outline:none;
 }
 
 /* LIST */
@@ -96,6 +96,7 @@ body{
   align-items:center;
 }
 
+/* AVATAR */
 .avatar{
   width:48px;
   height:48px;
@@ -107,8 +108,10 @@ body{
   color:#fff;
   font-weight:900;
   font-size:18px;
+  flex-shrink:0;
 }
 
+/* INFO */
 .info{
   flex:1;
 }
@@ -122,6 +125,7 @@ body{
   color:var(--muted);
 }
 
+/* META */
 .meta{
   text-align:right;
   font-size:12px;
@@ -132,6 +136,13 @@ body{
   display:block;
   font-size:11px;
   color:var(--muted);
+}
+
+/* WHATS ICON */
+.whats{
+  font-size:20px;
+  color:var(--gold);
+  margin-left:8px;
 }
 
 .empty{
@@ -165,6 +176,7 @@ const sb = supabase.createClient(
 
 let clientes = [];
 let clientesFiltrados = [];
+let agendamentos = [];
 
 async function carregarClientes(){
 
@@ -173,66 +185,76 @@ async function carregarClientes(){
 
   const lojaId = session.user.id;
 
-  const { data, error } = await sb
+  // 1️⃣ BUSCA CLIENTES
+  const { data: clientesData, error: errClientes } = await sb
     .from("clientes_profile")
-    .select(`
-      id,
-      nome,
-      whatsapp,
-      agendamentos (
-        id,
-        data
-      )
-    `)
+    .select("id, nome, whatsapp")
     .eq("loja_ativa", lojaId)
     .order("nome");
 
-  if(error){
-    console.error(error);
-    document.getElementById("lista").innerHTML =
-      `<div class="empty">Erro ao carregar clientes</div>`;
+  if(errClientes){
+    console.error(errClientes);
+    lista.innerHTML = `<div class="empty">Erro ao carregar clientes</div>`;
     return;
   }
 
-  clientes = (data || []).map(c => ({
-    nome: c.nome,
-    whatsapp: c.whatsapp,
-    total_servicos: c.agendamentos?.length || 0,
-    ultimo_servico: c.agendamentos?.length
-      ? c.agendamentos.map(a => a.data).sort().reverse()[0]
-      : null
-  }));
+  // 2️⃣ BUSCA AGENDAMENTOS DA LOJA
+  const { data: agData } = await sb
+    .from("agendamentos")
+    .select("cliente_id, data")
+    .eq("loja_id", lojaId)
+    .neq("status", "CANCELADO");
+
+  agendamentos = agData || [];
+
+  // 3️⃣ MONTA RESUMO
+  clientes = clientesData.map(c => {
+    const ags = agendamentos.filter(a => a.cliente_id === c.id);
+    const ultima = ags.length
+      ? ags.map(a => a.data).sort().reverse()[0]
+      : null;
+
+    return {
+      nome: c.nome,
+      whatsapp: c.whatsapp,
+      total: ags.length,
+      ultima
+    };
+  });
 
   clientesFiltrados = clientes;
   render();
 }
 
 function render(){
-  const box = document.getElementById("lista");
-  box.innerHTML = "";
+  lista.innerHTML = "";
 
   if(!clientesFiltrados.length){
-    box.innerHTML = `<div class="empty">Nenhum cliente encontrado</div>`;
+    lista.innerHTML = `<div class="empty">Nenhum cliente encontrado</div>`;
     return;
   }
 
   clientesFiltrados.forEach(c => {
     const letra = c.nome?.[0]?.toUpperCase() || "?";
-    const ultima = c.ultimo_servico
-      ? new Date(c.ultimo_servico).toLocaleDateString("pt-BR")
+    const ultima = c.ultima
+      ? new Date(c.ultima).toLocaleDateString("pt-BR")
       : "—";
 
-    box.innerHTML += `
+    lista.innerHTML += `
       <div class="card">
         <div class="avatar">${letra}</div>
+
         <div class="info">
           <strong>${c.nome}</strong>
           <small>${formatWhats(c.whatsapp)}</small>
         </div>
+
         <div class="meta">
-          ${c.total_servicos} serviços
+          ${c.total} serviços
           <span>Último: ${ultima}</span>
         </div>
+
+        ${c.whatsapp ? `<i class="ri-whatsapp-line whats"></i>` : ``}
       </div>
     `;
   });
