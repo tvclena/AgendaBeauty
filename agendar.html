@@ -432,7 +432,6 @@ function renderizarDia(d, index){
 
 
   
-/* ================= SERVIÇO → DIAS ================= */
 async function selecionarServico(id, dur, nome, preco){
 
   document.querySelectorAll(".service")
@@ -441,7 +440,6 @@ async function selecionarServico(id, dur, nome, preco){
   const card = document.querySelector(`[data-id="${id}"]`);
   card?.classList.add("selected");
 
-  // 🔥 AQUI A ROLAGEM AUTOMÁTICA
   card?.scrollIntoView({
     behavior: "smooth",
     inline: "center",
@@ -450,25 +448,24 @@ async function selecionarServico(id, dur, nome, preco){
 
   dados.servico = id;
   dados.servico_nome = nome;
-  dados.valor_servico = preco;
+  dados.valor_servico = Number(preco) || 0; // ✅ FIX FINAL
   duracao = dur;
 
-  // 🔹 mostra seção de dias
   document.getElementById("secDays").classList.remove("hidden");
   document.getElementById("secTimes").classList.add("hidden");
-
 
   document.getElementById("times").innerHTML = "";
   document.getElementById("final").innerHTML = "";
 
-DIAS_VALIDOS = [];
-cursorData = null;
-carregandoDias = false;
+  DIAS_VALIDOS = [];
+  cursorData = null;
+  carregandoDias = false;
 
-document.getElementById("days").innerHTML = "";
+  document.getElementById("days").innerHTML = "";
 
-carregarDiasLazy();
+  carregarDiasLazy();
 }
+
 
 
 
