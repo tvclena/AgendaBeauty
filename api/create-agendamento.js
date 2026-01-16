@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { enviarEmail } from "../lib/email.js";
+import { firebaseAdmin } from "../lib/firebaseAdmin.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -23,10 +24,9 @@ export default async function handler(req, res) {
 
   try {
     /* ================= PAYLOAD ================= */
-    const body =
-      typeof req.body === "string"
-        ? JSON.parse(req.body)
-        : req.body;
+    const body = typeof req.body === "string"
+      ? JSON.parse(req.body)
+      : req.body;
 
     console.log("📩 PAYLOAD RECEBIDO:", body);
 
@@ -54,20 +54,16 @@ export default async function handler(req, res) {
       !cliente_nome ||
       !cliente_whatsapp
     ) {
-      return res.status(400).json({
-        error: "Dados obrigatórios ausentes"
-      });
+      return res.status(400).json({ error: "Dados obrigatórios ausentes" });
     }
 
     /* ================= NORMALIZA VALOR ================= */
     const valorFinal = Number(valor_servico);
     if (isNaN(valorFinal)) {
-      return res.status(400).json({
-        error: "Valor do serviço inválido"
-      });
+      return res.status(400).json({ error: "Valor inválido" });
     }
 
-    /* ================= INSERÇÃO ================= */
+    /* ================= SALVA AGENDAMENTO ================= */
     const { error: insertError } = await supabase
       .from("agendamentos")
       .insert({
@@ -88,34 +84,26 @@ export default async function handler(req, res) {
 
     if (insertError) {
       console.error("❌ ERRO AO INSERIR:", insertError);
-      return res.status(500).json({
-        error: "Erro ao salvar agendamento",
-        detail: insertError.message
-      });
+      return res.status(500).json({ error: "Erro ao salvar agendamento" });
     }
 
-    console.log("✅ Agendamento salvo com sucesso");
+    console.log("✅ Agendamento salvo");
 
-    /* ================= EMAIL DA LOJA ================= */
-    const { data: loja, error: lojaError } = await supabase
+    /* ================= DADOS DA LOJA ================= */
+    const { data: loja } = await supabase
       .from("user_profile")
       .select("email_contato, negocio")
       .eq("user_id", loja_id)
       .single();
 
-    if (lojaError) {
-      console.warn("⚠️ Erro ao buscar loja:", lojaError.message);
-    }
-
-    /* ================= ENVIO DE EMAIL ================= */
+    /* ================= EMAIL ================= */
     if (loja?.email_contato) {
       try {
         await enviarEmail({
           to: loja.email_contato,
-          subject: "📅 Novo agendamento realizado",
+          subject: "📅 Novo agendamento",
           html: `
             <h2>Novo agendamento</h2>
-            <p><strong>Negócio:</strong> ${loja.negocio}</p>
             <p><strong>Cliente:</strong> ${cliente_nome}</p>
             <p><strong>WhatsApp:</strong> ${cliente_whatsapp}</p>
             <p><strong>Serviço:</strong> ${servico_nome}</p>
@@ -124,25 +112,64 @@ export default async function handler(req, res) {
             <p><strong>Horário:</strong> ${hora_inicio} - ${hora_fim}</p>
           `
         });
+        console.log("📧 Email enviado");
+      } catch (e) {
+        console.warn("⚠️ Falha no email:", e.message);
+      }
+    }
 
-        console.log("📧 Email enviado com sucesso");
+    /* ================= PUSH NOTIFICATION ================= */
+    const { data: tokens } = await supabase
+      .from("notificacoes_tokens")
+      .select("token")
+      .eq("user_id", loja_id);
 
-      } catch (emailError) {
-        console.warn("⚠️ Falha ao enviar email:", emailError.message);
+    if (tokens?.length) {
+
+      const mensagem = {
+        tokens: tokens.map(t => t.token),
+
+        notification: {
+          title: "📅 Novo agendamento",
+          body: `${cliente_nome} agendou ${servico_nome} às ${hora_inicio}`
+        },
+
+        android: {
+          priority: "high",
+          notification: {
+            channelId: "agendamentos",
+            sound: "default",
+            visibility: "public"
+          }
+        },
+
+        data: {
+          tipo: "AGENDAMENTO",
+          loja_id: String(loja_id),
+          data: String(data),
+          hora_inicio: String(hora_inicio)
+        }
+      };
+
+      try {
+        const resp = await firebaseAdmin
+          .messaging()
+          .sendEachForMulticast(mensagem);
+
+        console.log("🔔 PUSH:", resp.successCount, "enviados");
+      } catch (err) {
+        console.error("❌ ERRO PUSH:", err);
       }
     }
 
     /* ================= RESPOSTA ================= */
     return res.status(200).json({
       success: true,
-      message: "Agendamento criado com sucesso"
+      message: "Agendamento criado e notificação enviada"
     });
 
   } catch (err) {
     console.error("🔥 ERRO GERAL:", err);
-    return res.status(500).json({
-      error: "Erro interno no servidor",
-      detail: err.message
-    });
+    return res.status(500).json({ error: "Erro interno", detail: err.message });
   }
 }
