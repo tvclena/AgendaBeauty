@@ -724,7 +724,7 @@ function abrirNovoAgendamento(){
     const iframe = document.getElementById("iframeAgendar");
 
     // 🔥 abre o agendar reutilizando tudo que já existe
-    iframe.src = `agendar.html?l=${lojaId}`;
+iframe.src = `agendar.html?l=${lojaId}&novo=1`;
 
     document.getElementById("novoAgendamentoModal").style.display = "flex";
   });
