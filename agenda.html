@@ -278,12 +278,23 @@ const sb = supabase.createClient(
 
 let userId, agenda={}, current=new Date(), selected="", dirty=false;
 
-(async()=>{
-  const {data:{session}}=await sb.auth.getSession();
-  if(!session) location.href="login.html";
-  userId=session.user.id;
+async function verificarLogin(){
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){
+    alert("Sessão expirada. Faça login novamente.");
+    location.href = "/login.html";
+    return;
+  }
+  userId = user.id;
+}
+
+  
+(async ()=>{
+  await verificarLogin();
   carregar();
 })();
+
+
 
 function changeMonth(v){
   current.setMonth(current.getMonth()+v);
