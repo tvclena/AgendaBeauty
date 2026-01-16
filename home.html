@@ -285,12 +285,12 @@ body::-webkit-scrollbar{
 </div>
 
 
-    <div class="card">
-      <small>Serviços ativos</small>
-      <h2 id="kpiServicos">0</h2>
-      <i class="ri-scissors-line"></i>
-    </div>
-  </div>
+<div class="card" onclick="abrirServicos()">
+  <small>Serviços ativos</small>
+  <h2 id="kpiServicos">0</h2>
+  <i class="ri-scissors-line"></i>
+</div>
+
 
   <!-- AGENDA -->
   <div class="list">
@@ -600,6 +600,63 @@ async function carregarCalendarioFaturamento(){
   }
 }
 
+async function carregarServicos(){
+
+  const { data:{ session } } = await sbHome.auth.getSession();
+  if(!session) return;
+
+  const lojaId = session.user.id;
+
+  const { data: servicos, error } = await sbHome
+    .from("produtos_servicos")
+    .select("id, nome, preco, imagem_url")
+    .eq("user_id", lojaId)
+    .eq("ativo", true)
+    .eq("tipo", "SERVICO")
+    .order("nome");
+
+  const box = document.getElementById("listaServicos");
+  box.innerHTML = "";
+
+  if(error || !servicos || servicos.length === 0){
+    box.innerHTML = `<div class="empty">Nenhum serviço ativo</div>`;
+    return;
+  }
+
+  servicos.forEach(s => {
+
+    const valor = Number(s.preco||0).toLocaleString("pt-BR",{
+      style:"currency",
+      currency:"BRL"
+    });
+
+    box.innerHTML += `
+      <div style="
+        display:grid;
+        grid-template-columns:56px 1fr auto;
+        gap:12px;
+        align-items:center;
+        background:#f9fafb;
+        border-radius:14px;
+        padding:10px;
+        margin-bottom:10px;
+      ">
+
+        <img
+          src="${s.imagem_url || 'https://via.placeholder.com/56'}"
+          style="width:56px;height:56px;border-radius:12px;object-fit:cover"
+        />
+
+        <div style="display:flex;flex-direction:column">
+          <strong style="font-size:13px">${s.nome}</strong>
+          <small style="color:#16a34a;font-weight:700">${valor}</small>
+        </div>
+
+        <i class="ri-check-line" style="color:#22c55e;font-size:18px"></i>
+      </div>
+    `;
+  });
+}
 
 </script>
 <script>
@@ -619,7 +676,15 @@ function abrirFaturamentoMes(){
 function fecharFaturamentoMes(){
   document.getElementById("faturamentoModal").style.display = "none";
 }
-  
+function abrirServicos(){
+  document.getElementById("servicosModal").style.display = "flex";
+  carregarServicos();
+}
+
+function fecharServicos(){
+  document.getElementById("servicosModal").style.display = "none";
+}
+
 </script>
 <!-- MODAL CLIENTES -->
 <div id="clientesModal" style="
@@ -683,6 +748,52 @@ function fecharFaturamentoMes(){
     <div id="calendarioFaturamento"
          style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px">
     </div>
+
+  </div>
+</div>
+<!-- MODAL SERVIÇOS -->
+<div id="servicosModal" style="
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:flex-end;
+  z-index:99999;
+">
+
+  <div style="
+    width:100%;
+    height:92%;
+    background:#ffffff;
+    border-radius:22px 22px 0 0;
+    overflow:hidden;
+    padding:16px;
+    box-shadow:0 -14px 40px rgba(0,0,0,.25);
+  ">
+
+    <!-- handle -->
+    <div style="
+      width:40px;
+      height:4px;
+      background:#d1d5db;
+      border-radius:999px;
+      margin:0 auto 12px;
+    "></div>
+
+    <!-- header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <strong style="font-size:16px">Serviços ativos</strong>
+      <button onclick="fecharServicos()" style="
+        border:none;
+        background:#e5e7eb;
+        border-radius:999px;
+        padding:6px 12px;
+        font-weight:700;
+      ">Fechar</button>
+    </div>
+
+    <!-- lista -->
+    <div id="listaServicos"></div>
 
   </div>
 </div>
