@@ -2,14 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-T97MS35TJ6"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-T97MS35TJ6');
-</script>
-<title>Loja - Início</title>
+<title>Loja • Início</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#ff6a00">
@@ -36,7 +29,6 @@ html,body{
   overflow:hidden;
 }
 
-/* FUNDO DA LOJA */
 .bg{
   position:fixed;
   inset:0;
@@ -46,7 +38,6 @@ html,body{
   transform:scale(1.05);
 }
 
-/* OVERLAY FOSCO */
 .overlay{
   position:fixed;
   inset:0;
@@ -55,10 +46,8 @@ html,body{
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:10;
 }
 
-/* CARD LOGIN */
 .card{
   width:92%;
   max-width:380px;
@@ -66,12 +55,6 @@ html,body{
   border-radius:26px;
   padding:26px;
   box-shadow:0 30px 80px rgba(0,0,0,.45);
-  animation:up .5s ease;
-}
-
-@keyframes up{
-  from{transform:translateY(30px);opacity:0}
-  to{transform:translateY(0);opacity:1}
 }
 
 .logo{
@@ -83,7 +66,6 @@ html,body{
   height:84px;
   border-radius:22px;
   object-fit:cover;
-  box-shadow:0 10px 30px rgba(0,0,0,.25);
 }
 
 h1{
@@ -92,6 +74,7 @@ h1{
   font-weight:800;
   margin:10px 0 6px;
 }
+
 p{
   text-align:center;
   font-size:14px;
@@ -118,15 +101,6 @@ button{
   font-weight:800;
   font-size:16px;
   cursor:pointer;
-  margin-top:6px;
-}
-
-small{
-  display:block;
-  text-align:center;
-  margin-top:12px;
-  color:var(--muted);
-  font-size:12px;
 }
 </style>
 </head>
@@ -141,22 +115,17 @@ small{
       <img id="logoLoja" src="https://via.placeholder.com/200">
     </div>
 
-    <h1 id="nomeLoja">CLENA.COM.BR</h1>
-    <p>Entre para continuar</p>
+    <h1 id="nomeLoja">Agenda Fácil</h1>
+    <p>Informe seus dados para continuar</p>
 
-    <input id="nome" placeholder="SEU NOME">
+    <input id="nome" placeholder="SEU NOME COMPLETO">
     <input id="whats" placeholder="WHATSAPP">
-    <input id="email" placeholder="E-MAIL">
-    <input id="senha" type="password" placeholder="SENHA">
 
     <button onclick="entrar()">Entrar</button>
-
-    <small>Se for seu primeiro acesso, criaremos sua conta automaticamente</small>
   </div>
 </div>
 
 <script>
-/* ===== SUPABASE ===== */
 const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
@@ -164,7 +133,7 @@ const sb = supabase.createClient(
 
 const lojaId = new URLSearchParams(location.search).get("l");
 
-/* ===== MÁSCARA WHATS ===== */
+/* máscara whatsapp */
 whats.addEventListener("input",()=>{
   let v = whats.value.replace(/\D/g,"").slice(0,11);
   if(v.length > 6) v = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
@@ -172,7 +141,7 @@ whats.addEventListener("input",()=>{
   whats.value = v;
 });
 
-/* ===== LOAD LOJA ===== */
+/* carregar loja */
 (async()=>{
   const { data } = await sb
     .from("user_profile")
@@ -192,72 +161,65 @@ whats.addEventListener("input",()=>{
   }
 })();
 
-/* ===== LOGIN / CADASTRO ===== */
+/* entrada automática */
 async function entrar(){
-  const nomeVal  = nome.value.trim().toUpperCase();
+  const nomeVal = nome.value.trim().toUpperCase();
   const whatsVal = whats.value.replace(/\D/g,"");
-  const emailVal = email.value.trim();
-  const senhaVal = senha.value;
 
-  if(!emailVal || senhaVal.length < 6){
-    alert("Informe email e senha válidos");
+  if(nomeVal.length < 3 || whatsVal.length < 10){
+    alert("Informe nome e WhatsApp válidos");
     return;
   }
 
-  // 1️⃣ tenta login
+  const emailFake = `${whatsVal}@cliente.agendafacil`;
+  const senhaFake = `AF@${whatsVal}`;
+
+  // tenta login
   let { error } = await sb.auth.signInWithPassword({
-    email: emailVal,
-    password: senhaVal
+    email: emailFake,
+    password: senhaFake
   });
 
-  // 2️⃣ se não existir, cria conta
+  // se não existir, cria
   if(error){
-    const { error: signupError } = await sb.auth.signUp({
-      email: emailVal,
-      password: senhaVal
+    await sb.auth.signUp({
+      email: emailFake,
+      password: senhaFake
     });
-    if(signupError){
-      alert(signupError.message);
-      return;
-    }
   }
 
-  // 3️⃣ pega usuário logado
   const { data:{ user } } = await sb.auth.getUser();
   if(!user){
     alert("Erro ao autenticar");
     return;
   }
-// 🔗 salva vínculo cliente ↔ loja (MINHAS LOJAS)
-await sb.from("clientes_loja").upsert({
-  cliente_id: user.id,
-  loja_id: lojaId
-});
 
-  // 4️⃣ busca perfil (SEM single)
+  // vínculo loja
+  await sb.from("clientes_loja").upsert({
+    cliente_id: user.id,
+    loja_id: lojaId
+  });
+
+  // perfil
   const { data: perfil } = await sb
     .from("clientes_profile")
-    .select("*")
+    .select("id")
     .eq("id", user.id)
     .maybeSingle();
 
-  // 5️⃣ se não existe perfil, cria
   if(!perfil){
     await sb.from("clientes_profile").insert({
       id: user.id,
-      nome: nomeVal || user.email,
-      whatsapp: whatsVal || null,
-      email: emailVal,
+      nome: nomeVal,
+      whatsapp: whatsVal,
       loja_ativa: lojaId
     });
   } else {
-    // só atualiza loja ativa
     await sb.from("clientes_profile")
       .update({ loja_ativa: lojaId })
       .eq("id", user.id);
   }
 
-  // 6️⃣ segue o fluxo SEM POPUP
   location.href = `app.html?l=${lojaId}`;
 }
 </script>
