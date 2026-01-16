@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export default async function handler(req, res) {
 
-  // 🔓 CORS
+  /* ================= CORS ================= */
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -22,6 +22,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    /* ================= PAYLOAD ================= */
     const body =
       typeof req.body === "string"
         ? JSON.parse(req.body)
@@ -43,31 +44,50 @@ export default async function handler(req, res) {
       cliente_id
     } = body;
 
-    // 🔎 Validação mínima
-    if (!loja_id || !servico_id || !data || !hora_inicio || !hora_fim) {
+    /* ================= VALIDAÇÃO ================= */
+    if (
+      !loja_id ||
+      !servico_id ||
+      !data ||
+      !hora_inicio ||
+      !hora_fim ||
+      !cliente_nome ||
+      !cliente_whatsapp
+    ) {
       return res.status(400).json({
         error: "Dados obrigatórios ausentes"
       });
     }
 
-    // 1️⃣ SALVA AGENDAMENTO
+    /* ================= NORMALIZA VALOR ================= */
+    const valorFinal = Number(valor_servico);
+    if (isNaN(valorFinal)) {
+      return res.status(400).json({
+        error: "Valor do serviço inválido"
+      });
+    }
+
+    /* ================= INSERÇÃO ================= */
     const { error: insertError } = await supabase
       .from("agendamentos")
       .insert({
         user_id: loja_id,
         loja_id,
         servico_id,
-        valor_servico,
+        servico_nome,
+        valor_servico: valorFinal,
         data,
         hora_inicio,
         hora_fim,
         cliente_nome,
         cliente_whatsapp,
-        cliente_id
+        cliente_email: cliente_email || null,
+        cliente_id: cliente_id || null,
+        status: "CONFIRMADO"
       });
 
     if (insertError) {
-      console.error("❌ ERRO AO INSERIR AGENDAMENTO:", insertError);
+      console.error("❌ ERRO AO INSERIR:", insertError);
       return res.status(500).json({
         error: "Erro ao salvar agendamento",
         detail: insertError.message
@@ -76,7 +96,7 @@ export default async function handler(req, res) {
 
     console.log("✅ Agendamento salvo com sucesso");
 
-    // 2️⃣ BUSCA EMAIL DA LOJA (CORRETO)
+    /* ================= EMAIL DA LOJA ================= */
     const { data: loja, error: lojaError } = await supabase
       .from("user_profile")
       .select("email_contato, negocio")
@@ -87,11 +107,9 @@ export default async function handler(req, res) {
       console.warn("⚠️ Erro ao buscar loja:", lojaError.message);
     }
 
-    // 3️⃣ ENVIA EMAIL (SEM QUEBRAR A API)
+    /* ================= ENVIO DE EMAIL ================= */
     if (loja?.email_contato) {
       try {
-        console.log("📧 Enviando email para:", loja.email_contato);
-
         await enviarEmail({
           to: loja.email_contato,
           subject: "📅 Novo agendamento realizado",
@@ -101,28 +119,27 @@ export default async function handler(req, res) {
             <p><strong>Cliente:</strong> ${cliente_nome}</p>
             <p><strong>WhatsApp:</strong> ${cliente_whatsapp}</p>
             <p><strong>Serviço:</strong> ${servico_nome}</p>
+            <p><strong>Valor:</strong> R$ ${valorFinal.toFixed(2)}</p>
             <p><strong>Data:</strong> ${data}</p>
             <p><strong>Horário:</strong> ${hora_inicio} - ${hora_fim}</p>
           `
         });
 
-        console.log("✅ Email enviado com sucesso");
+        console.log("📧 Email enviado com sucesso");
 
       } catch (emailError) {
-        console.error("❌ ERRO AO ENVIAR EMAIL:", emailError);
-        // ⚠️ NÃO quebra a API
+        console.warn("⚠️ Falha ao enviar email:", emailError.message);
       }
-    } else {
-      console.warn("⚠️ Loja não possui email_contato cadastrado");
     }
 
+    /* ================= RESPOSTA ================= */
     return res.status(200).json({
       success: true,
       message: "Agendamento criado com sucesso"
     });
 
   } catch (err) {
-    console.error("🔥 ERRO GERAL NA API:", err);
+    console.error("🔥 ERRO GERAL:", err);
     return res.status(500).json({
       error: "Erro interno no servidor",
       detail: err.message
