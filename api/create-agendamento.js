@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import { enviarEmail } from "../lib/email.js";
-import { firebaseAdmin } from "../lib/firebaseAdmin.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -8,7 +7,8 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-  /* ================= CORS ================= */
+
+  // 🔓 CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -22,9 +22,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = typeof req.body === "string"
-      ? JSON.parse(req.body)
-      : req.body;
+    const body =
+      typeof req.body === "string"
+        ? JSON.parse(req.body)
+        : req.body;
 
     console.log("📩 PAYLOAD RECEBIDO:", body);
 
@@ -42,96 +43,77 @@ export default async function handler(req, res) {
       cliente_id
     } = body;
 
-    /* ================= VALIDAÇÃO ================= */
-    if (
-      !loja_id ||
-      !servico_id ||
-      !data ||
-      !hora_inicio ||
-      !hora_fim ||
-      !cliente_nome ||
-      !cliente_whatsapp
-    ) {
-      return res.status(400).json({ error: "Dados obrigatórios ausentes" });
+    // 🔎 Validação mínima
+    if (!loja_id || !servico_id || !data || !hora_inicio || !hora_fim) {
+      return res.status(400).json({
+        error: "Dados obrigatórios ausentes"
+      });
     }
 
-    const valorFinal = Number(valor_servico) || 0;
-
-    /* ================= SALVA AGENDAMENTO ================= */
-    const { error } = await supabase
+    // 1️⃣ SALVA AGENDAMENTO
+    const { error: insertError } = await supabase
       .from("agendamentos")
       .insert({
         user_id: loja_id,
         loja_id,
         servico_id,
-        servico_nome,
-        valor_servico: valorFinal,
+        valor_servico,
         data,
         hora_inicio,
         hora_fim,
         cliente_nome,
         cliente_whatsapp,
-        cliente_email: cliente_email || null,
-        cliente_id: cliente_id || null,
-        status: "CONFIRMADO"
+        cliente_id
       });
 
-    if (error) {
-      console.error("❌ ERRO AO SALVAR:", error);
-      return res.status(500).json({ error: "Erro ao salvar agendamento" });
+    if (insertError) {
+      console.error("❌ ERRO AO INSERIR AGENDAMENTO:", insertError);
+      return res.status(500).json({
+        error: "Erro ao salvar agendamento",
+        detail: insertError.message
+      });
     }
 
-    /* ================= EMAIL ================= */
-    const { data: loja } = await supabase
+    console.log("✅ Agendamento salvo com sucesso");
+
+    // 2️⃣ BUSCA EMAIL DA LOJA (CORRETO)
+    const { data: loja, error: lojaError } = await supabase
       .from("user_profile")
       .select("email_contato, negocio")
       .eq("user_id", loja_id)
       .single();
 
-    if (loja?.email_contato) {
-      try {
-        await enviarEmail({
-          to: loja.email_contato,
-          subject: "📅 Novo agendamento",
-          html: `
-            <p><strong>${cliente_nome}</strong> agendou:</p>
-            <p>${servico_nome}</p>
-            <p>${data} • ${hora_inicio} - ${hora_fim}</p>
-          `
-        });
-      } catch (e) {
-        console.warn("⚠️ Email falhou:", e.message);
-      }
+    if (lojaError) {
+      console.warn("⚠️ Erro ao buscar loja:", lojaError.message);
     }
 
-    /* ================= PUSH (NUNCA BLOQUEIA) ================= */
-    if (firebaseAdmin) {
+    // 3️⃣ ENVIA EMAIL (SEM QUEBRAR A API)
+    if (loja?.email_contato) {
       try {
-        const { data: tokens } = await supabase
-          .from("notificacoes_tokens")
-          .select("token")
-          .eq("user_id", loja_id);
+        console.log("📧 Enviando email para:", loja.email_contato);
 
-        if (tokens?.length) {
-          await firebaseAdmin.messaging().sendEach(
-            tokens.map(t => ({
-              token: t.token,
-              notification: {
-                title: "📅 Novo agendamento",
-                body: `${cliente_nome} • ${hora_inicio}`
-              },
-              data: {
-                tipo: "AGENDAMENTO",
-                loja_id
-              }
-            }))
-          );
+        await enviarEmail({
+          to: loja.email_contato,
+          subject: "📅 Novo agendamento realizado",
+          html: `
+            <h2>Novo agendamento</h2>
+            <p><strong>Negócio:</strong> ${loja.negocio}</p>
+            <p><strong>Cliente:</strong> ${cliente_nome}</p>
+            <p><strong>WhatsApp:</strong> ${cliente_whatsapp}</p>
+            <p><strong>Serviço:</strong> ${servico_nome}</p>
+            <p><strong>Data:</strong> ${data}</p>
+            <p><strong>Horário:</strong> ${hora_inicio} - ${hora_fim}</p>
+          `
+        });
 
-          console.log("🔔 Push enviado");
-        }
-      } catch (e) {
-        console.error("⚠️ Push falhou (ignorado):", e.message);
+        console.log("✅ Email enviado com sucesso");
+
+      } catch (emailError) {
+        console.error("❌ ERRO AO ENVIAR EMAIL:", emailError);
+        // ⚠️ NÃO quebra a API
       }
+    } else {
+      console.warn("⚠️ Loja não possui email_contato cadastrado");
     }
 
     return res.status(200).json({
@@ -140,7 +122,10 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error("🔥 ERRO GERAL:", err);
-    return res.status(500).json({ error: "Erro interno" });
+    console.error("🔥 ERRO GERAL NA API:", err);
+    return res.status(500).json({
+      error: "Erro interno no servidor",
+      detail: err.message
+    });
   }
 }
