@@ -759,20 +759,27 @@ if (veioDoBotaoMais && !cliente) {
     return;
   }
 
-  if(!response.ok){
-    const erro = await response.text();
-    console.error("❌ ERRO API:", erro);
-    alert("❌ Erro ao salvar agendamento");
-    return;
-  }
+if(!response.ok){
+  const erro = await response.text();
+  console.error("❌ ERRO API:", erro);
+  alert("❌ Erro ao salvar agendamento");
+  return;
+}
 
-  // ✅ SUCESSO
-  document.body.insertAdjacentHTML("beforeend", `
-    <div class="overlay" id="overlayConfirm">
-      <div class="msg-final">
-        ✅ <strong>
-          ${alterarId ? "Agendamento atualizado!" : "Agendamento confirmado!"}
-        </strong><br><br>
+// ✅ SUCESSO
+
+// 🧹 limpa cliente temporário após agendar
+if (veioDoBotaoMais) {
+  localStorage.removeItem("CLIENTE_LOJA");
+}
+
+document.body.insertAdjacentHTML("beforeend", `
+  <div class="overlay" id="overlayConfirm">
+    <div class="msg-final">
+      ✅ <strong>
+        ${alterarId ? "Agendamento atualizado!" : "Agendamento confirmado!"}
+      </strong><br><br>
+
 
         Serviço: <b>${dados.servico_nome}</b><br>
         Data: <b>${dados.data}</b><br>
