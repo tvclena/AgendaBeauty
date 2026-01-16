@@ -251,6 +251,15 @@ body::-webkit-scrollbar{
 .card:active{
   transform:scale(0.97);
 }
+.main-content{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.list{
+  margin-bottom:0;
+}
 
 </style>
 </head>
@@ -263,47 +272,43 @@ body::-webkit-scrollbar{
     <h1>Bem-vindo ao <span>Agenda Fácil</span></h1>
   </div>
 
-  <!-- KPIs -->
-  <div class="grid">
-    <div class="card">
-      <small>Agendamentos do dia</small>
-      <h2 id="kpiHoje">0</h2>
-      <i class="ri-calendar-check-line"></i>
-    </div>
+<!-- KPIs -->
+<div class="grid">
 
-<div class="card" onclick="abrirClientes()">
-  <small>Clientes</small>
-  <h2 id="kpiClientes">0</h2>
-  <i class="ri-user-3-line"></i>
-</div>
-
-
-<div class="card" onclick="abrirFaturamentoMes()">
-  <small>Faturamento mês</small>
-  <h2 id="kpiFaturamento">R$ 0</h2>
-  <i class="ri-currency-line"></i>
-</div>
-
-
-<div class="card" onclick="abrirServicos()">
-  <small>Serviços ativos</small>
-  <h2 id="kpiServicos">0</h2>
-  <i class="ri-scissors-line"></i>
-</div>
-
-
-<!-- CONTEÚDO PRINCIPAL (1 coluna) -->
-<div style="display:flex;flex-direction:column;gap:16px">
-
-  <!-- AGENDA -->
-  <div class="list">
-    <h3 id="tituloAgenda"></h3>
-    <div id="agendaHoje">
-      <div class="empty">Nenhum horário agendado hoje</div>
-    </div>
+  <div class="card">
+    <small>Agendamentos do dia</small>
+    <h2 id="kpiHoje">0</h2>
+    <i class="ri-calendar-check-line"></i>
   </div>
 
-  <!-- AVISOS -->
+  <div class="card" onclick="abrirClientes()">
+    <small>Clientes</small>
+    <h2 id="kpiClientes">0</h2>
+    <i class="ri-user-3-line"></i>
+  </div>
+
+  <div class="card" onclick="abrirFaturamentoMes()">
+    <small>Faturamento mês</small>
+    <h2 id="kpiFaturamento">R$ 0</h2>
+    <i class="ri-currency-line"></i>
+  </div>
+
+  <div class="card" onclick="abrirServicos()">
+    <small>Serviços ativos</small>
+    <h2 id="kpiServicos">0</h2>
+    <i class="ri-scissors-line"></i>
+  </div>
+
+</div> <!-- ✅ FECHAMENTO CORRETO -->
+
+
+<div class="main-content">
+
+  <div class="list">
+    <h3 id="tituloAgenda"></h3>
+    <div id="agendaHoje"></div>
+  </div>
+
   <div class="list">
     <h3>Avisos</h3>
 
