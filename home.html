@@ -714,7 +714,34 @@ function abrirServicos(){
 function fecharServicos(){
   document.getElementById("servicosModal").style.display = "none";
 }
+function abrirNovoAgendamento(){
 
+  sbHome.auth.getSession().then(({data:{session}})=>{
+    if(!session) return;
+
+    const lojaId = session.user.id;
+
+    const iframe = document.getElementById("iframeAgendar");
+
+    // 🔥 abre o agendar reutilizando tudo que já existe
+    iframe.src = `agendar.html?l=${lojaId}`;
+
+    document.getElementById("novoAgendamentoModal").style.display = "flex";
+  });
+}
+
+function fecharNovoAgendamento(){
+  const modal = document.getElementById("novoAgendamentoModal");
+  const iframe = document.getElementById("iframeAgendar");
+
+  iframe.src = ""; // limpa
+  modal.style.display = "none";
+
+  // 🔄 atualiza agenda do dia automaticamente
+  sbHome.auth.getSession().then(({data:{session}})=>{
+    if(session) carregarAgendaDia(session.user.id);
+  });
+}
 </script>
 
 <!-- MODAL CLIENTES -->
@@ -889,6 +916,13 @@ function fecharServicos(){
 
   </div>
 </div>
+<script>
+window.addEventListener("message", function(event) {
+  if (event.data === "AGENDAMENTO_OK") {
+    fecharNovoAgendamento();
+  }
+});
+</script>
 
 </body>
 </html>
