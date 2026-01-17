@@ -14,7 +14,6 @@
 
 <title>Meus Agendamentos</title>
 
-<!-- VIEWPORT (ZOOM BLOQUEADO TOTAL) -->
 <meta name="viewport"
   content="width=device-width,
   initial-scale=1,
@@ -24,16 +23,13 @@
 
 <meta name="theme-color" content="#ffffff">
 
-<!-- THEMA LOAD -->
 <script>
 (function(){
   const params = new URLSearchParams(location.search);
   const lojaId = params.get("l");
   if(!lojaId) return;
-
   const tema = localStorage.getItem("loja_tema_" + lojaId);
   if(!tema) return;
-
   try{
     const cfg = JSON.parse(tema);
     const root = document.documentElement;
@@ -44,17 +40,11 @@
 })();
 </script>
 
-<!-- FONTS & ICONS -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* =========================================================
-   ROOT / RESET
-========================================================= */
 :root{
   --primary:#ff6a00;
   --primary-2:#ff9a57;
@@ -67,199 +57,29 @@
   --radius:22px;
   --shadow:0 18px 45px rgba(0,0,0,.08);
 }
-
-*{
-  box-sizing:border-box;
-  font-family:'Inter', sans-serif;
-  -webkit-tap-highlight-color:transparent;
-}
-
-html, body{
-  margin:0;
-  padding:0;
-  overscroll-behavior: none;
-  touch-action: manipulation;
-}
-
-body{
-  background:var(--bg);
-  color:var(--text);
-  padding:16px 16px 28px;
-}
-
-/* =========================================================
-   HEADER
-========================================================= */
-.header{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  font-size:20px;
-  font-weight:900;
-  margin-bottom:18px;
-}
-
-.header i{
-  font-size:26px;
-  color:var(--primary);
-}
-
-/* =========================================================
-   CARD
-========================================================= */
-.card{
-  background:var(--card);
-  border-radius:var(--radius);
-  padding:18px;
-  box-shadow:var(--shadow);
-  margin-bottom:16px;
-  animation:fadeIn .35s ease;
-}
-
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(6px)}
-  to{opacity:1;transform:none}
-}
-
-.card-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:12px;
-}
-
-.title{
-  font-size:17px;
-  font-weight:900;
-  line-height:1.2;
-}
-
-.badge{
-  background:rgba(255,106,0,.15);
-  color:var(--primary);
-  padding:6px 14px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:800;
-  white-space:nowrap;
-}
-
-.info{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:10px;
-}
-
-.time{
-  font-size:15px;
-  font-weight:800;
-  margin-top:4px;
-}
-
-/* =========================================================
-   ACTIONS
-========================================================= */
-.actions{
-  display:flex;
-  gap:12px;
-  margin-top:16px;
-}
-
-button{
-  flex:1;
-  padding:14px 0;
-  border-radius:999px;
-  border:none;
-  font-weight:900;
-  font-size:14px;
-  cursor:pointer;
-  transition:.2s;
-}
-
-button:active{
-  transform:scale(.97);
-}
-
-.btn-outline{
-  background:#fff;
-  border:1px solid var(--border);
-}
-
-.btn-danger{
-  background:#fee2e2;
-  color:var(--danger);
-}
-
-button:disabled{
-  opacity:.45;
-  cursor:not-allowed;
-  transform:none;
-}
-
-/* =========================================================
-   LOCK INFO
-========================================================= */
-.lock{
-  margin-top:12px;
-  font-size:12px;
-  font-weight:800;
-  color:var(--danger);
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-
-/* =========================================================
-   EMPTY STATE
-========================================================= */
-.empty{
-  background:var(--card);
-  border-radius:var(--radius);
-  padding:28px 20px;
-  text-align:center;
-  color:var(--muted);
-  font-size:14px;
-  box-shadow:var(--shadow);
-}
-
-/* =========================================================
-   SAFE AREA
-========================================================= */
-@supports(padding:max(0px)){
-  body{
-    padding-bottom:calc(28px + env(safe-area-inset-bottom));
-  }
-}
-/* =========================================================
-   LOJA NO CARD
-========================================================= */
-.loja{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:12px;
-}
-
-.loja img{
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  object-fit:cover;
-  border:1px solid var(--border);
-}
-
-.loja-nome{
-  font-size:13px;
-  font-weight:800;
-  color:var(--muted);
-}
-.loja-placeholder{
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  background:var(--border);
-}
-
+*{box-sizing:border-box;font-family:Inter;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);padding:16px 16px 28px}
+.header{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:900;margin-bottom:18px}
+.header i{font-size:26px;color:var(--primary)}
+.card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.title{font-size:17px;font-weight:900}
+.badge{background:rgba(255,106,0,.15);color:var(--primary);padding:6px 14px;border-radius:999px;font-size:12px;font-weight:800}
+.info{font-size:12px;color:var(--muted);margin-top:10px}
+.time{font-size:15px;font-weight:800;margin-top:4px}
+.actions{display:flex;gap:12px;margin-top:16px}
+button{flex:1;padding:14px 0;border-radius:999px;border:none;font-weight:900;font-size:14px;cursor:pointer}
+.btn-outline{background:#fff;border:1px solid var(--border)}
+.btn-danger{background:#fee2e2;color:var(--danger)}
+.lock{margin-top:12px;font-size:12px;font-weight:800;color:var(--danger);display:flex;align-items:center;gap:6px}
+.empty{background:var(--card);border-radius:var(--radius);padding:28px 20px;text-align:center;color:var(--muted);font-size:14px;box-shadow:var(--shadow)}
+.loja{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.loja img{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid var(--border)}
+.loja-placeholder{width:34px;height:34px;border-radius:50%;background:var(--border)}
+.loja-nome{font-size:13px;font-weight:800;color:var(--muted)}
+.servico-item{font-size:13px;font-weight:700;margin-top:4px}
+.whats{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:#16a34a;text-decoration:none;margin-top:8px}
 </style>
 </head>
 
@@ -273,47 +93,31 @@ button:disabled{
 <div id="lista"></div>
 
 <script>
-/* =========================================================
-   SUPABASE
-========================================================= */
 const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
-
 const lista = document.getElementById("lista");
 
-/* =========================================================
-   UTILS
-========================================================= */
-function dateLocal(dataISO){
-  const [y,m,d] = dataISO.split("-");
-  return new Date(y, m-1, d);
+function dateLocal(d){
+  const [y,m,da]=d.split("-");
+  return new Date(y,m-1,da);
 }
-
-function minutosAte(data, hora){
-  const [h,m] = hora.split(":").map(Number);
-  const d = dateLocal(data);
+function minutosAte(data,hora){
+  const [h,m]=hora.split(":").map(Number);
+  const d=dateLocal(data);
   d.setHours(h,m,0,0);
-  return Math.floor((d - new Date()) / 60000);
+  return Math.floor((d-new Date())/60000);
 }
 
-/* =========================================================
-   LOAD
-========================================================= */
 async function carregar(){
-
   const { data:auth } = await sb.auth.getUser();
-
   if(!auth?.user){
-    lista.innerHTML = `
-      <div class="empty">
-        Faça login para visualizar seus agendamentos
-      </div>`;
+    lista.innerHTML=`<div class="empty">Faça login para visualizar seus agendamentos</div>`;
     return;
   }
 
-  const { data: ags } = await sb
+  const { data:ags } = await sb
     .from("agendamentos")
     .select(`
       id,
@@ -324,80 +128,80 @@ async function carregar(){
       loja_id,
       servicos,
       valor_total,
-      duracao_total
+      duracao_total,
+      cliente_nome,
+      cliente_whatsapp
     `)
     .eq("cliente_id", auth.user.id)
-    .eq("status","CONFIRMADO")
+    .in("status",["CONFIRMADO","CONCLUIDO"])
     .order("data");
 
   if(!ags || !ags.length){
-    lista.innerHTML = `
-      <div class="empty">
-        Nenhum agendamento encontrado<br><br>
-        <small>Agende um serviço pela loja</small>
-      </div>`;
+    lista.innerHTML=`<div class="empty">Nenhum agendamento encontrado</div>`;
     return;
   }
 
-  /* ===== MAPA DE LOJAS ===== */
-  const lojasIds = [...new Set(ags.map(a => a.loja_id).filter(Boolean))];
-  let mapaLojas = {};
-
-  if (lojasIds.length) {
-    const { data: lojas } = await sb
+  const lojasIds=[...new Set(ags.map(a=>a.loja_id))];
+  let mapaLojas={};
+  if(lojasIds.length){
+    const { data:lojas } = await sb
       .from("user_profile")
       .select("user_id,negocio,avatar_url")
-      .in("user_id", lojasIds);
-
-    lojas?.forEach(l => {
-      mapaLojas[l.user_id] = {
-        nome: l.negocio,
-        logo_url: l.avatar_url
-      };
+      .in("user_id",lojasIds);
+    lojas?.forEach(l=>{
+      mapaLojas[l.user_id]={nome:l.negocio,logo:l.avatar_url};
     });
   }
 
-  /* ===== RENDER ===== */
   lista.innerHTML = ags.map(a=>{
-    const mins = minutosAte(a.data, a.hora_inicio);
-    const bloqueado = mins < 40 && mins >= 0;
-
-    const nomesServicos = Array.isArray(a.servicos)
-      ? a.servicos.map(s => s.nome).join(", ")
-      : "Serviço";
+    const mins=minutosAte(a.data,a.hora_inicio);
+    const bloqueado=mins<40 && mins>=0;
+    const loja=mapaLojas[a.loja_id]||{};
+    const servicosHtml = Array.isArray(a.servicos)
+      ? a.servicos.map(s=>`
+          <div class="servico-item">
+            • ${s.nome} — ${Number(s.preco||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+          </div>
+        `).join("")
+      : `<div class="servico-item">Serviço</div>`;
 
     return `
       <div class="card">
 
         <div class="loja">
-          ${mapaLojas[a.loja_id]?.logo_url
-            ? `<img src="${mapaLojas[a.loja_id].logo_url}">`
-            : `<div class="loja-placeholder"></div>`}
-          <div class="loja-nome">
-            ${mapaLojas[a.loja_id]?.nome || "Loja"}
-          </div>
+          ${loja.logo ? `<img src="${loja.logo}">` : `<div class="loja-placeholder"></div>`}
+          <div class="loja-nome">${loja.nome || "Loja"}</div>
         </div>
 
         <div class="card-top">
-          <div class="title">${nomesServicos}</div>
+          <div class="title">Serviços</div>
           <div class="badge">${dateLocal(a.data).toLocaleDateString()}</div>
         </div>
+
+        ${servicosHtml}
 
         <div class="info">Horário</div>
         <div class="time">${a.hora_inicio} – ${a.hora_fim}</div>
 
+        <div class="info">Cliente</div>
+        <div class="time">${a.cliente_nome || "Cliente"}</div>
+
+        ${a.cliente_whatsapp ? `
+          <a class="whats" href="https://wa.me/55${a.cliente_whatsapp.replace(/\D/g,"")}" target="_blank">
+            <i class="ri-whatsapp-fill"></i> WhatsApp
+          </a>` : ``}
+
         <div class="info">Valor total</div>
-        <div class="time">R$ ${Number(a.valor_total || 0).toFixed(2)}</div>
+        <div class="time">
+          ${Number(a.valor_total||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+        </div>
 
         <div class="actions">
-          <button class="btn-outline"
-            ${bloqueado ? "disabled" : ""}
+          <button class="btn-outline" ${bloqueado?"disabled":""}
             onclick="alterar('${a.id}','${a.loja_id}')">
             Alterar
           </button>
-
-          <button class="btn-danger"
-            ${bloqueado ? "disabled" : ""}
+          <button class="btn-danger" ${bloqueado?"disabled":""}
             onclick="cancelar('${a.id}','${a.loja_id}')">
             Cancelar
           </button>
@@ -407,51 +211,32 @@ async function carregar(){
           <div class="lock">
             <i class="ri-lock-fill"></i>
             Alterações permitidas até 40 minutos antes
-          </div>` : ""}
+          </div>` : ``}
       </div>
     `;
   }).join("");
 }
 
-/* =========================================================
-   ACTIONS
-========================================================= */
-function alterar(id, loja){
-  location.href = `agendar.html?l=${loja}&alterar=${id}`;
+function alterar(id,loja){
+  location.href=`agendar.html?l=${loja}&alterar=${id}`;
 }
-
-async function cancelar(id, loja){
+async function cancelar(id,loja){
   if(!confirm("Deseja cancelar este agendamento?")) return;
-
-  try{
-    const res = await fetch("/api/update-agendamento", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        agendamento_id:id,
-        loja_id:loja,
-        novo_status:"CANCELADO",
-        motivo:"CANCELAMENTO_CLIENTE"
-      })
-    });
-
-    if(!res.ok){
-      alert("Erro ao cancelar agendamento");
-      return;
-    }
-
-    carregar();
-  }catch(err){
-    alert("Falha de conexão com o servidor");
-  }
+  await fetch("/api/update-agendamento",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      agendamento_id:id,
+      loja_id:loja,
+      novo_status:"CANCELADO",
+      motivo:"CANCELAMENTO_CLIENTE"
+    })
+  });
+  carregar();
 }
 
-/* =========================================================
-   INIT
-========================================================= */
 carregar();
 </script>
-
 
 </body>
 </html>
