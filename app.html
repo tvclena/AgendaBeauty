@@ -493,6 +493,34 @@ async function trocarLoja(lojaId){
 }
 
 
+
+
+function sincronizarClienteLoja() {
+  if (!perfil || !user) {
+    console.warn("Perfil ou usuário ainda não carregado");
+    return;
+  }
+
+  const clienteLoja = {
+    id: user.id,
+    nome: perfil.nome || "",
+    whatsapp: perfil.whatsapp || "",
+    cep: perfil.cep || "",
+    rua: perfil.rua || "",
+    numero: perfil.numero || "",
+    cidade: perfil.cidade || "",
+    uf: perfil.uf || ""
+  };
+
+  localStorage.setItem("CLIENTE_LOJA", JSON.stringify(clienteLoja));
+}
+
+
+
+
+
+
+  
 function go(el,p){
   document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
   el.classList.add("active");
@@ -680,22 +708,7 @@ onMessage(messaging, payload => {
   alert(payload.notification.title + "\n" + payload.notification.body);
 });
 
-function sincronizarClienteLoja() {
-  if (!perfil || !user) return;
 
-  const clienteLoja = {
-    id: user.id,
-    nome: perfil.nome || "",
-    whatsapp: perfil.whatsapp || "",
-    cep: perfil.cep || "",
-    rua: perfil.rua || "",
-    numero: perfil.numero || "",
-    cidade: perfil.cidade || "",
-    uf: perfil.uf || ""
-  };
-
-  localStorage.setItem("CLIENTE_LOJA", JSON.stringify(clienteLoja));
-}
 </script>
 
 
