@@ -134,16 +134,62 @@ async function carregar(){
     });
   }
 
+
+// ================= MAPA DE SERVIÇOS =================
+const servicosIds = [
+  ...new Set(
+    ags.flatMap(a =>
+      Array.isArray(a.servicos)
+        ? a.servicos.map(s => s.servico_id)
+        : []
+    )
+  )
+];
+
+let mapaServicos = {};
+
+if (servicosIds.length) {
+  const { data: servs } = await sb
+    .from("produtos_servicos")
+    .select("id,nome,imagem_url")
+    .in("id", servicosIds);
+
+  servs?.forEach(s => {
+    mapaServicos[s.id] = {
+      nome: s.nome,
+      imagem: s.imagem_url
+    };
+  });
+}
+
+
+  
   lista.innerHTML = ags.map(a=>{
     const mins=minutosAte(a.data,a.hora_inicio);
     const bloqueado=mins<40 && mins>=0;
 
     const loja = mapaLojas[a.loja_id] || {};
-    const servicos = Array.isArray(a.servicos)
-      ? a.servicos.map(s=>`
-          <div class="servico">• ${s.nome}</div>
-        `).join("")
-      : `<div class="servico">Serviço</div>`;
+
+    
+const servicosHtml = Array.isArray(a.servicos)
+  ? a.servicos.map(s => {
+      const srv = mapaServicos[s.servico_id] || {};
+      return `
+        <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+          ${
+            srv.imagem
+              ? `<img src="${srv.imagem}"
+                   style="width:36px;height:36px;border-radius:8px;
+                          object-fit:cover;border:1px solid #e5e7eb">`
+              : `<div style="width:36px;height:36px;
+                            border-radius:8px;background:#e5e7eb"></div>`
+          }
+          <div class="servico">${srv.nome || "Serviço"}</div>
+        </div>
+      `;
+    }).join("")
+  : `<div class="servico">Serviço</div>`;
+
 
     return `
       <div class="card">
@@ -158,7 +204,7 @@ async function carregar(){
           <div class="badge">${dateLocal(a.data).toLocaleDateString()}</div>
         </div>
 
-        ${servicos}
+      ${servicosHtml}
 
         <div class="info">Horário</div>
         <div class="time">${a.hora_inicio} – ${a.hora_fim}</div>
