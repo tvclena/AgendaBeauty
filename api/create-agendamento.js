@@ -29,11 +29,12 @@ export default async function handler(req, res) {
 
     console.log("📩 PAYLOAD RECEBIDO:", body);
 
+    /* ================= EXTRAI DADOS ================= */
     const {
       loja_id,
-      servico_id,
-      servico_nome,
-      valor_servico,
+      servicos,
+      valor_total,
+      duracao_total,
       data,
       hora_inicio,
       hora_fim,
@@ -43,27 +44,41 @@ export default async function handler(req, res) {
       cliente_id
     } = body;
 
-    // 🔎 Validação mínima
-    if (!loja_id || !servico_id || !data || !hora_inicio || !hora_fim) {
+    /* ================= VALIDAÇÃO ================= */
+    if (
+      !loja_id ||
+      !Array.isArray(servicos) ||
+      servicos.length === 0 ||
+      !data ||
+      !hora_inicio ||
+      !hora_fim ||
+      !cliente_nome ||
+      !cliente_whatsapp
+    ) {
       return res.status(400).json({
-        error: "Dados obrigatórios ausentes"
+        error: "Dados obrigatórios ausentes ou inválidos"
       });
     }
 
-    // 1️⃣ SALVA AGENDAMENTO
+    /* ================= SALVA AGENDAMENTO ================= */
     const { error: insertError } = await supabase
       .from("agendamentos")
       .insert({
         user_id: loja_id,
         loja_id,
-        servico_id,
-        valor_servico,
+
+        servicos,          // jsonb
+        valor_total,
+        duracao_total,
+
         data,
         hora_inicio,
         hora_fim,
+
         cliente_nome,
         cliente_whatsapp,
-        cliente_id
+        cliente_email: cliente_email || null,
+        cliente_id: cliente_id || null
       });
 
     if (insertError) {
@@ -76,21 +91,17 @@ export default async function handler(req, res) {
 
     console.log("✅ Agendamento salvo com sucesso");
 
-    // 2️⃣ BUSCA EMAIL DA LOJA (CORRETO)
-    const { data: loja, error: lojaError } = await supabase
+    /* ================= BUSCA EMAIL DA LOJA ================= */
+    const { data: loja } = await supabase
       .from("user_profile")
       .select("email_contato, negocio")
       .eq("user_id", loja_id)
       .single();
 
-    if (lojaError) {
-      console.warn("⚠️ Erro ao buscar loja:", lojaError.message);
-    }
-
-    // 3️⃣ ENVIA EMAIL (SEM QUEBRAR A API)
+    /* ================= ENVIA EMAIL ================= */
     if (loja?.email_contato) {
       try {
-        console.log("📧 Enviando email para:", loja.email_contato);
+        const listaServicos = servicos.map(s => s.nome).join(", ");
 
         await enviarEmail({
           to: loja.email_contato,
@@ -100,7 +111,11 @@ export default async function handler(req, res) {
             <p><strong>Negócio:</strong> ${loja.negocio}</p>
             <p><strong>Cliente:</strong> ${cliente_nome}</p>
             <p><strong>WhatsApp:</strong> ${cliente_whatsapp}</p>
-            <p><strong>Serviço:</strong> ${servico_nome}</p>
+
+            <p><strong>Serviços:</strong> ${listaServicos}</p>
+            <p><strong>Valor total:</strong> R$ ${valor_total}</p>
+            <p><strong>Duração:</strong> ${duracao_total} min</p>
+
             <p><strong>Data:</strong> ${data}</p>
             <p><strong>Horário:</strong> ${hora_inicio} - ${hora_fim}</p>
           `
@@ -110,10 +125,7 @@ export default async function handler(req, res) {
 
       } catch (emailError) {
         console.error("❌ ERRO AO ENVIAR EMAIL:", emailError);
-        // ⚠️ NÃO quebra a API
       }
-    } else {
-      console.warn("⚠️ Loja não possui email_contato cadastrado");
     }
 
     return res.status(200).json({
