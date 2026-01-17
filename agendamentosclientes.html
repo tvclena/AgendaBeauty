@@ -2,6 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+
+<!-- ANALYTICS -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-T97MS35TJ6"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -9,10 +11,20 @@
   gtag('js', new Date());
   gtag('config', 'G-T97MS35TJ6');
 </script>
-<title>Meus Agendamentos</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-<!-- ===== THEMA LOAD (ANTES DE TUDO) ===== -->
+<title>Meus Agendamentos</title>
+
+<!-- VIEWPORT (ZOOM BLOQUEADO TOTAL) -->
+<meta name="viewport"
+  content="width=device-width,
+  initial-scale=1,
+  maximum-scale=1,
+  user-scalable=no,
+  viewport-fit=cover">
+
+<meta name="theme-color" content="#ffffff">
+
+<!-- THEMA LOAD -->
 <script>
 (function(){
   const params = new URLSearchParams(location.search);
@@ -32,54 +44,94 @@
 })();
 </script>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- FONTS & ICONS -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+/* =========================================================
+   ROOT / RESET
+========================================================= */
 :root{
-  --primary: var(--primary, #ff6a00);
-  --primary-2: var(--primary-2, #ff9a57);
+  --primary:#ff6a00;
+  --primary-2:#ff9a57;
   --bg:#f4f6fb;
   --card:#ffffff;
   --border:#e5e7eb;
-  --text: var(--text, #111827);
+  --text:#111827;
   --muted:#6b7280;
   --danger:#ef4444;
+  --radius:22px;
+  --shadow:0 18px 45px rgba(0,0,0,.08);
 }
 
-*{box-sizing:border-box;font-family:Inter}
-body{
+*{
+  box-sizing:border-box;
+  font-family:'Inter', sans-serif;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html, body{
   margin:0;
-  background:var(--bg);
-  padding:16px;
-  color:var(--text);
+  padding:0;
+  overscroll-behavior: none;
+  touch-action: manipulation;
 }
 
-/* HEADER */
+body{
+  background:var(--bg);
+  color:var(--text);
+  padding:16px 16px 28px;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
 .header{
   display:flex;
   align-items:center;
   gap:12px;
-  font-size:18px;
+  font-size:20px;
   font-weight:900;
-  margin-bottom:16px;
+  margin-bottom:18px;
 }
 
-/* CARD */
+.header i{
+  font-size:26px;
+  color:var(--primary);
+}
+
+/* =========================================================
+   CARD
+========================================================= */
 .card{
   background:var(--card);
-  border-radius:22px;
-  padding:16px;
-  box-shadow:0 12px 30px rgba(0,0,0,.08);
-  margin-bottom:14px;
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:var(--shadow);
+  margin-bottom:16px;
+  animation:fadeIn .35s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:none}
 }
 
 .card-top{
   display:flex;
   justify-content:space-between;
-  align-items:center;
-  gap:10px;
+  align-items:flex-start;
+  gap:12px;
+}
+
+.title{
+  font-size:17px;
+  font-weight:900;
+  line-height:1.2;
 }
 
 .badge{
@@ -89,37 +141,43 @@ body{
   border-radius:999px;
   font-size:12px;
   font-weight:800;
-}
-
-.title{
-  font-weight:900;
-  font-size:17px;
+  white-space:nowrap;
 }
 
 .info{
+  font-size:12px;
   color:var(--muted);
-  font-size:13px;
-  margin-top:6px;
+  margin-top:10px;
 }
 
 .time{
+  font-size:15px;
   font-weight:800;
-  margin-top:6px;
+  margin-top:4px;
 }
 
+/* =========================================================
+   ACTIONS
+========================================================= */
 .actions{
   display:flex;
-  gap:10px;
-  margin-top:14px;
+  gap:12px;
+  margin-top:16px;
 }
 
 button{
   flex:1;
-  padding:12px;
+  padding:14px 0;
   border-radius:999px;
   border:none;
   font-weight:900;
+  font-size:14px;
   cursor:pointer;
+  transition:.2s;
+}
+
+button:active{
+  transform:scale(.97);
 }
 
 .btn-outline{
@@ -135,22 +193,42 @@ button{
 button:disabled{
   opacity:.45;
   cursor:not-allowed;
+  transform:none;
 }
 
+/* =========================================================
+   LOCK INFO
+========================================================= */
 .lock{
-  margin-top:10px;
+  margin-top:12px;
   font-size:12px;
+  font-weight:800;
   color:var(--danger);
-  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:6px;
 }
 
-/* EMPTY */
+/* =========================================================
+   EMPTY STATE
+========================================================= */
 .empty{
   background:var(--card);
-  border-radius:22px;
-  padding:22px;
+  border-radius:var(--radius);
+  padding:28px 20px;
   text-align:center;
   color:var(--muted);
+  font-size:14px;
+  box-shadow:var(--shadow);
+}
+
+/* =========================================================
+   SAFE AREA
+========================================================= */
+@supports(padding:max(0px)){
+  body{
+    padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  }
 }
 </style>
 </head>
@@ -165,7 +243,9 @@ button:disabled{
 <div id="lista"></div>
 
 <script>
-/* ================= SUPABASE ================= */
+/* =========================================================
+   SUPABASE
+========================================================= */
 const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
@@ -174,7 +254,9 @@ const sb = supabase.createClient(
 const lojaId = new URLSearchParams(location.search).get("l");
 const lista = document.getElementById("lista");
 
-/* ================= UTILS ================= */
+/* =========================================================
+   UTILS
+========================================================= */
 function dateLocal(dataISO){
   const [y,m,d] = dataISO.split("-");
   return new Date(y, m-1, d);
@@ -187,10 +269,13 @@ function minutosAte(data, hora){
   return Math.floor((d - new Date()) / 60000);
 }
 
-/* ================= LOAD ================= */
+/* =========================================================
+   LOAD
+========================================================= */
 async function carregar(){
 
   const { data:auth } = await sb.auth.getUser();
+
   if(!auth?.user){
     lista.innerHTML = `
       <div class="empty">
@@ -210,7 +295,7 @@ async function carregar(){
   if(!ags || !ags.length){
     lista.innerHTML = `
       <div class="empty">
-        Nenhum agendamento encontrado<br>
+        Nenhum agendamento encontrado<br><br>
         <small>Agende um serviço pela loja</small>
       </div>`;
     return;
@@ -235,7 +320,7 @@ async function carregar(){
         </div>
 
         <div class="info">Horário</div>
-        <div class="time">${a.hora_inicio} - ${a.hora_fim}</div>
+        <div class="time">${a.hora_inicio} – ${a.hora_fim}</div>
 
         <div class="actions">
           <button class="btn-outline"
@@ -251,16 +336,19 @@ async function carregar(){
           </button>
         </div>
 
-        ${bloqueado
-          ? `<div class="lock">🔒 Alterações permitidas até 40 minutos antes</div>`
-          : ""
-        }
+        ${bloqueado ? `
+          <div class="lock">
+            <i class="ri-lock-fill"></i>
+            Alterações permitidas até 40 minutos antes
+          </div>` : ""}
       </div>
     `;
   }).join("");
 }
 
-/* ================= ACTIONS ================= */
+/* =========================================================
+   ACTIONS
+========================================================= */
 function alterar(id, servico){
   location.href =
     `agendar.html?l=${lojaId}&servico=${servico}&alterar=${id}`;
@@ -271,35 +359,32 @@ async function cancelar(id){
 
   try{
     const res = await fetch("/api/update-agendamento", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        agendamento_id: id,
-        loja_id: lojaId,
-        novo_status: "CANCELADO",
-        motivo: "CANCELAMENTO_CLIENTE"
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        agendamento_id:id,
+        loja_id:lojaId,
+        novo_status:"CANCELADO",
+        motivo:"CANCELAMENTO_CLIENTE"
       })
     });
 
-    const json = await res.json();
-
     if(!res.ok){
       alert("Erro ao cancelar agendamento");
-      console.error(json);
       return;
     }
 
     carregar();
   }catch(err){
     alert("Falha de conexão com o servidor");
-    console.error(err);
   }
 }
 
-/* ================= INIT ================= */
+/* =========================================================
+   INIT
+========================================================= */
 carregar();
 </script>
-
 
 </body>
 </html>
