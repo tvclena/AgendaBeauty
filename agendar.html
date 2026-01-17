@@ -95,6 +95,12 @@ html,body{margin:0;background:var(--bg)}
   box-shadow:0 18px 44px rgba(0,0,0,.14);
   cursor:pointer;
 }
+.service.selected{
+  box-shadow:
+    0 0 0 3px var(--primary),
+    0 18px 44px rgba(0,0,0,.14);
+}
+
 
 .service img{
   width:100%;
@@ -123,7 +129,15 @@ html,body{margin:0;background:var(--bg)}
   text-align:center;
   font-weight:800;
   cursor:pointer;
+  transition:.2s;
 }
+
+.item.selected{
+  box-shadow:0 0 0 3px var(--primary);
+  background:#fff7f0;
+}
+
+
 
 .item:hover{
   background:#fff3ea;
@@ -141,9 +155,8 @@ html,body{margin:0;background:var(--bg)}
   display: none;
 }
 
-.selected {
-  border: 2px solid var(--primary) !important;
-}
+
+
 
 .overlay {
   position: fixed;
@@ -547,7 +560,7 @@ async function selecionarDia(index){
   }
 
   document.getElementById("times").innerHTML = slots.map(h => `
-    <div class="item" onclick="confirmar('${h}')">${h}</div>
+<div class="item" onclick="selecionarHorario(this,'${h}')">${h}</div>
   `).join("");
 }
 
@@ -764,6 +777,18 @@ async function confirmar(h){
   `);
 }
 
+function selecionarHorario(el, h){
+
+  document.querySelectorAll("#times .item")
+    .forEach(i => i.classList.remove("selected"));
+
+  el.classList.add("selected");
+
+  dados.hora = h;
+
+  // pequena pausa para o usuário VER a seleção
+setTimeout(() => confirmar(h), 350);
+}
 
 
 
