@@ -327,13 +327,18 @@ const lojasIds = [...new Set(ags.map(a => a.loja_id).filter(Boolean))];
 let mapaLojas = {};
 
 if (lojasIds.length) {
-  const { data: lojas, error } = await sb
-    .from("lojas")
-    .select("id,nome,logo_url")
-    .in("id", lojasIds);
+const { data: lojas, error } = await sb
+  .from("user_profile")
+  .select("user_id,negocio,avatar_url")
+  .in("user_id", lojasIds);
 
   if (!error && Array.isArray(lojas)) {
-    lojas.forEach(l => mapaLojas[l.id] = l);
+lojas.forEach(l => {
+  mapaLojas[l.user_id] = {
+    nome: l.negocio,
+    logo_url: l.avatar_url
+  };
+});
   }
 }
 
