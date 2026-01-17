@@ -8,6 +8,7 @@ const supabase = createClient(
 
 export default async function handler(req, res) {
 
+  /* ================= CORS ================= */
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -29,19 +30,41 @@ export default async function handler(req, res) {
       agendamento_id,
       loja_id,
       novo_status,
-      motivo // ex: "CANCELAMENTO_CLIENTE", "ALTERACAO"
+
+      // ⬇️ campos opcionais (alteração completa)
+      data,
+      hora_inicio,
+      hora_fim,
+      servico_id,
+      servico_nome,
+      valor_servico,
+
+      motivo
     } = body;
 
+    /* ================= VALIDAÇÃO ================= */
     if (!agendamento_id || !loja_id || !novo_status) {
       return res.status(400).json({
         error: "Parâmetros obrigatórios ausentes"
       });
     }
 
-    // 1️⃣ Atualiza agendamento
+    /* ================= MONTA UPDATE ================= */
+    const updatePayload = {
+      status: novo_status
+    };
+
+    if (data) updatePayload.data = data;
+    if (hora_inicio) updatePayload.hora_inicio = hora_inicio;
+    if (hora_fim) updatePayload.hora_fim = hora_fim;
+    if (servico_id) updatePayload.servico_id = servico_id;
+    if (servico_nome) updatePayload.servico_nome = servico_nome;
+    if (valor_servico !== undefined) updatePayload.valor_servico = valor_servico;
+
+    /* ================= UPDATE AGENDAMENTO ================= */
     const { error: updateError } = await supabase
       .from("agendamentos")
-      .update({ status: novo_status })
+      .update(updatePayload)
       .eq("id", agendamento_id);
 
     if (updateError) {
@@ -49,27 +72,23 @@ export default async function handler(req, res) {
       throw updateError;
     }
 
-    console.log("✅ Agendamento atualizado");
+    console.log("✅ Agendamento atualizado com sucesso");
 
-    // 2️⃣ Busca dados do agendamento
-    const { data: ag, error: agError } = await supabase
+    /* ================= BUSCA AGENDAMENTO ================= */
+    const { data: ag } = await supabase
       .from("agendamentos")
       .select("data,hora_inicio,hora_fim,cliente_nome")
       .eq("id", agendamento_id)
       .single();
 
-    if (agError) {
-      console.warn("⚠️ Não foi possível buscar agendamento");
-    }
-
-    // 3️⃣ Busca email da loja
+    /* ================= BUSCA LOJA ================= */
     const { data: loja } = await supabase
       .from("user_profile")
       .select("email_contato, negocio")
       .eq("user_id", loja_id)
       .single();
 
-    // 4️⃣ Envia email
+    /* ================= EMAIL ================= */
     if (loja?.email_contato) {
       try {
         const titulo =
@@ -91,12 +110,13 @@ export default async function handler(req, res) {
           `
         });
 
-        console.log("📧 Email de atualização enviado");
+        console.log("📧 Email enviado com sucesso");
       } catch (mailErr) {
-        console.error("❌ ERRO EMAIL UPDATE:", mailErr);
+        console.error("❌ ERRO EMAIL:", mailErr);
       }
     }
 
+    /* ================= SUCESSO ================= */
     return res.status(200).json({
       success: true
     });
