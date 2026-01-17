@@ -313,36 +313,22 @@ async function carregar(){
     return;
   }
 
-const { data: ags } = await sb
-  .from("agendamentos")
-  .select("id,data,hora_inicio,hora_fim,servico_id,status,loja_id")
-  .eq("cliente_id", auth.user.id)
-  .eq("status","CONFIRMADO")
-  .order("data");
-
-
-  
-const lojasIds = [...new Set(ags.map(a => a.loja_id).filter(Boolean))];
-
-let mapaLojas = {};
-
-if (lojasIds.length) {
-const { data: lojas, error } = await sb
-  .from("user_profile")
-  .select("user_id,negocio,avatar_url")
-  .in("user_id", lojasIds);
-
-  if (!error && Array.isArray(lojas)) {
-lojas.forEach(l => {
-  mapaLojas[l.user_id] = {
-    nome: l.negocio,
-    logo_url: l.avatar_url
-  };
-});
-  }
-}
-
-
+  const { data: ags } = await sb
+    .from("agendamentos")
+    .select(`
+      id,
+      data,
+      hora_inicio,
+      hora_fim,
+      status,
+      loja_id,
+      servicos,
+      valor_total,
+      duracao_total
+    `)
+    .eq("cliente_id", auth.user.id)
+    .eq("status","CONFIRMADO")
+    .order("data");
 
   if(!ags || !ags.length){
     lista.innerHTML = `
@@ -353,51 +339,68 @@ lojas.forEach(l => {
     return;
   }
 
-  const { data: servs } = await sb
-    .from("produtos_servicos")
-    .select("id,nome");
+  /* ===== MAPA DE LOJAS ===== */
+  const lojasIds = [...new Set(ags.map(a => a.loja_id).filter(Boolean))];
+  let mapaLojas = {};
 
-  const mapa = {};
-  servs.forEach(s => mapa[s.id] = s.nome);
+  if (lojasIds.length) {
+    const { data: lojas } = await sb
+      .from("user_profile")
+      .select("user_id,negocio,avatar_url")
+      .in("user_id", lojasIds);
 
+    lojas?.forEach(l => {
+      mapaLojas[l.user_id] = {
+        nome: l.negocio,
+        logo_url: l.avatar_url
+      };
+    });
+  }
+
+  /* ===== RENDER ===== */
   lista.innerHTML = ags.map(a=>{
     const mins = minutosAte(a.data, a.hora_inicio);
     const bloqueado = mins < 40 && mins >= 0;
 
+    const nomesServicos = Array.isArray(a.servicos)
+      ? a.servicos.map(s => s.nome).join(", ")
+      : "Serviço";
+
     return `
       <div class="card">
-      <div class="loja">
-${mapaLojas[a.loja_id]?.logo_url
-  ? `<img src="${mapaLojas[a.loja_id].logo_url}">`
-  : `<div class="loja-placeholder"></div>`
-}
-  <div class="loja-nome">
-    ${mapaLojas[a.loja_id]?.nome || "Loja"}
-  </div>
-</div>
+
+        <div class="loja">
+          ${mapaLojas[a.loja_id]?.logo_url
+            ? `<img src="${mapaLojas[a.loja_id].logo_url}">`
+            : `<div class="loja-placeholder"></div>`}
+          <div class="loja-nome">
+            ${mapaLojas[a.loja_id]?.nome || "Loja"}
+          </div>
+        </div>
 
         <div class="card-top">
-          <div class="title">${mapa[a.servico_id] || "Serviço"}</div>
+          <div class="title">${nomesServicos}</div>
           <div class="badge">${dateLocal(a.data).toLocaleDateString()}</div>
         </div>
 
         <div class="info">Horário</div>
         <div class="time">${a.hora_inicio} – ${a.hora_fim}</div>
 
+        <div class="info">Valor total</div>
+        <div class="time">R$ ${Number(a.valor_total || 0).toFixed(2)}</div>
+
         <div class="actions">
-<button class="btn-outline"
-  ${bloqueado ? "disabled" : ""}
-  onclick="alterar('${a.id}','${a.servico_id}','${a.loja_id}')">
-  Alterar
-</button>
+          <button class="btn-outline"
+            ${bloqueado ? "disabled" : ""}
+            onclick="alterar('${a.id}','${a.loja_id}')">
+            Alterar
+          </button>
 
-
-<button class="btn-danger"
-  ${bloqueado ? "disabled" : ""}
-  onclick="cancelar('${a.id}','${a.loja_id}')">
-  Cancelar
-</button>
-
+          <button class="btn-danger"
+            ${bloqueado ? "disabled" : ""}
+            onclick="cancelar('${a.id}','${a.loja_id}')">
+            Cancelar
+          </button>
         </div>
 
         ${bloqueado ? `
@@ -413,9 +416,8 @@ ${mapaLojas[a.loja_id]?.logo_url
 /* =========================================================
    ACTIONS
 ========================================================= */
-function alterar(id, servico, loja){
-  location.href =
-    `agendar.html?l=${loja}&servico=${servico}&alterar=${id}`;
+function alterar(id, loja){
+  location.href = `agendar.html?l=${loja}&alterar=${id}`;
 }
 
 async function cancelar(id, loja){
@@ -449,6 +451,7 @@ async function cancelar(id, loja){
 ========================================================= */
 carregar();
 </script>
+
 
 </body>
 </html>
