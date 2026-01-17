@@ -203,6 +203,33 @@ border:5px solid var(--primary);
   min-width:70px;
 }
 
+.btn-ver-datas{
+  margin-top:14px;
+  width:100%;
+  padding:14px;
+  border-radius:16px;
+  border:none;
+
+  background: var(--primary);
+  color: var(--text);
+
+  font-weight:800;
+  cursor:pointer;
+  transition: opacity .2s ease, filter .2s ease;
+}
+
+/* quando desabilitado */
+.btn-ver-datas:disabled{
+  background: var(--border);
+  color: var(--muted);
+  cursor:not-allowed;
+  opacity:.7;
+}
+
+/* feedback visual */
+.btn-ver-datas:active{
+  filter: brightness(.95);
+}
 
 </style>
 </head>
@@ -223,19 +250,10 @@ border:5px solid var(--primary);
        style="display:flex;gap:10px;flex-wrap:wrap">
   </div>
 
-  <button onclick="confirmarServicos()" style="
-    margin-top:14px;
-    width:100%;
-    padding:14px;
-    border-radius:16px;
-    border:none;
-    background:var(--primary);
-    color:#fff;
-    font-weight:800;
-    cursor:pointer;
-  ">
-    Ver datas disponíveis
-  </button>
+<button class="btn-ver-datas" onclick="confirmarServicos()">
+  Ver datas disponíveis
+</button>
+
 </div>
 
 
