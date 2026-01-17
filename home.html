@@ -526,44 +526,6 @@ agenda.forEach(a => {
 });
 
 
-    const whatsapp = a.cliente_whatsapp
-      ? `https://wa.me/55${a.cliente_whatsapp.replace(/\D/g,"")}`
-      : "#";
-
-    box.innerHTML += `
-      <div class="agenda-item" style="display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center">
-
-        <img
-          src="${servico.imagem_url || 'https://via.placeholder.com/56'}"
-          style="width:56px;height:56px;border-radius:12px;object-fit:cover"
-        />
-
-        <div style="display:flex;flex-direction:column;gap:4px">
-          <strong>${hora} • ${servico.nome || 'Serviço'}</strong>
-          <small style="color:#16a34a;font-weight:700">${valor}</small>
-          <small>${a.cliente_nome}</small>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <a href="${whatsapp}" target="_blank"
-             style="font-size:11px;padding:6px 10px;border-radius:999px;
-                    background:#dcfce7;color:#166534;text-align:center">
-            Whats
-          </a>
-
-          <select
-            class="status-select ${a.status.toLowerCase()}"
-            onchange="alterarStatus('${a.id}', this.value)">
-            <option value="CONFIRMADO" ${a.status==="CONFIRMADO"?"selected":""}>CONFIRMADO</option>
-            <option value="CONCLUIDO" ${a.status==="CONCLUIDO"?"selected":""}>CONCLUÍDO</option>
-            <option value="CANCELADO" ${a.status==="CANCELADO"?"selected":""}>CANCELADO</option>
-          </select>
-        </div>
-
-      </div>
-    `;
-  });
-
   // KPI acompanha o dia
   document.getElementById("kpiHoje").innerText = agenda.length;
 }
