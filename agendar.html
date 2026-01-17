@@ -710,21 +710,22 @@ async function confirmar(h){
     : "/api/create-agendamento";
 
   // 🔁 DEFINE PAYLOAD CORRETO
-  const payload = alterarId
-    ? {
-        agendamento_id: alterarId,
-        loja_id: lojaId,
-        servico_id: dados.servico,
-        servico_nome: dados.servico_nome,
-        valor_servico: dados.valor_servico,
-        data: dados.data,
-        hora_inicio: h,
-        hora_fim: fim,
-        cliente_nome: cliente.nome,
-        cliente_whatsapp: cliente.whatsapp,
-        cliente_email: cliente.email || null,
-        motivo: "ALTERACAO_CLIENTE"
-      }
+const payload = alterarId
+  ? {
+      agendamento_id: alterarId,
+      loja_id: lojaId,
+      novo_status: "ALTERADO", // ✅ ESSENCIAL
+      servico_id: dados.servico,
+      servico_nome: dados.servico_nome,
+      valor_servico: dados.valor_servico,
+      data: dados.data,
+      hora_inicio: h,
+      hora_fim: fim,
+      cliente_nome: cliente.nome,
+      cliente_whatsapp: cliente.whatsapp,
+      cliente_email: cliente.email || null,
+      motivo: "ALTERACAO_CLIENTE"
+    }
     : {
         loja_id: lojaId,
         servico_id: dados.servico,
