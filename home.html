@@ -191,6 +191,89 @@ body::-webkit-scrollbar{
   margin-bottom:10px;
   align-items:center;
 }
+/* CARD DE AGENDAMENTO (AGENDA DO DIA) */
+.agenda-item{
+  display:grid;
+  grid-template-columns:64px 1fr auto;
+  gap:14px;
+  align-items:center;
+
+  background:#ffffff;
+  border-radius:16px;
+  padding:14px;
+
+  box-shadow:0 6px 18px rgba(0,0,0,.06);
+  border:1px solid #f1f5f9;
+
+  margin-bottom:14px; /* 🔥 separação bonita */
+}
+
+/* COLUNA DA HORA */
+.agenda-hora{
+  width:64px;
+  height:64px;
+  border-radius:14px;
+  background:#f8fafc;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:15px;
+  color:var(--primary);
+}
+
+/* INFO */
+.agenda-info{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.agenda-info strong{
+  font-size:14px;
+  font-weight:800;
+}
+
+.agenda-info .servico{
+  font-size:13px;
+  color:#111;
+}
+
+.agenda-info .valor{
+  font-size:13px;
+  font-weight:700;
+  color:#16a34a;
+}
+
+.agenda-info .cliente{
+  font-size:12px;
+  color:var(--muted);
+}
+
+/* AÇÕES */
+.agenda-actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.agenda-actions select{
+  padding:6px 10px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  font-weight:600;
+}
+
+.agenda-actions a{
+  background:#dcfce7;
+  color:#166534;
+  text-align:center;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  text-decoration:none;
+}
 
 .servico-img{
   width:48px;
@@ -483,46 +566,32 @@ agenda.forEach(a => {
     ? `https://wa.me/55${a.cliente_whatsapp.replace(/\D/g,"")}`
     : "#";
 
-  box.innerHTML += `
-    <div class="agenda-item" style="display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center">
+ box.innerHTML += `
+  <div class="agenda-item">
 
-      <div style="
-        width:56px;
-        height:56px;
-        border-radius:12px;
-        background:#f1f5f9;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-weight:800;
-        color:#ff6a00
-      ">
-        ${hora}
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <strong>${hora} • ${nomesServicos}</strong>
-        <small style="color:#16a34a;font-weight:700">${valor}</small>
-        <small>${a.cliente_nome}</small>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <a href="${whatsapp}" target="_blank"
-           style="font-size:11px;padding:6px 10px;border-radius:999px;
-                  background:#dcfce7;color:#166534;text-align:center">
-          Whats
-        </a>
-
-        <select
-          onchange="alterarStatus('${a.id}', this.value)">
-          <option value="CONFIRMADO" ${a.status==="CONFIRMADO"?"selected":""}>CONFIRMADO</option>
-          <option value="CONCLUIDO" ${a.status==="CONCLUIDO"?"selected":""}>CONCLUÍDO</option>
-          <option value="CANCELADO" ${a.status==="CANCELADO"?"selected":""}>CANCELADO</option>
-        </select>
-      </div>
-
+    <div class="agenda-hora">
+      ${hora}
     </div>
-  `;
+
+    <div class="agenda-info">
+      <strong>${hora} • ${nomesServicos}</strong>
+      <div class="valor">${valor}</div>
+      <div class="cliente">${a.cliente_nome}</div>
+    </div>
+
+    <div class="agenda-actions">
+      <a href="${whatsapp}" target="_blank">Whats</a>
+
+      <select onchange="alterarStatus('${a.id}', this.value)">
+        <option value="CONFIRMADO" ${a.status==="CONFIRMADO"?"selected":""}>CONFIRMADO</option>
+        <option value="CONCLUIDO" ${a.status==="CONCLUIDO"?"selected":""}>CONCLUÍDO</option>
+        <option value="CANCELADO" ${a.status==="CANCELADO"?"selected":""}>CANCELADO</option>
+      </select>
+    </div>
+
+  </div>
+`;
+
 });
 
 
