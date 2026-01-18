@@ -73,6 +73,18 @@ body{margin:0;background:var(--bg);height:100vh;overflow:hidden}
 .meta{text-align:right;font-size:12px;font-weight:700}
 .meta span{display:block;font-size:11px;color:var(--muted)}
 
+/* WHATS */
+.whats-link{text-decoration:none;margin-left:6px}
+.whats{
+  font-size:22px;
+  color:var(--gold);
+  transition:.2s;
+}
+.whats-link:hover .whats{
+  color:#25D366;
+  transform:scale(1.15);
+}
+
 /* MODAL */
 .overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.5);
@@ -90,9 +102,14 @@ body{margin:0;background:var(--bg);height:100vh;overflow:hidden}
 }
 .hist-img{
   width:42px;height:42px;border-radius:10px;
-  background:#e5e7eb;flex-shrink:0
+  background:#e5e7eb;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;color:#999
 }
-.hist-img img{width:100%;height:100%;object-fit:cover;border-radius:10px}
+.hist-img img{
+  width:100%;height:100%;
+  object-fit:cover;border-radius:10px
+}
 .hist-info{flex:1;font-size:13px}
 .hist-info b{display:block}
 .close{
@@ -123,6 +140,12 @@ const sb = supabase.createClient(
 
 let clientes=[], clientesFiltrados=[], historico={};
 
+function msgWhats(nome){
+  return encodeURIComponent(
+    `Olá ${nome}! 😊\n\nAqui é da *Agenda Fácil*.`
+  );
+}
+
 async function carregarClientes(){
   const { data:{ session } } = await sb.auth.getSession();
   const lojaId = session.user.id;
@@ -137,7 +160,14 @@ async function carregarClientes(){
 
   ags.forEach(a=>{
     if(!mapa[a.cliente_id]){
-      mapa[a.cliente_id]={id:a.cliente_id,nome:a.cliente_nome,whatsapp:a.cliente_whatsapp,total:0,valor:0,ultima:null};
+      mapa[a.cliente_id]={
+        id:a.cliente_id,
+        nome:a.cliente_nome,
+        whatsapp:a.cliente_whatsapp,
+        total:0,
+        valor:0,
+        ultima:null
+      };
       historico[a.cliente_id]=[];
     }
 
@@ -151,8 +181,11 @@ async function carregarClientes(){
 
     (a.servicos||[]).forEach(s=>{
       historico[a.cliente_id].push({
-        nome:s.nome, preco:s.preco, duracao:s.duracao,
-        data:a.data, hora:a.hora_inicio
+        nome:s.nome,
+        preco:s.preco,
+        foto: s.foto || s.imagem || s.imagem_url || null,
+        data:a.data,
+        hora:a.hora_inicio
       });
     });
   });
@@ -182,14 +215,25 @@ function render(){
     lista.innerHTML+=`
       <div class="card" onclick="abrir('${c.id}')">
         <div class="avatar">${c.nome[0]}</div>
+
         <div class="info">
           <strong>${c.nome}</strong>
           <small>${c.whatsapp||""}</small>
         </div>
+
         <div class="meta">
           ${c.total} serviços
           <span>Ticket: R$ ${(c.valor/c.total).toFixed(2)}</span>
         </div>
+
+        ${c.whatsapp ? `
+          <a class="whats-link"
+            onclick="event.stopPropagation()"
+            href="https://wa.me/55${c.whatsapp.replace(/\D/g,'')}?text=${msgWhats(c.nome)}"
+            target="_blank">
+            <i class="ri-whatsapp-line whats"></i>
+          </a>
+        ` : ``}
       </div>
     `;
   });
@@ -202,7 +246,9 @@ function abrir(id){
         <h3>Histórico</h3>
         ${historico[id].map(h=>`
           <div class="hist-item">
-            <div class="hist-img"></div>
+            <div class="hist-img">
+              ${h.foto ? `<img src="${h.foto}" onerror="this.remove()">` : 'IMG'}
+            </div>
             <div class="hist-info">
               <b>${h.nome}</b>
               ${h.data} ${h.hora}<br>
@@ -218,7 +264,9 @@ function abrir(id){
 
 function filtrarClientes(){
   const q = busca.value.toLowerCase();
-  clientesFiltrados = clientes.filter(c=>c.nome.toLowerCase().includes(q));
+  clientesFiltrados = clientes.filter(c =>
+    c.nome.toLowerCase().includes(q)
+  );
   render();
 }
 
