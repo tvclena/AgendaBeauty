@@ -407,6 +407,52 @@ footer{
   .hero-box{
     border-radius:32px;
   }
+/* MOCKUP STACK (NOTEBOOK + CELULAR) */
+.mockup-stack{
+  position:relative;
+  width:100%;
+  max-width:520px;
+  height:360px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.mockup{
+  position:absolute;
+  border-radius:18px;
+  box-shadow:0 28px 60px rgba(0,0,0,.22);
+  background:#fff;
+}
+
+/* NOTEBOOK */
+.mockup.notebook{
+  width:100%;
+  max-width:520px;
+  z-index:1;
+}
+
+/* CELULAR */
+.mockup.celular{
+  width:160px;
+  right:-18px;
+  bottom:-18px;
+  z-index:2;
+  border-radius:28px;
+}
+
+/* MOBILE AJUSTE */
+@media(max-width:900px){
+  .mockup-stack{
+    height:320px;
+  }
+
+  .mockup.celular{
+    width:140px;
+    right:-10px;
+    bottom:-10px;
+  }
+}
 
   .cta{
     grid-template-columns:1fr;
@@ -469,13 +515,11 @@ footer{
       <a href="planos.html"><button class="btn btn-outline">Ver planos</button></a>
     </div>
   </div>
-<div class="hero-box">
-  <img 
-    src="mockup-sistema.png"
-    alt="Mockup do sistema Agenda Clena"
-    class="hero-image"
-  >
+<div class="hero-box mockup-stack">
+  <img src="mockup-notebook.png" class="mockup notebook" alt="Sistema no computador">
+  <img src="mockup-celular.png" class="mockup celular" alt="Sistema no celular">
 </div>
+
 </section>
 
 <section class="numbers">
