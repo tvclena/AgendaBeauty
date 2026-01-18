@@ -137,6 +137,7 @@ const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
+let NOME_LOJA = "Minha loja";
 
 let clientes=[], clientesFiltrados=[], historico={};
 function formatarDataBR(data){
@@ -156,6 +157,29 @@ function msgWhats(nome){
 async function carregarClientes(){
   const { data:{ session } } = await sb.auth.getSession();
   const lojaId = session.user.id;
+// 🔹 BUSCA NOME DA LOJA
+const { data: perfil, error: erroPerfil } = await sb
+  .from("user_profile")
+  .select("negocio")
+  .eq("user_id", lojaId)
+  .single();
+
+if (!erroPerfil && perfil?.negocio) {
+  NOME_LOJA = perfil.negocio;
+}
+function saudacao(){
+  const hora = new Date().getHours();
+  if (hora >= 5 && hora < 12) return "Bom dia";
+  if (hora >= 12 && hora < 18) return "Boa tarde";
+  return "Boa noite";
+}
+function msgWhats(nome){
+  const texto =
+    `${saudacao()} ${nome}! 😊\n\n` +
+    `Aqui é do *${NOME_LOJA}*.`;
+
+  return encodeURIComponent(texto);
+}
 
   const { data: ags } = await sb
     .from("agendamentos")
