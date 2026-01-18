@@ -247,6 +247,16 @@ body{margin:0;background:var(--bg);padding:16px}
   font-weight:700;
   cursor:pointer;
 }
+.btn{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:999px;
+  background:var(--primary);
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+}
 
 </style>
 </head>
@@ -433,15 +443,15 @@ function setTab(t){
 }
 
 function acao(id,tipo){
-  if(tipo==="SERVICO")
-    location.href=`agendar.html?l=${lojaId}&servico=${id}`;
-  else
-    alert("Checkout em breve");
+  if(tipo==="SERVICO"){
+    location.href = `agendar.html?l=${lojaId}&servico=${id}`;
+  } else {
+    produtoAtual = todos.find(p => p.id === id);
+    adicionarAoCarrinho();
+  }
 }
-
-busca.addEventListener("input",render);
+busca.addEventListener("input", render);
 load();
-
 
 let produtoAtual = null;
 
@@ -463,8 +473,13 @@ carregarRelacionados();
 }
 
 function fecharProduto(){
+  if (window.mpComentario) mpComentario.value = "";
+  if (window.mpObsCarrinho) mpObsCarrinho.value = "";
+  notaSelecionada = 5;
   modalProduto.style.display = "none";
 }
+
+
 async function carregarAvaliacoes(){
   const { data } = await sb
     .from("avaliacoes_loja")
@@ -537,6 +552,49 @@ function renderEstrelas(){
   `).join("");
 }
 
+function getCarrinho(){
+  return JSON.parse(
+    localStorage.getItem("carrinho_" + lojaId) || "[]"
+  );
+}
+
+function salvarCarrinho(carrinho){
+  localStorage.setItem(
+    "carrinho_" + lojaId,
+    JSON.stringify(carrinho)
+  );
+}
+
+
+
+
+ function adicionarAoCarrinho(){
+  const carrinho = getCarrinho();
+  const comentario = mpObsCarrinho.value || "";
+
+  const existente = carrinho.find(
+    i => i.produto_id === produtoAtual.id
+  );
+
+  if(existente){
+    existente.quantidade += 1;
+    existente.comentario = comentario;
+  }else{
+    carrinho.push({
+      produto_id: produtoAtual.id,
+      nome: produtoAtual.nome,
+      preco: produtoAtual.preco,
+      imagem: produtoAtual.imagem_url,
+      quantidade: 1,
+      comentario
+    });
+  }
+
+  salvarCarrinho(carrinho);
+
+  alert("Produto adicionado ao carrinho 🛒");
+  fecharProduto();
+}
 
 
   
@@ -551,28 +609,52 @@ function renderEstrelas(){
 <div class="modal" id="modalProduto" onclick="fecharProduto()">
   <div class="modal-box" style="max-width:420px" onclick="event.stopPropagation()">
 
-
+    <!-- IMAGEM -->
     <img id="mpImagem" style="width:100%;border-radius:14px;margin-bottom:10px">
 
+    <!-- NOME -->
     <h2 id="mpNome"></h2>
+
+    <!-- DESCRIÇÃO -->
     <p id="mpDescricao" style="font-size:14px;color:#555"></p>
 
+    <!-- PREÇO -->
     <div style="margin:10px 0;font-weight:900;font-size:18px">
       R$ <span id="mpPreco"></span>
     </div>
+
+    <!-- OBSERVAÇÃO DO CARRINHO -->
+    <label style="font-size:12px;font-weight:700;color:#555">
+      Observação para este produto (opcional)
+    </label>
+    <textarea id="mpObsCarrinho"
+      placeholder="Ex: sem cebola, embalagem separada, presente…"
+      style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border)">
+    </textarea>
+
+    <!-- BOTÃO CARRINHO -->
+    <button class="btn"
+      style="margin-top:10px"
+      onclick="adicionarAoCarrinho()">
+      🛒 Adicionar ao carrinho
+    </button>
+
+    <hr style="margin:16px 0;border:none;border-top:1px solid #eee">
 
     <!-- AVALIAÇÃO -->
     <div id="mpAvaliacao"></div>
     <p id="mpMedia" style="font-size:13px;color:#666"></p>
 
-    <!-- COMENTAR -->
+    <!-- COMENTÁRIO DE AVALIAÇÃO -->
     <textarea id="mpComentario"
-      placeholder="Escreva seu comentário"
+      placeholder="Escreva sua avaliação"
       style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border)">
     </textarea>
 
-    <button class="btn" style="margin-top:10px" onclick="enviarAvaliacao()">
-      Enviar avaliação
+    <button class="btn"
+      style="margin-top:10px"
+      onclick="enviarAvaliacao()">
+      ⭐ Enviar avaliação
     </button>
 
     <!-- COMENTÁRIOS -->
@@ -582,6 +664,7 @@ function renderEstrelas(){
     <h3 style="margin-top:16px">Produtos relacionados</h3>
     <div id="mpRelacionados" class="grid"></div>
 
+    <!-- FECHAR -->
     <button class="btn-sec" style="margin-top:12px" onclick="fecharProduto()">
       Fechar
     </button>
