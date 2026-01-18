@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Pedidos • Painel da Loja</title>
+
+<meta name="viewport"
+  content="width=device-width,
+  initial-scale=1,
+  maximum-scale=1,
+  user-scalable=no,
+  viewport-fit=cover">
+
+<meta name="theme-color" content="#ffffff">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --primary:#ff6a00;
+  --bg:#f4f6fb;
+  --card:#ffffff;
+  --border:#e5e7eb;
+  --text:#111827;
+  --muted:#6b7280;
+  --success:#16a34a;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+  --radius:22px;
+  --shadow:0 18px 45px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;font-family:Inter;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--text);padding:16px}
+
+/* HEADER */
+.header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:20px;
+  font-weight:900;
+  margin-bottom:18px
+}
+.header i{font-size:26px;color:var(--primary)}
+
+/* CARD */
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:var(--shadow);
+  margin-bottom:18px
+}
+
+/* BADGES */
+.badge{
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800
+}
+.PENDENTE_PAGAMENTO{background:#fff7ed;color:#9a3412}
+.PAGO{background:#dcfce7;color:#166534}
+.CANCELADO{background:#fee2e2;color:#991b1b}
+.ERRO_PAGAMENTO{background:#fef2f2;color:#b91c1c}
+.CRIADO{background:#e0f2fe;color:#0369a1}
+.APROVED{background:#dcfce7;color:#166534}
+.PENDING{background:#fef3c7;color:#92400e}
+.REJEITADO{background:#fee2e2;color:#991b1b}
+
+/* TEXT */
+.small{font-size:12px;color:var(--muted)}
+.bold{font-weight:800}
+.value{font-size:15px;font-weight:900}
+
+/* FLEX */
+.row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.col{display:flex;flex-direction:column;gap:4px}
+
+/* AVATAR */
+.avatar{
+  width:38px;height:38px;
+  border-radius:50%;
+  object-fit:cover;
+  border:1px solid var(--border)
+}
+.avatar-ph{
+  width:38px;height:38px;
+  border-radius:50%;
+  background:var(--border)
+}
+
+/* ITEM */
+.item{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-top:10px
+}
+.item img{
+  width:44px;height:44px;
+  border-radius:12px;
+  object-fit:cover;
+  border:1px solid var(--border)
+}
+.item-nome{font-size:13px;font-weight:800}
+.item-qtd{font-size:12px;color:var(--muted)}
+
+.empty{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:32px;
+  text-align:center;
+  color:var(--muted);
+  box-shadow:var(--shadow)
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <i class="ri-shopping-cart-2-fill"></i>
+  Pedidos da Loja
+</div>
+
+<div id="lista"></div>
+
+<script>
+const sb = supabase.createClient(
+  "https://egxjgmzukjyyxmkukwub.supabase.co",
+  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+);
+
+const lista = document.getElementById("lista");
+
+function money(v){
+  return Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+}
+
+async function carregar(){
+  const { data: auth } = await sb.auth.getUser();
+  if(!auth?.user){
+    lista.innerHTML = `<div class="empty">Faça login para acessar os pedidos</div>`;
+    return;
+  }
+
+  /* ================= PEDIDOS ================= */
+  const { data: pedidos } = await sb
+    .from("pedidos")
+    .select("*")
+    .eq("loja_id", auth.user.id)
+    .order("created_at", { ascending:false });
+
+  if(!pedidos?.length){
+    lista.innerHTML = `<div class="empty">Nenhum pedido encontrado</div>`;
+    return;
+  }
+
+  /* ================= ITENS ================= */
+  const pedidosIds = pedidos.map(p=>p.id);
+
+  const { data: itens } = await sb
+    .from("pedidos_itens")
+    .select("*")
+    .in("pedido_id", pedidosIds);
+
+  /* ================= PAGAMENTOS ================= */
+  const { data: movimentos } = await sb
+    .from("movimentacoes_pagamento")
+    .select("*")
+    .in("pedido_id", pedidosIds);
+
+  /* ================= CLIENTES ================= */
+  const clientesIds = [...new Set(pedidos.map(p=>p.cliente_id).filter(Boolean))];
+
+  const { data: clientes } = clientesIds.length
+    ? await sb.from("clientes_profile").select("*").in("id", clientesIds)
+    : { data: [] };
+
+  let mapaClientes = {};
+  clientes?.forEach(c=> mapaClientes[c.id]=c);
+
+  /* ================= PRODUTOS ================= */
+  const produtosIds = [...new Set(itens.map(i=>i.produto_id))];
+
+  const { data: produtos } = await sb
+    .from("produtos_servicos")
+    .select("id,nome,imagem_url")
+    .in("id", produtosIds);
+
+  let mapaProdutos = {};
+  produtos?.forEach(p=> mapaProdutos[p.id]=p);
+
+  /* ================= RENDER ================= */
+  lista.innerHTML = pedidos.map(p=>{
+    const its = itens.filter(i=>i.pedido_id===p.id);
+    const mov = movimentos.find(m=>m.pedido_id===p.id);
+    const cli = mapaClientes[p.cliente_id] || {};
+
+    return `
+      <div class="card">
+
+        <div class="row">
+          <div class="col">
+            <div class="small">Pedido</div>
+            <div class="bold">#${p.id.slice(0,8)}</div>
+          </div>
+          <span class="badge ${p.status}">${p.status}</span>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div class="col">
+            <div class="small">Cliente</div>
+            <div class="bold">${p.cliente_nome}</div>
+            <div class="small">${p.cliente_whatsapp}</div>
+          </div>
+          <div class="col">
+            <div class="small">Valor</div>
+            <div class="value">${money(p.valor_total)}</div>
+          </div>
+        </div>
+
+        <div class="small" style="margin-top:14px">Itens</div>
+
+        ${its.map(i=>{
+          const prod = mapaProdutos[i.produto_id] || {};
+          return `
+            <div class="item">
+              ${prod.imagem_url
+                ? `<img src="${prod.imagem_url}">`
+                : `<div class="avatar-ph"></div>`}
+              <div>
+                <div class="item-nome">${i.nome}</div>
+                <div class="item-qtd">
+                  ${i.quantidade} × ${money(i.preco_unitario)}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("")}
+
+        <div class="row" style="margin-top:16px">
+          <div class="col">
+            <div class="small">Pagamento</div>
+            <span class="badge ${mov?.status || 'CRIADO'}">
+              ${mov?.status || 'CRIADO'}
+            </span>
+          </div>
+          <div class="col">
+            <div class="small">Criado em</div>
+            <div class="bold">
+              ${new Date(p.created_at).toLocaleString("pt-BR")}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    `;
+  }).join("");
+}
+
+carregar();
+</script>
+
+</body>
+</html>
