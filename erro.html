@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Pagamento não concluído • Sua Loja</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ff6a00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --primary:#ff6a00;
+  --primary-dark:#e85c00;
+  --text:#111;
+  --muted:#666;
+  --bg:#fafafa;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:'Inter', sans-serif;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:var(--bg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.card{
+  background:#fff;
+  max-width:420px;
+  width:100%;
+  border-radius:20px;
+  padding:34px 26px;
+  text-align:center;
+  box-shadow:0 24px 48px rgba(0,0,0,.08);
+}
+
+.icon{
+  width:70px;
+  height:70px;
+  border-radius:18px;
+  background:linear-gradient(135deg,#ff6a00,#ff8c2b);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 22px;
+  color:#fff;
+  font-size:34px;
+  font-weight:800;
+}
+
+h1{
+  margin:0 0 10px;
+  font-size:22px;
+  color:var(--text);
+}
+
+p{
+  margin:0 0 26px;
+  font-size:14.5px;
+  line-height:1.55;
+  color:var(--muted);
+}
+
+button{
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:14px;
+  background:var(--primary);
+  color:#fff;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.2s;
+}
+
+button:hover{
+  background:var(--primary-dark);
+}
+
+footer{
+  margin-top:22px;
+  font-size:11px;
+  color:#aaa;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <div class="icon">!</div>
+
+  <h1>Pagamento não concluído</h1>
+
+  <p>
+    Não foi possível finalizar seu pagamento.<br>
+    Nenhuma cobrança foi confirmada.<br><br>
+    Você pode voltar para a loja e tentar novamente com tranquilidade.
+  </p>
+
+  <button onclick="voltarParaLoja()">
+    Voltar para a loja
+  </button>
+
+  <footer>
+    Sua Loja • Compra segura e transparente
+  </footer>
+</div>
+
+<script>
+function voltarParaLoja(){
+  const params = new URLSearchParams(window.location.search);
+  const accountId = params.get('account_id');
+
+  // 1️⃣ Se veio com account_id
+  if(accountId){
+    window.location.href = `/app.html?account_id=${accountId}`;
+    return;
+  }
+
+  // 2️⃣ Se o navegador tiver referrer (mais comum em pagamento)
+  if(document.referrer){
+    window.location.href = document.referrer;
+    return;
+  }
+
+  // 3️⃣ Fallback seguro
+  window.location.href = '/app.html';
+}
+</script>
+
+</body>
+</html>
