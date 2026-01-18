@@ -820,30 +820,70 @@ if(alterarId){
   }
 
   // ✅ SUCESSO
-  document.body.insertAdjacentHTML("beforeend", `
-    <div class="overlay" id="overlayConfirm">
-      <div class="msg-final">
-        ✅ <strong>
+ document.body.insertAdjacentHTML("beforeend", `
+  <div class="overlay" id="overlayConfirm">
+    <div class="msg-final" style="
+      max-width:420px;
+      text-align:left;
+      animation: fadeUp .3s ease;
+    ">
+
+      <div style="
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin-bottom:14px;
+        font-size:18px;
+      ">
+        <span style="
+          display:inline-flex;
+          width:28px;
+          height:28px;
+          border-radius:50%;
+          background:#dcfce7;
+          color:#166534;
+          align-items:center;
+          justify-content:center;
+          font-weight:900;
+        ">✓</span>
+
+        <strong>
           ${alterarId ? "Agendamento atualizado!" : "Agendamento confirmado!"}
-        </strong><br><br>
+        </strong>
+      </div>
 
-Serviços:
-<b>${dados.servicos.map(s => s.nome).join(", ")}</b><br>
-        Data: <b>${dados.data}</b><br>
-        Horário: <b>${h}</b><br><br>
+      <div style="font-size:14px;line-height:1.6;color:#374151">
+        <div><b>Serviços:</b> ${dados.servicos.map(s => s.nome).join(", ")}</div>
+        <div><b>Data:</b> ${formatarDataBR(dados.data)}</div>
+        <div><b>Horário:</b> ${h}</div>
+      </div>
 
-        <div style="display:flex;gap:10px">
-          <button onclick="irParaAgendamentos()" style="flex:1">
-            📋 Meus Agendamentos
-          </button>
-          <button onclick="fecharOverlay()" style="flex:1">
-            ✖ Fechar
-          </button>
-        </div>
+      <div style="
+        display:flex;
+        gap:12px;
+        margin-top:18px
+      ">
+        <button onclick="irParaAgendamentos()" style="
+          flex:1;
+          background:#2563eb;
+          color:#fff;
+          border-radius:14px;
+        ">
+          📋 Meus Agendamentos
+        </button>
+
+        <button onclick="fecharOverlay()" style="
+          flex:1;
+          background:#f3f4f6;
+          border-radius:14px;
+        ">
+          ✖ Fechar
+        </button>
       </div>
     </div>
-  `);
-}
+  </div>
+`);
+
 
 function selecionarHorario(el, h){
 
