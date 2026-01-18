@@ -292,32 +292,128 @@ function menos(i){
   else salvar();
 }
 
-/* CHECKOUT */
 async function finalizarCompra(){
-  const res = await fetch("https://www.clena.com.br/api/create-pagamento",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      loja_id: lojaId,
-      cliente,
-      itens: carrinho.itens
-    })
-  });
-  const data = await res.json();
-  if(data.init_point){
-    localStorage.removeItem(KEY);
-    location.href = data.init_point;
-  }else{
-    alert("Erro ao gerar pagamento");
+  try{
+    const res = await fetch("https://www.clena.com.br/api/create-pagamento",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        loja_id: lojaId,
+        cliente,
+        itens: carrinho.itens
+      })
+    });
+
+    const data = await res.json();
+
+    // ✅ Pagamento online OK
+    if(data?.init_point){
+      localStorage.removeItem(KEY);
+      location.href = data.init_point;
+      return;
+    }
+
+    // ❌ Falhou → abre PIX
+    const loja = await buscarLoja();
+    abrirPix(loja);
+
+  }catch(err){
+    console.error("Erro pagamento:", err);
+
+    // ❌ Erro geral → abre PIX
+    const loja = await buscarLoja();
+    abrirPix(loja);
   }
 }
+
 
 /* INIT */
 (async()=>{
   await carregarProdutos();
   render();
 })();
+async function buscarLoja(){
+  const { data, error } = await sb
+    .from("user_profile")
+    .select("whatsapp, negocio")
+    .eq("user_id", lojaId)
+    .single();
+
+  if(error) throw error;
+  return data;
+}
+
+let lojaPix = null;
+
+function abrirPix(loja){
+  lojaPix = loja;
+
+  pixChave.innerText = loja.whatsapp;
+  pixValor.innerText = totalEl.innerText.replace("Total: ","");
+
+  modalPix.style.display = "flex";
+}
+
+function fecharPix(){
+  modalPix.style.display = "none";
+}
+
+function copiarPix(){
+  navigator.clipboard.writeText(lojaPix.whatsapp);
+  alert("Chave PIX copiada");
+}
+
+function enviarComprovante(){
+  const valor = pixValor.innerText;
+  const msg = encodeURIComponent(
+    `Olá! Fiz o PIX no valor de ${valor}.\nSegue o comprovante do pedido.`
+  );
+
+  const numero = lojaPix.whatsapp.replace(/\D/g,"");
+
+window.open(`https://wa.me/${numero}?text=${msg}`, "_blank");
+}
+
 </script>
+<!-- MODAL PIX -->
+<div class="modal" id="modalPix">
+  <div class="modal-box">
+
+    <div class="modal-title">Pagamento via PIX</div>
+
+    <p style="font-size:14px;color:#555;margin-bottom:12px">
+      Finalize o pagamento via PIX e envie o comprovante para a loja.
+    </p>
+
+    <div class="card" style="margin-bottom:12px">
+      <strong>Valor total</strong>
+      <div id="pixValor" style="font-size:18px;font-weight:800;margin-top:4px"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <strong>Chave PIX (WhatsApp)</strong>
+      <div id="pixChave"
+        style="font-weight:800;font-size:15px;margin-top:6px">
+      </div>
+
+      <button class="btn-sec" style="margin-top:10px" onclick="copiarPix()">
+        Copiar chave PIX
+      </button>
+    </div>
+
+    <button class="btn" onclick="enviarComprovante()"
+      style="display:flex;align-items:center;justify-content:center;gap:8px">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+           width="20">
+      Enviar comprovante
+    </button>
+
+    <button class="btn-sec" style="margin-top:10px" onclick="fecharPix()">
+      Cancelar
+    </button>
+
+  </div>
+</div>
 
 </body>
 </html>
