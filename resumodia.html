@@ -22,10 +22,8 @@
   --bg:#f6f7fb;
   --card:#ffffff;
   --muted:#6b7280;
-  --border:#e5e7eb;
   --radius:18px;
   --green:#16a34a;
-  --red:#dc2626;
   --blue:#2563eb;
 }
 
@@ -41,47 +39,69 @@ body{margin:0;background:var(--bg)}
 }
 
 /* HEADER */
-.header h1{font-size:18px;font-weight:800}
-.header small{color:var(--muted)}
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.header h1{
+  font-size:18px;
+  font-weight:800;
+}
+.header button{
+  border:none;
+  background:#e5e7eb;
+  border-radius:999px;
+  padding:6px 12px;
+  font-weight:700;
+}
 
-/* CARD */
+/* CARD TOPO */
+.card-topo{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:16px;
+  box-shadow:0 8px 22px rgba(0,0,0,.06);
+  display:grid;
+  grid-template-columns:1fr 1fr 110px;
+  gap:12px;
+  align-items:center;
+}
+
+.kpi small{
+  color:var(--muted);
+  font-weight:600;
+  font-size:12px;
+}
+.kpi h2{
+  margin:6px 0 2px;
+  font-size:22px;
+  font-weight:800;
+}
+.percentual{
+  font-size:12px;
+  font-weight:700;
+  color:var(--blue);
+}
+
+/* GRAFICO PEQUENO */
+.grafico-box{
+  width:110px;
+  height:110px;
+  position:relative;
+}
+.grafico-box canvas{
+  width:100% !important;
+  height:100% !important;
+}
+
+/* LISTA */
 .card{
   background:var(--card);
   border-radius:var(--radius);
   padding:16px;
   box-shadow:0 8px 22px rgba(0,0,0,.06);
 }
-
-/* KPIS */
-.kpis{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-}
-.kpi h2{
-  margin:6px 0 0;
-  font-size:22px;
-  font-weight:800;
-}
-.kpi small{color:var(--muted);font-weight:600}
-
-.percentual{
-  margin-top:4px;
-  font-size:12px;
-  font-weight:700;
-  color:var(--blue);
-}
-
-/* VARIACAO */
-.variacao{
-  font-size:13px;
-  font-weight:700;
-}
-.up{color:var(--green)}
-.down{color:var(--red)}
-.neutral{color:var(--muted)}
-
-/* LISTA */
 .lista{
   display:flex;
   flex-direction:column;
@@ -120,7 +140,6 @@ body{margin:0;background:var(--bg)}
   font-size:13px;
   text-align:right;
 }
-
 .whats{
   margin-top:4px;
   background:#dcfce7;
@@ -132,7 +151,6 @@ body{margin:0;background:var(--bg)}
   text-decoration:none;
   display:inline-block;
 }
-
 .empty{
   text-align:center;
   color:var(--muted);
@@ -148,42 +166,27 @@ body{margin:0;background:var(--bg)}
 
   <div class="header">
     <h1 id="tituloData">Resumo do dia</h1>
-    <small>Faturamento e desempenho</small>
+    <button onclick="parent.fecharResumoDia?.()">Fechar</button>
   </div>
 
-  <!-- KPIs -->
-  <div class="card kpis">
+  <!-- CARD TOPO COM GRAFICO -->
+  <div class="card-topo">
+
     <div class="kpi">
       <small>Total do dia</small>
       <h2 id="totalDia">R$ 0,00</h2>
       <div id="percentualDia" class="percentual">—</div>
     </div>
+
     <div class="kpi">
       <small>Agendamentos</small>
       <h2 id="qtdDia">0</h2>
     </div>
-  </div>
 
-  <!-- GRAFICO -->
-  <div class="card">
-    <small style="font-weight:700">Participação no faturamento do mês</small>
-    <canvas id="graficoDia" height="180"></canvas>
-  </div>
-
-  <!-- COMPARATIVOS -->
-  <div class="card">
-    <div class="kpis">
-      <div>
-        <small>Vs mês anterior</small>
-        <h2 id="valorMesAnterior">—</h2>
-        <div id="varMesAnterior" class="variacao neutral">—</div>
-      </div>
-      <div>
-        <small>Vs mesmo mês ano anterior</small>
-        <h2 id="valorAnoAnterior">—</h2>
-        <div id="varAnoAnterior" class="variacao neutral">—</div>
-      </div>
+    <div class="grafico-box">
+      <canvas id="graficoDia"></canvas>
     </div>
+
   </div>
 
   <!-- LISTA -->
@@ -211,7 +214,6 @@ const moeda = v => Number(v||0).toLocaleString("pt-BR",{style:"currency",currenc
 
 async function carregarResumo(){
 
-  /* ===== DIA ===== */
   const { data: dia } = await sb
     .from("agendamentos")
     .select("hora_inicio, cliente_nome, cliente_whatsapp, servicos, valor_total")
@@ -255,7 +257,6 @@ async function carregarResumo(){
     });
   }
 
-  /* ===== MES ===== */
   const d = new Date(dataDia);
   const iniMes = new Date(d.getFullYear(), d.getMonth(), 1).toLocaleDateString("en-CA");
   const fimMes = new Date(d.getFullYear(), d.getMonth()+1, 0).toLocaleDateString("en-CA");
@@ -279,22 +280,15 @@ async function carregarResumo(){
   new Chart(document.getElementById("graficoDia"),{
     type:"doughnut",
     data:{
-      labels:["Dia selecionado","Restante do mês"],
       datasets:[{
         data:[totalDia, Math.max(totalMes-totalDia,0)],
-        backgroundColor:["#ff6a00","#e5e7eb"]
+        backgroundColor:["#ff6a00","#e5e7eb"],
+        borderWidth:0
       }]
     },
     options:{
       cutout:"70%",
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          callbacks:{
-            label:(ctx)=> moeda(ctx.raw)
-          }
-        }
-      }
+      plugins:{legend:{display:false},tooltip:{enabled:false}}
     }
   });
 }
