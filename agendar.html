@@ -355,12 +355,12 @@ const { data } = await sb
   `)
   .eq("user_id", lojaId)
   .eq("ativo", true)
-  // 1️⃣ quem tem ordem_exibicao vem primeiro
+  .eq("tipo", "SERVICO")
+  .not("duracao_minutos", "is", null)
   .order("ordem_exibicao", { ascending: true, nullsLast: true })
-  // 2️⃣ se empatar, o atualizado mais recente vem primeiro
   .order("updated_at", { ascending: false })
-  // 3️⃣ para os sem ordem, respeita a ordem de cadastro
   .order("created_at", { ascending: true });
+
 
 
   const container = document.getElementById("services");
