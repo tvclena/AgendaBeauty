@@ -575,13 +575,18 @@ async function carregarAgendaDia(lojaId){
     .from("agendamentos")
 .select(`
   id,
+  data,
   hora_inicio,
   cliente_nome,
   cliente_whatsapp,
   status,
+  servico_nome,
   servicos,
-  valor_total
+  valor_total,
+  created_at,
+  updated_at
 `)
+
 
     .eq("user_id", lojaId)
     .eq("data", data)
@@ -906,15 +911,27 @@ function abrirHistorico(a){
       ${a.servico_nome || (Array.isArray(a.servicos) ? a.servicos.map(s=>s.nome).join(", ") : "—")}
     </div>
 
-    <div class="historico-item">
-      <strong>Data e hora</strong>
-      ${new Date(a.data).toLocaleDateString("pt-BR")} • ${a.hora_inicio?.slice(0,5)}
-    </div>
+<div class="historico-item">
+  <strong>Data e hora</strong>
+  ${formatarDataBR(a.data)} • ${a.hora_inicio?.slice(0,5)}
+</div>
 
+<div class="historico-item">
+  <strong>Criado em</strong>
+  ${formatarDataHora(a.created_at)}
+</div>
+
+${
+  a.updated_at && a.updated_at !== a.created_at
+  ? `
     <div class="historico-item">
-      <strong>Criado em</strong>
-      ${formatarDataHora(a.created_at)}
+      <strong>Última alteração</strong>
+      ${formatarDataHora(a.updated_at)}
     </div>
+  `
+  : ""
+}
+
 
     ${
       a.updated_at && a.updated_at !== a.created_at
@@ -936,6 +953,16 @@ function abrirHistorico(a){
   document.getElementById("historicoModal").style.display = "flex";
 }
 
+function formatarDataBR(dataISO){
+  if(!dataISO) return "—";
+  const [y,m,d] = dataISO.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+
+
+
+  
   
 </script>
 
