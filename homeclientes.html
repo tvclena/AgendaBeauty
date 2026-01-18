@@ -379,7 +379,7 @@ function render(){
         <strong>${i.nome}</strong>
         <div class="meta">
           <span>${i.tipo==="SERVICO" ? `⏱ ${i.duracao_minutos||0} min`:"📦 Produto"}</span>
-          <span class="price">R$ ${Number(i.preco).toFixed(0)}</span>
+<span class="price">R$ ${Number(i.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}</span>
         </div>
         <button onclick="acao('${i.id}','${i.tipo}')">
           ${i.tipo==="SERVICO"?"Agendar":"Comprar"}
