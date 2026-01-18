@@ -363,6 +363,56 @@ body::-webkit-scrollbar{
 #btnNovoAgendamento:active{
   transform:scale(.94);
 }
+/* ÍCONE DE HISTÓRICO */
+.info-btn{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:#fff7ed;
+  color:#ff6a00;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  font-size:13px;
+  cursor:pointer;
+  border:1px solid #fed7aa;
+  flex-shrink:0;
+}
+
+/* MODAL HISTÓRICO */
+#historicoModal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:flex-end;
+  z-index:200000;
+}
+
+#historicoModal .modal-box{
+  width:100%;
+  height:60%;
+  background:#fff;
+  border-radius:22px 22px 0 0;
+  padding:16px;
+  box-shadow:0 -14px 40px rgba(0,0,0,.25);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.historico-item{
+  background:#f9fafb;
+  border-radius:14px;
+  padding:12px;
+  font-size:13px;
+}
+
+.historico-item strong{
+  display:block;
+  font-size:14px;
+}
 
 </style>
 </head>
@@ -573,11 +623,19 @@ agenda.forEach(a => {
       ${hora}
     </div>
 
-    <div class="agenda-info">
-      <strong>${hora} • ${nomesServicos}</strong>
-      <div class="valor">${valor}</div>
-      <div class="cliente">${a.cliente_nome}</div>
+<div class="agenda-info">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="info-btn"
+      onclick='abrirHistorico(${JSON.stringify(a)})'>
+      !
     </div>
+    <strong>${nomesServicos}</strong>
+  </div>
+
+  <div class="valor">${valor}</div>
+  <div class="cliente">${a.cliente_nome}</div>
+</div>
+
 
     <div class="agenda-actions">
       <a href="${whatsapp}" target="_blank">Whats</a>
@@ -828,6 +886,55 @@ function fecharResumoDia(){
   iframe.src = "";
   modal.style.display = "none";
 }
+function formatarDataHora(dt){
+  if(!dt) return "—";
+  return new Date(dt).toLocaleString("pt-BR");
+}
+
+function abrirHistorico(a){
+
+  const box = document.getElementById("historicoConteudo");
+
+  box.innerHTML = `
+    <div class="historico-item">
+      <strong>Cliente</strong>
+      ${a.cliente_nome}
+    </div>
+
+    <div class="historico-item">
+      <strong>Serviço</strong>
+      ${a.servico_nome || (Array.isArray(a.servicos) ? a.servicos.map(s=>s.nome).join(", ") : "—")}
+    </div>
+
+    <div class="historico-item">
+      <strong>Data e hora</strong>
+      ${new Date(a.data).toLocaleDateString("pt-BR")} • ${a.hora_inicio?.slice(0,5)}
+    </div>
+
+    <div class="historico-item">
+      <strong>Criado em</strong>
+      ${formatarDataHora(a.created_at)}
+    </div>
+
+    ${
+      a.updated_at && a.updated_at !== a.created_at
+      ? `
+        <div class="historico-item">
+          <strong>Última alteração</strong>
+          ${formatarDataHora(a.updated_at)}
+        </div>
+      `
+      : ""
+    }
+
+    <div class="historico-item">
+      <strong>Status atual</strong>
+      ${a.status}
+    </div>
+  `;
+
+  document.getElementById("historicoModal").style.display = "flex";
+}
 
   
 </script>
@@ -1060,6 +1167,21 @@ window.addEventListener("message", function(event) {
   }
 });
 </script>
+<div id="historicoModal">
+  <div class="modal-box">
+
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <strong>Histórico do agendamento</strong>
+      <button onclick="document.getElementById('historicoModal').style.display='none'"
+        style="border:none;background:#e5e7eb;border-radius:999px;padding:6px 12px;font-weight:700">
+        Fechar
+      </button>
+    </div>
+
+    <div id="historicoConteudo"></div>
+
+  </div>
+</div>
 
 </body>
 </html>
