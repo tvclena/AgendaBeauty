@@ -2,71 +2,155 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+
+<!-- ANALYTICS -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-T97MS35TJ6"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-T97MS35TJ6');
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-T97MS35TJ6');
 </script>
-<title>Encontre lojas</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<title>Clena Store • Encontre Lojas</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#ff6a00">
 <meta name="apple-mobile-web-app-capable" content="yes">
 
 <link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/icons/icon-192.png">
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  
 <style>
+/* ================= ROOT ================= */
 :root{
   --primary:#ff6a00;
   --accent:#b8ff65;
-  --bg:#f4f6fb;
-  --card:#ffffff;
-  --border:#e5e7eb;
   --text:#1f2937;
   --muted:#6b7280;
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --border:#e5e7eb;
+  --radius:26px;
+  --shadow:0 18px 40px rgba(0,0,0,.12);
 }
 
-*{box-sizing:border-box;font-family:Inter}
-body{margin:0;background:var(--bg);color:var(--text)}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
+body{background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
 
-/* FIXED TOP */
-.top{
-  position:fixed;
-  top:0;left:0;right:0;
-  background:#fff;
+/* ================= NAVBAR ================= */
+header{
+  position:sticky;
+  top:0;
   z-index:100;
+  background:#fff;
   border-bottom:1px solid var(--border);
 }
 
-/* HEADER */
 .header{
-  padding:14px 16px 6px;
-  font-size:18px;
+  max-width:1200px;
+  margin:auto;
+  padding:16px 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.logo{
+  font-size:20px;
   font-weight:800;
+  color:var(--primary);
 }
 
-/* HERO */
-.hero{
-  padding:12px 16px 14px;
+nav{
+  display:flex;
+  gap:26px;
 }
-.banner{
+
+nav a{
+  text-decoration:none;
+  color:#111;
+  font-size:14px;
+  font-weight:500;
   position:relative;
-  border-radius:22px;
-  padding:20px;
-  background:linear-gradient(135deg,#ff6a00,#ff9a57);
-  color:#fff;
 }
-.banner h2{margin:0 0 4px;font-size:20px}
-.banner p{margin:0;font-size:13px;opacity:.95}
 
-/* LOCATION */
+nav a::after{
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:-6px;
+  width:0;
+  height:2px;
+  background:var(--primary);
+  transition:.25s;
+}
+
+nav a:hover::after{width:100%}
+
+.actions{display:flex;gap:12px}
+
+.btn{
+  padding:12px 22px;
+  border-radius:999px;
+  border:none;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+}
+
+.btn-primary{background:var(--accent)}
+.btn-outline{background:#fff;border:1px solid var(--border)}
+
+.menu-btn{display:none;font-size:26px;cursor:pointer}
+
+/* ================= MOBILE MENU ================= */
+.mobile-menu{
+  position:fixed;
+  inset:0;
+  background:#fff;
+  z-index:200;
+  display:none;
+  flex-direction:column;
+  padding:32px;
+}
+
+.mobile-menu.active{display:flex}
+.mobile-menu a{
+  padding:16px 0;
+  font-size:18px;
+  border-bottom:1px solid var(--border);
+  text-decoration:none;
+  color:#111;
+}
+
+.close-menu{
+  align-self:flex-end;
+  font-size:30px;
+  cursor:pointer;
+  margin-bottom:20px;
+}
+
+/* ================= HERO ================= */
+.hero{
+  max-width:1200px;
+  margin:auto;
+  padding:26px 22px 16px;
+}
+
+.banner{
+  background:linear-gradient(135deg,#ff6a00,#ff9a57);
+  border-radius:28px;
+  padding:22px;
+  color:#fff;
+  position:relative;
+}
+
+.banner h2{font-size:22px;margin-bottom:6px}
+.banner p{font-size:14px;opacity:.95}
+
 .location{
   position:absolute;
   top:14px;
@@ -80,17 +164,18 @@ body{margin:0;background:var(--bg);color:var(--text)}
   gap:4px;
 }
 
-/* SEARCH */
+/* ================= SEARCH ================= */
 .search{
-  margin-top:12px;
+  margin-top:14px;
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:12px;
   background:#fff;
   border-radius:999px;
-  padding:14px 18px;
-  box-shadow:0 10px 28px rgba(0,0,0,.15);
+  padding:16px 20px;
+  box-shadow:var(--shadow);
 }
+
 .search i{font-size:20px;color:#9ca3af}
 .search input{
   border:none;
@@ -99,82 +184,64 @@ body{margin:0;background:var(--bg);color:var(--text)}
   font-size:15px;
 }
 
-/* CONTENT */
+/* ================= CONTENT ================= */
 .content{
-  padding:260px 16px 120px;
+  padding:30px 22px 120px;
 }
 
-/* LISTA RESPONSIVA */
 .list{
   display:grid;
-  grid-template-columns:repeat(2,1fr); /* celular */
-  gap:14px;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:16px;
 }
 
-/* tablets */
-@media (min-width: 640px){
-  .list{
-    grid-template-columns:repeat(3,1fr);
-  }
-}
-
-/* notebooks */
-@media (min-width: 900px){
-  .list{
-    grid-template-columns:repeat(4,1fr);
-  }
-}
-
-/* desktops grandes */
-@media (min-width: 1200px){
-  .list{
-    grid-template-columns:repeat(7,1fr);
-  }
-}
-@media (min-width: 1200px){
-  .card{
-    padding:16px;
-  }
-  .card h3{
-    font-size:15px;
-  }
-}
-
-
-/* CARD */
+/* ================= CARD ================= */
 .card{
   background:#fff;
   border-radius:22px;
-  padding:14px;
-  box-shadow:0 12px 30px rgba(0,0,0,.1);
+  padding:16px;
+  box-shadow:var(--shadow);
   display:flex;
   flex-direction:column;
 }
-.logo{
+
+.card .logo{
   width:56px;height:56px;
   border-radius:50%;
   background:#eee center/cover;
-  margin-bottom:8px;
+  margin-bottom:10px;
 }
-.card h3{font-size:14px;font-weight:800;margin:0}
-.card small{font-size:12px;color:var(--muted)}
+
+.card h3{
+  font-size:14px;
+  font-weight:800;
+}
+
+.card small{
+  font-size:12px;
+  color:var(--muted);
+}
+
 .distance{
   font-size:11px;
-  margin:4px 0;
   color:#059669;
+  margin:6px 0;
 }
+
 .tags{
   display:flex;
   gap:6px;
   flex-wrap:wrap;
   margin:6px 0;
 }
+
 .tag{
   font-size:11px;
   padding:5px 10px;
   border-radius:999px;
   background:#f3f4f6;
 }
+
 .card button{
   margin-top:auto;
   padding:10px;
@@ -184,74 +251,69 @@ body{margin:0;background:var(--bg);color:var(--text)}
   font-weight:800;
 }
 
-/* LOADER */
+/* ================= LOADER ================= */
 .loader{
   text-align:center;
-  padding:16px;
+  padding:20px;
   color:var(--muted);
 }
 
-/* TOP BUTTON */
-#topBtn{
-  position:fixed;
-  right:16px;
-  bottom:20px;
-  width:46px;
-  height:46px;
-  border-radius:50%;
-  border:none;
-  background:var(--primary);
-  color:#fff;
-  font-size:22px;
-  display:none;
-  z-index:200;
+/* ================= RESPONSIVE ================= */
+@media(max-width:900px){
+  nav,.actions{display:none}
+  .menu-btn{display:block}
 }
-.header{
-  padding:14px 16px 6px;
-  font-size:18px;
-  font-weight:800;
-  color: var(--text); /* ou simplesmente remova a linha */
-}
-.highlight{
-  background: linear-gradient(90deg,#ff6a00,#ff9a57);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
 </style>
 </head>
 
 <body>
 
-<div class="top">
-<div class="header">
-  Todas as lojas, <span class="highlight">UM LUGAR</span>
-</div>
-
-  <div class="hero">
-    <div class="banner">
-      <div class="location" id="localizacao">
-        <i class="ri-map-pin-line"></i> Localizando…
-      </div>
-      <h2>Perto de você</h2>
-      <p>Agende com lojas, serviços e profissionais</p>
+<header>
+  <div class="header">
+    <div class="logo">CLENA STORE</div>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="saloes.html">Para Empresas</a>
+      <a href="cliente.html">Para Clientes</a>
+      <a href="planos.html">Planos</a>
+    </nav>
+    <div class="actions">
+      <a href="login.html"><button class="btn btn-outline">Entrar</button></a>
+      <a href="cadastro.html"><button class="btn btn-primary">Teste grátis</button></a>
     </div>
-
-    <div class="search">
-      <i class="ri-search-line"></i>
-      <input id="busca" placeholder="Buscar loja, serviço ou produto">
-    </div>
+    <div class="menu-btn" onclick="openMenu()">☰</div>
   </div>
+</header>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="close-menu" onclick="closeMenu()">✕</div>
+  <a href="index.html">Início</a>
+  <a href="saloes.html">Para Empresas</a>
+  <a href="cliente.html">Para Clientes</a>
+  <a href="planos.html">Planos</a>
+  <a href="login.html">Entrar</a>
 </div>
+
+<section class="hero">
+  <div class="banner">
+    <div class="location" id="localizacao">
+      <i class="ri-map-pin-line"></i> Sua região
+    </div>
+    <h2>Lojas perto de você</h2>
+    <p>Agende serviços e compre produtos no mesmo lugar</p>
+  </div>
+
+  <div class="search">
+    <i class="ri-search-line"></i>
+    <input id="busca" placeholder="Buscar loja, serviço ou produto">
+  </div>
+</section>
 
 <div class="content">
   <div class="list" id="lista"></div>
   <div class="loader" id="loader">Carregando mais lojas…</div>
 </div>
-
-<button id="topBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-  <i class="ri-arrow-up-line"></i>
-</button>
 
 <script>
 const sb = supabase.createClient(
@@ -260,7 +322,7 @@ const sb = supabase.createClient(
 );
 
 let lojas=[],servicos=[],produtos=[];
-let offset=0,limit=20,carregando=false,acabou=false;
+let offset=0,limit=24,carregando=false,acabou=false;
 let userLat=null,userLng=null;
 
 /* DISTÂNCIA */
@@ -274,17 +336,21 @@ function km(lat1,lon1,lat2,lon2){
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-/* GEO */
-navigator.geolocation.getCurrentPosition(async pos=>{
-  userLat=pos.coords.latitude;
-  userLng=pos.coords.longitude;
-
-  const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}`);
-  const j=await r.json();
-  localizacao.innerHTML=`<i class="ri-map-pin-line"></i> ${j.address.suburb||j.address.neighbourhood||j.address.city||"Sua região"}`;
-
-  carregar();
-},()=>carregar());
+/* GEO RÁPIDO (não bloqueia render) */
+navigator.geolocation.getCurrentPosition(
+  pos=>{
+    userLat=pos.coords.latitude;
+    userLng=pos.coords.longitude;
+    ordenar();
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}`)
+      .then(r=>r.json())
+      .then(j=>{
+        localizacao.innerHTML=`<i class="ri-map-pin-line"></i> ${j.address.suburb||j.address.city||"Sua região"}`;
+      });
+  },
+  ()=>{},
+  { enableHighAccuracy:false, timeout:3000 }
+);
 
 async function carregar(){
   if(carregando||acabou) return;
@@ -297,41 +363,39 @@ async function carregar(){
     .range(offset,offset+limit-1);
 
   if(!data||data.length<limit) acabou=true;
-
   lojas.push(...(data||[]));
   offset+=limit;
 
-  if(servicos.length===0){
+  if(!servicos.length){
     servicos=(await sb.from("servicos_loja").select("loja_id,nome")).data||[];
     produtos=(await sb.from("produtos_loja").select("loja_id,nome")).data||[];
   }
 
   render();
-  carregando=false;
+  carregarando=false;
+}
+
+function ordenar(){
+  if(!userLat) return;
+  lojas.forEach(l=>{
+    if(l.lat&&l.lng){
+      l.dist=km(userLat,userLng,l.lat,l.lng);
+    }else l.dist=999;
+  });
+  lojas.sort((a,b)=>a.dist-b.dist);
+  render();
 }
 
 function render(){
   lista.innerHTML="";
   const termo=busca.value.toLowerCase();
 
-  let listaOrdenada=[...lojas];
-  if(userLat){
-    listaOrdenada.forEach(l=>{
-      if(l.lat&&l.lng){
-        l.dist=km(userLat,userLng,l.lat,l.lng);
-      }else l.dist=999;
-    });
-    listaOrdenada.sort((a,b)=>a.dist-b.dist);
-  }
-
-  for(const l of listaOrdenada){
-    if(termo){
-      const ok=
-        l.negocio?.toLowerCase().includes(termo)||
-        servicos.some(s=>s.loja_id===l.user_id&&s.nome.toLowerCase().includes(termo))||
-        produtos.some(p=>p.loja_id===l.user_id&&p.nome.toLowerCase().includes(termo));
-      if(!ok) continue;
-    }
+  lojas.forEach(l=>{
+    const ok=!termo||
+      l.negocio?.toLowerCase().includes(termo)||
+      servicos.some(s=>s.loja_id===l.user_id&&s.nome.toLowerCase().includes(termo))||
+      produtos.some(p=>p.loja_id===l.user_id&&p.nome.toLowerCase().includes(termo));
+    if(!ok) return;
 
     lista.innerHTML+=`
       <div class="card">
@@ -343,22 +407,25 @@ function render(){
           ${servicos.filter(s=>s.loja_id===l.user_id).slice(0,2).map(s=>`<span class="tag">${s.nome}</span>`).join("")}
         </div>
         <button onclick="location.href='loja.html?l=${l.user_id}'">Entrar</button>
-      </div>
-    `;
-  }
+      </div>`;
+  });
 
   loader.style.display=acabou?"none":"block";
 }
 
-/* SCROLL */
 window.addEventListener("scroll",()=>{
-  topBtn.style.display=window.scrollY>300?"block":"none";
   if(window.innerHeight+window.scrollY>document.body.offsetHeight-300){
     carregar();
   }
 });
 
 busca.addEventListener("input",render);
+
+carregar();
+
+/* MENU */
+function openMenu(){mobileMenu.classList.add("active")}
+function closeMenu(){mobileMenu.classList.remove("active")}
 </script>
 
 </body>
