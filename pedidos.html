@@ -11,6 +11,7 @@
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  
 <style>
 :root{
   --primary:#ff6a00;
@@ -169,10 +170,17 @@ async function carregar(){
 
   const pedidosIds = pedidos.map(p=>p.id);
 
-  const { data: itens } = await sb
-    .from("pedidos_itens")
-    .select("*")
-    .in("pedido_id", pedidosIds);
+const { data: itens } = await sb
+  .from("pedidos_itens")
+  .select(`
+    *,
+    produtos_servicos (
+      id,
+      imagem_url
+    )
+  `)
+  .in("pedido_id", pedidosIds);
+
 
   const { data: pagamentos } = await sb
     .from("movimentacoes_pagamento")
@@ -220,7 +228,7 @@ async function carregar(){
         <div class="section-title"><i class="ri-shopping-cart-line"></i> Itens do Pedido</div>
         ${its.map(i=>`
           <div class="item">
-            <img src="${i.imagem_url || ''}">
+<img src="${i.produtos_servicos?.imagem_url || 'https://via.placeholder.com/150?text=Produto'}">
             <div>
               <div class="bold">${i.nome}</div>
               <div class="small">${i.quantidade} × ${money(i.preco_unitario)}</div>
