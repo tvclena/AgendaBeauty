@@ -143,7 +143,6 @@ async function continuar(){
     return;
   }
 
-  // Verifica se já existe
   const {data:existente} = await sb
     .from("clientes_loja")
     .select("id")
