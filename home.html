@@ -479,34 +479,48 @@ body::-webkit-scrollbar{
     <h3 id="tituloAgenda"></h3>
     <div id="agendaHoje"></div>
   </div>
+<div class="list">
+  <h3>Avisos</h3>
 
-  <div class="list">
-    <h3>Avisos</h3>
+  <!-- AVISO IMPORTANTE -->
+  <div class="item">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span>
+        Você faz parte de um grupo selecionado para usar esta ferramenta.
+        Ficamos felizes em te ter aqui e esperamos atender todas as expectativas.
+        Estamos empenhados em melhorar ainda mais sua experiência,
+        por esse motivo haverá constantes atualizações.
+      </span>
+    </div>
 
-<div class="item">
-  <div style="display:flex;flex-direction:column;gap:6px">
-    <span>
-      Qualquer instabilidade ou possíveis perdas de conteúdo,
-      acione nosso suporte. Se possível, envie prints para
-      entendermos o ocorrido e recuperar os dados.
-    </span>
+    <span class="badge">Importante</span>
   </div>
 
-  <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-    <span class="badge">Participe</span>
+  <!-- AVISO SUPORTE -->
+  <div class="item">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span>
+        Qualquer instabilidade ou possíveis perdas de conteúdo,
+        acione nosso suporte. Se possível, envie prints para
+        entendermos o ocorrido e recuperar os dados.
+      </span>
+    </div>
 
-    <a
-      class="btn-suporte"
-      href="https://wa.me/5577998253249?text=Ol%C3%A1%2C%20preciso%20de%20suporte%20na%20Clena%20Store.%20Estou%20enfrentando%20uma%20instabilidade%20ou%20perda%20de%20dados.%20Posso%20enviar%20prints%20para%20ajudar%20na%20an%C3%A1lise."
-      target="_blank"
-    >
-      <i class="ri-whatsapp-line"></i>
-      SUPORTE
-    </a>
+    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+      <span class="badge">Participe</span>
+
+      <a
+        class="btn-suporte"
+        href="https://wa.me/5577998253249?text=Ol%C3%A1%2C%20preciso%20de%20suporte%20na%20Clena%20Store.%20Estou%20enfrentando%20uma%20instabilidade%20ou%20perda%20de%20dados.%20Posso%20enviar%20prints%20para%20ajudar%20na%20an%C3%A1lise."
+        target="_blank"
+      >
+        <i class="ri-whatsapp-line"></i>
+        SUPORTE
+      </a>
+    </div>
   </div>
 </div>
 
-  </div>
 
 </div>
 
@@ -965,16 +979,6 @@ ${
 }
 
 
-    ${
-      a.updated_at && a.updated_at !== a.created_at
-      ? `
-        <div class="historico-item">
-          <strong>Última alteração</strong>
-          ${formatarDataHora(a.updated_at)}
-        </div>
-      `
-      : ""
-    }
 
     <div class="historico-item">
       <strong>Status atual</strong>
