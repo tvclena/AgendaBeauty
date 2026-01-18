@@ -431,6 +431,21 @@ body::-webkit-scrollbar{
 .btn-suporte i{
   font-size:16px;
 }
+.btn-dia{
+  border:none;
+  background:#f1f5f9;
+  color:#111;
+  width:32px;
+  height:32px;
+  border-radius:10px;
+  font-size:18px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.btn-dia:active{
+  transform:scale(.92);
+}
 
 </style>
 </head>
@@ -476,7 +491,14 @@ body::-webkit-scrollbar{
 <div class="main-content">
 
   <div class="list">
-    <h3 id="tituloAgenda"></h3>
+<div style="display:flex;align-items:center;justify-content:space-between">
+  <h3 id="tituloAgenda"></h3>
+
+  <div style="display:flex;gap:6px">
+    <button class="btn-dia" onclick="mudarDia(-1)">‹</button>
+    <button class="btn-dia" onclick="mudarDia(1)">›</button>
+  </div>
+</div>
     <div id="agendaHoje"></div>
   </div>
 <div class="list">
@@ -530,6 +552,15 @@ let dataAtual = new Date();
 
 function dataISO(d){
   return d.toLocaleDateString("en-CA");
+}
+function mudarDia(direcao){
+  dataAtual.setDate(dataAtual.getDate() + direcao);
+
+  sbHome.auth.getSession().then(({data:{session}})=>{
+    if(session){
+      carregarAgendaDia(session.user.id);
+    }
+  });
 }
 
 const sbHome = supabase.createClient(
