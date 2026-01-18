@@ -114,10 +114,42 @@ button{
 .close{background:#f3f4f6}
 
 @media print{
-  body{background:#fff;padding:0}
-  .actions{display:none}
-  .card,.header{box-shadow:none;border-radius:0}
+  body{
+    background:#fff;
+    padding:0;
+  }
+
+  /* esconde tudo */
+  body *{
+    visibility:hidden;
+  }
+
+  /* mostra apenas o pedido selecionado */
+  .print-only,
+  .print-only *{
+    visibility:visible;
+  }
+
+  .print-only{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+  }
+
+  /* remove botões e header */
+  .actions,
+  .header{
+    display:none !important;
+  }
+
+  .card{
+    box-shadow:none;
+    border-radius:0;
+    margin:0;
+  }
 }
+
 </style>
 </head>
 
@@ -256,7 +288,7 @@ const produtosMap = {};
         </div>
 
         <div class="actions">
-          <button class="print" onclick="window.print()">Imprimir pedido</button>
+<button class="print" onclick="imprimirPedido(this)">Imprimir pedido</button>
           <button class="close" onclick="this.closest('.card').remove()">Fechar</button>
         </div>
 
@@ -266,6 +298,27 @@ const produtosMap = {};
 }
 
 carregar();
+carregar();
+
+function imprimirPedido(botao){
+  // remove marcação anterior
+  document.querySelectorAll('.card').forEach(c =>
+    c.classList.remove('print-only')
+  );
+
+  // marca somente o pedido clicado
+  const card = botao.closest('.card');
+  card.classList.add('print-only');
+
+  window.print();
+
+  // limpa após a impressão
+  setTimeout(() => {
+    card.classList.remove('print-only');
+  }, 500);
+}
+</script>
+
 </script>
 
 </body>
