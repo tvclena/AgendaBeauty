@@ -314,7 +314,19 @@ body{
   border-radius:18px;
   font-weight:800;
 }
+/* ===== ORDENACAO DRAG ===== */
+.item.dragging {
+  opacity: .4;
+}
 
+.item.drag-over {
+  outline: 2px dashed var(--primary);
+}
+
+
+
+
+  
 
 </style>
 </head>
@@ -470,6 +482,9 @@ const sb=supabase.createClient(
 );
 let pagamentoOnlineAtivo = false;
 let userId,itens=[],editId=null,blob=null;
+let dragEl = null;
+let pressTimer = null;
+
 const TIPO_LABEL = {
   SERVICO: "SERVIÇO",
   PRODUTO: "PRODUTO"
@@ -599,7 +614,9 @@ function render(){
   return true;
  }).forEach(i=>{
  lista.innerHTML+=`
- <div class="item">
+<div class="item"
+     draggable="true"
+     data-id="${i.id}">
   ${i.imagem_url?`<img src="${i.imagem_url}">`:""}
   <div class="item-body">
    <h4>${i.nome}</h4>
@@ -618,8 +635,105 @@ function render(){
   </div>
  </div>`;
  });
+ ativarOrdenacao();
 }
 
+
+
+function ativarOrdenacao() {
+  const cards = document.querySelectorAll(".item");
+
+  cards.forEach(card => {
+
+    /* ===== DESKTOP ===== */
+    card.addEventListener("dragstart", e => {
+      dragEl = card;
+      card.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+    });
+
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+      salvarNovaOrdem();
+    });
+
+    card.addEventListener("dragover", e => {
+      e.preventDefault();
+      const after = getDragAfterElement(lista, e.clientY);
+      if (!after) lista.appendChild(dragEl);
+      else lista.insertBefore(dragEl, after);
+    });
+
+    /* ===== MOBILE (TOQUE LONGO) ===== */
+    card.addEventListener("touchstart", () => {
+      pressTimer = setTimeout(() => {
+        dragEl = card;
+        card.classList.add("dragging");
+      }, 250);
+    });
+
+    card.addEventListener("touchend", () => {
+      clearTimeout(pressTimer);
+      if (dragEl) {
+        dragEl.classList.remove("dragging");
+        dragEl = null;
+        salvarNovaOrdem();
+      }
+    });
+
+    card.addEventListener("touchmove", e => {
+      if (!dragEl) return;
+      const touch = e.touches[0];
+      const after = getDragAfterElement(lista, touch.clientY);
+      if (!after) lista.appendChild(dragEl);
+      else lista.insertBefore(dragEl, after);
+    });
+
+  });
+}
+function getDragAfterElement(container, y) {
+  const els = [...container.querySelectorAll(".item:not(.dragging)")];
+
+  return els.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset, element: child };
+    }
+    return closest;
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+async function salvarNovaOrdem() {
+  const cards = document.querySelectorAll(".item");
+
+  const updates = [...cards].map((card, index) => ({
+    id: card.dataset.id,
+    ordem_exibicao: index + 1
+  }));
+
+  // atualiza local
+  updates.forEach(u => {
+    const item = itens.find(i => i.id === u.id);
+    if (item) item.ordem_exibicao = u.ordem_exibicao;
+  });
+
+  // atualiza Supabase
+  await Promise.all(
+    updates.map(u =>
+      sb.from("produtos_servicos")
+        .update({ ordem_exibicao: u.ordem_exibicao })
+        .eq("id", u.id)
+    )
+  );
+}
+
+
+
+
+
+
+
+  
 function editar(id){
  const i=itens.find(x=>x.id===id);
  editId=id;
