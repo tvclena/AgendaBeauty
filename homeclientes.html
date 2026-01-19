@@ -1120,6 +1120,7 @@ const sb = supabase.createClient(
 let galeria = [];
 let imgIndex = 0;
 
+
 const lojaId = new URLSearchParams(location.search).get("l");
 if(!lojaId){
   document.body.innerHTML = "<p style='text-align:center'>Loja não identificada</p>";
@@ -1480,7 +1481,7 @@ const imagens = extrairImagens(produtoAtual.imagem_url);
 
 galeria = extrairImagens(produtoAtual.imagem_url);
 if(!galeria.length) galeria = [""]; // segurança
-imgIndex = 0;
+imgIndex = galeria.length > 1 ? 1 : 0;
 
 
 // DESKTOP → começa na primeira imagem (carrossel)
@@ -1556,6 +1557,8 @@ if (produtoAtual.tipo === "PRODUTO") {
   carregarRelacionados();
   configurarBotaoAcaoModal();
 
+  iniciarAutoplay(); // 🔥 AQUI
+
   document.body.classList.add("modal-open");
   modalProduto.style.display = "flex";
 }
@@ -1629,9 +1632,12 @@ function fecharProduto(){
   if (window.mpObsCarrinho) mpObsCarrinho.value = "";
   notaSelecionada = 5;
 
+  pararAutoplay(); // 🔥 AQUI
+
   modalProduto.style.display = "none";
-  document.body.classList.remove("modal-open"); // 🔓 LIBERA FUNDO
+  document.body.classList.remove("modal-open");
 }
+
 
 
 
@@ -2034,7 +2040,22 @@ function imgPrev(){
 }
 
 
-  
+  let autoplay = null;
+
+function iniciarAutoplay(){
+  pararAutoplay();
+  autoplay = setInterval(() => {
+    imgNext();
+  }, 3500); // 3.5 segundos
+}
+
+function pararAutoplay(){
+  if(autoplay){
+    clearInterval(autoplay);
+    autoplay = null;
+  }
+}
+
 
 
   
