@@ -561,6 +561,53 @@ body{margin:0;background:var(--bg);padding:16px}
 }
 
 
+/* ===== STATUS LOJA (AVALIAÇÕES + SELO) ===== */
+.banner-status{
+  position:absolute;
+  top:14px;
+  right:14px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:6px;
+}
+
+/* Estrelas */
+.banner-stars{
+  background:rgba(255,255,255,.18);
+  backdrop-filter:blur(6px);
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:800;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+
+.banner-stars span{
+  color:#facc15;
+  letter-spacing:-1px;
+}
+
+/* Loja verificada */
+.banner-verificada{
+  background:rgba(16,185,129,.18);
+  color:#ecfdf5;
+  font-size:11px;
+  font-weight:900;
+  padding:5px 10px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+
+.banner-verificada i{
+  color:#34d399;
+  font-size:14px;
+}
 
   
 
@@ -610,6 +657,17 @@ body{margin:0;background:var(--bg);padding:16px}
   <button id="btnBio" class="bio-toggle" style="display:none">
     Ver mais
   </button>
+</div>
+<!-- STATUS DA LOJA (AVALIAÇÕES + SELO) -->
+<div class="banner-status">
+  <div class="banner-stars" id="bannerStars">
+    ⭐ Sem avaliações
+  </div>
+
+  <div class="banner-verificada" id="bannerVerificada" style="display:none">
+    <i class="ri-shield-check-fill"></i>
+    Loja verificada
+  </div>
 </div>
 
 
@@ -738,7 +796,11 @@ tipoAtual = temServ ? "SERVICO" : temProd ? "PRODUTO" : null;
 await carregarVendasProdutos();
 await carregarAvaliacoesResumo();
 
+await carregarMediaLoja();
+await verificarLojaVerificada();
+
 setTab(tipoAtual);
+
 
 }
 
@@ -1185,7 +1247,56 @@ function formatarDataBR(dataISO){
 }
 
   
+async function carregarMediaLoja(){
+  if(!bannerStars) return;
 
+  const { data, error } = await sb
+    .from("avaliacoes_loja")
+    .select("nota")
+    .eq("loja_id", lojaId);
+
+  if(error || !data || data.length === 0){
+    bannerStars.innerHTML = "⭐ Sem avaliações";
+    return;
+  }
+
+  const soma = data.reduce((s,a)=>s + a.nota, 0);
+  const media = (soma / data.length).toFixed(1);
+
+  const estrelasCheias = Math.round(media);
+  const estrelas =
+    "★".repeat(estrelasCheias) +
+    "☆".repeat(5 - estrelasCheias);
+
+  bannerStars.innerHTML = `
+    <span>${estrelas}</span>
+    ${media}
+  `;
+}
+
+async function verificarLojaVerificada(){
+  if(!bannerVerificada) return;
+
+  const { data, error } = await sb
+    .from("user_profile")
+    .select("status")
+    .eq("user_id", lojaId)
+    .maybeSingle();
+
+  if(!error && data?.status === "active"){
+    bannerVerificada.style.display = "flex";
+  }
+}
+
+
+
+
+
+
+
+
+
+  
 
 
 
