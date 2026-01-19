@@ -1093,7 +1093,8 @@ const bannerVerificada = document.getElementById("bannerVerificada");
 let produtoAtual = null;
 
 let modalProduto,
-    mpImagem,
+    mpImagemDesktop,
+    mpImagemMobile,
     mpNome,
     mpDescricao,
     mpPreco,
@@ -1101,7 +1102,7 @@ let modalProduto,
     mpVendidos,
     mpAvaliacao,
     mpMedia,
-    mpComentario,      // 🔥 FALTAVA
+    mpComentario,
     mpComentarios,
     mpRelacionados,
     mpObsCarrinho;
@@ -1109,7 +1110,8 @@ let modalProduto,
 
 function mapearModal(){
   modalProduto   = document.getElementById("modalProduto");
-  mpImagem       = document.getElementById("mpImagem");
+  mpImagemDesktop = document.getElementById("mpImagemDesktop");
+  mpImagemMobile  = document.getElementById("mpImagemMobile");
   mpNome         = document.getElementById("mpNome");
   mpDescricao    = document.getElementById("mpDescricao");
   mpPreco        = document.getElementById("mpPreco");
@@ -1117,11 +1119,12 @@ function mapearModal(){
   mpVendidos     = document.getElementById("mpVendidos");
   mpAvaliacao    = document.getElementById("mpAvaliacao");
   mpMedia        = document.getElementById("mpMedia");
-  mpComentario   = document.getElementById("mpComentario"); // 🔥 ESSENCIAL
+  mpComentario   = document.getElementById("mpComentario");
   mpComentarios  = document.getElementById("mpComentarios");
   mpRelacionados = document.getElementById("mpRelacionados");
   mpObsCarrinho  = document.getElementById("mpObsCarrinho");
 }
+
 
 
   
@@ -1337,7 +1340,7 @@ const lista = todos
 <div class="card" onclick="abrirProduto('${i.id}')">
       <div style="position:relative">
         ${i.promocao_ativa ? `<div class="badge">Promoção</div>`:""}
-        <img src="${i.imagem_url||""}">
+<img src="${extrairImagens(i.imagem_url)[0] || ''}">
       </div>
       <div class="card-body">
 <strong class="item-nome">${i.nome}</strong>
@@ -1433,7 +1436,14 @@ function abrirProduto(id){
   produtoAtual = todos.find(p => p.id === id);
   if(!produtoAtual) return;
 
-  mpImagem.src = produtoAtual.imagem_url || "";
+const imagens = extrairImagens(produtoAtual.imagem_url);
+
+// mobile sempre primeira
+mpImagemMobile.src = imagens[0] || "";
+
+// desktop usa a segunda, se existir
+mpImagemDesktop.src =
+  imagens[1] || imagens[0] || "";
   mpNome.innerText = produtoAtual.nome;
   mpDescricao.innerText = produtoAtual.descricao || "";
 
@@ -1711,7 +1721,7 @@ function carregarRelacionados(){
 
   mpRelacionados.innerHTML = relacionados.map(p=>`
     <div class="card" onclick="abrirProduto('${p.id}')">
-      <img src="${p.imagem_url || ''}">
+<img src="${extrairImagens(p.imagem_url)[0] || ''}">
       <div class="card-body">
         <strong>${p.nome}</strong>
       </div>
@@ -1944,7 +1954,18 @@ requestAnimationFrame(()=>{
 
   }, 700);
 }
+function extrairImagens(imagem_url){
+  if(!imagem_url) return [];
 
+  return imagem_url
+    .split(",")
+    .map(i => i.trim())
+    .filter(Boolean);
+}
+
+
+
+  
 
 
   
@@ -1969,18 +1990,20 @@ requestAnimationFrame(()=>{
   <div class="modal-box" onclick="event.stopPropagation()">
 
     <!-- IMAGEM -->
-    <div class="modal-img">
-      <img id="mpImagem">
-    </div>
+<div class="modal-img">
+  <img id="mpImagemDesktop">
+</div>
+
 
     <!-- CONTEÚDO -->
     <div class="modal-content">
 
 <div class="modal-topo-simples">
 
-  <div class="modal-img-mini">
-    <img id="mpImagem">
-  </div>
+<div class="modal-img-mini">
+  <img id="mpImagemMobile">
+</div>
+
 
   <div class="modal-info-simples">
 
