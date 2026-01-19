@@ -403,8 +403,11 @@ const frame = document.getElementById("frame");
   
 let user, perfil;
 frame.addEventListener("load", () => {
-  atualizarBadgeCarrinho();
+  if (typeof atualizarBadgeCarrinho === "function") {
+    atualizarBadgeCarrinho();
+  }
 });
+
 
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
@@ -828,7 +831,11 @@ function abrirCarrinho(){
 }
 
 /* 🔥 AQUI — FORA DE FUNÇÕES */
-setInterval(atualizarBadgeCarrinho, 1000);
+setInterval(() => {
+  if (typeof atualizarBadgeCarrinho === "function") {
+    atualizarBadgeCarrinho();
+  }
+}, 1000);
 
 
 
