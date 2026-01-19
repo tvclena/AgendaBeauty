@@ -30,7 +30,6 @@ body{margin:0;background:var(--bg);padding:16px;color:var(--text)}
   padding:14px 16px;
   border-radius:14px;
   border:1px solid var(--border);
-  font-size:14px;
 }
 
 /* FILTROS */
@@ -78,29 +77,20 @@ body{margin:0;background:var(--bg);padding:16px;color:var(--text)}
   height:140px;
   object-fit:cover;
 }
-.card-body{
-  padding:12px;
-}
+.card-body{padding:12px}
 .card-body strong{
   display:block;
   font-size:14px;
   font-weight:800;
 }
-.card-stars{
-  color:#facc15;
-  font-size:13px;
-  margin:4px 0;
-}
-.card-price{
-  font-weight:900;
-  font-size:15px;
-}
+.card-stars{color:#facc15;font-size:13px;margin:4px 0}
+.card-price{font-weight:900;font-size:15px}
 
 /* MODAL */
 .modal{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.6);
+  background:rgba(0,0,0,.65);
   display:none;
   align-items:center;
   justify-content:center;
@@ -114,32 +104,17 @@ body{margin:0;background:var(--bg);padding:16px;color:var(--text)}
   display:flex;
   overflow:hidden;
 }
-.modal-img{
-  width:45%;
-}
-.modal-img img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
+.modal-img{width:45%}
+.modal-img img{width:100%;height:100%;object-fit:cover}
 .modal-content{
   width:55%;
   padding:20px;
   overflow-y:auto;
 }
-.modal-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.modal-header h2{
-  font-size:20px;
-  font-weight:800;
-}
 .modal-preco{
   font-size:18px;
   font-weight:900;
-  margin:8px 0;
+  margin:6px 0 10px;
 }
 textarea{
   width:100%;
@@ -166,15 +141,33 @@ textarea{
   margin-top:8px;
 }
 
+/* AVALIAÇÕES */
+.avaliacao-item{
+  display:flex;
+  gap:10px;
+  border-top:1px solid #eee;
+  padding:10px 0;
+}
+.avaliacao-avatar{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:var(--primary);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+}
+.avaliacao-stars{color:#facc15}
+
 /* RELACIONADOS */
 .relacionados{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:10px;
 }
-.relacionados .card img{
-  height:90px;
-}
+.relacionados .card img{height:90px}
 </style>
 </head>
 
@@ -185,16 +178,16 @@ textarea{
 </div>
 
 <div class="filters" id="filtros"></div>
-
 <div id="grid" class="grid"></div>
 
+<!-- MODAL -->
 <div class="modal" id="modalProduto" onclick="fecharProduto()">
   <div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-img"><img id="mpImagem"></div>
     <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="mpNome"></h2>
-      </div>
+
+      <h2 id="mpNome"></h2>
+      <p id="mpDescricao"></p>
 
       <div class="modal-preco">R$ <span id="mpPreco"></span></div>
 
@@ -204,56 +197,75 @@ textarea{
       <button class="btn-primary" onclick="adicionarAoCarrinho()">Adicionar ao carrinho</button>
       <button class="btn-secondary" onclick="fecharProduto()">Fechar</button>
 
+      <hr style="margin:16px 0">
+
+      <!-- AVALIAÇÃO -->
+      <div id="mpAvaliacao"></div>
+      <p id="mpMedia"></p>
+
+      <textarea id="mpComentario" placeholder="Escreva sua avaliação"></textarea>
+      <button class="btn-primary" style="margin-top:8px" onclick="enviarAvaliacao()">Enviar avaliação</button>
+
+      <div id="mpComentarios"></div>
+
       <h4 style="margin-top:20px">Produtos relacionados</h4>
       <div id="mpRelacionados" class="relacionados"></div>
+
     </div>
   </div>
 </div>
 
 <script>
-const sb=supabase.createClient(
+const sb = supabase.createClient(
  "https://egxjgmzukjyyxmkukwub.supabase.co",
  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-const lojaId=new URLSearchParams(location.search).get("l");
-const grid=document.getElementById("grid");
-const filtros=document.getElementById("filtros");
-const busca=document.getElementById("busca");
+const lojaId = new URLSearchParams(location.search).get("l");
+const grid = document.getElementById("grid");
+const filtros = document.getElementById("filtros");
+const busca = document.getElementById("busca");
 
-let produtos=[],produtoAtual=null,categoriaAtiva="ALL",precoMax=null;
+let produtos = [];
+let produtoAtual = null;
+let categoriaAtiva = "ALL";
+let notaSelecionada = 5;
 
+/* LOAD */
 async function load(){
- const {data}=await sb.from("produtos_servicos")
+ const { data } = await sb
+  .from("produtos_servicos")
   .select("*")
-  .eq("ativo",true)
-  .eq("tipo","PRODUTO")
-  .eq("user_id",lojaId);
+  .eq("user_id", lojaId)
+  .eq("ativo", true)
+  .eq("tipo", "PRODUTO");
 
- produtos=data||[];
+ produtos = data || [];
  montarFiltros();
  render();
 }
 
+/* FILTROS */
 function montarFiltros(){
- const cats=[...new Set(produtos.map(p=>p.categoria).filter(Boolean))];
- filtros.innerHTML=`<div class="filter-chip active" onclick="setCategoria('ALL',this)">Todos</div>`+
- cats.map(c=>`<div class="filter-chip" onclick="setCategoria('${c}',this)">${c}</div>`).join("");
+ const cats = [...new Set(produtos.map(p=>p.categoria).filter(Boolean))];
+ filtros.innerHTML =
+  `<div class="filter-chip active" onclick="setCategoria('ALL',this)">Todos</div>` +
+  cats.map(c=>`<div class="filter-chip" onclick="setCategoria('${c}',this)">${c}</div>`).join("");
 }
-
 function setCategoria(c,el){
- categoriaAtiva=c;
- document.querySelectorAll(".filter-chip").forEach(e=>e.classList.remove("active"));
+ categoriaAtiva = c;
+ document.querySelectorAll(".filter-chip").forEach(f=>f.classList.remove("active"));
  el.classList.add("active");
  render();
 }
 
+/* RENDER */
 function render(){
- const q=busca.value.toLowerCase();
- grid.innerHTML=produtos.filter(p=>{
-  if(categoriaAtiva!=="ALL"&&p.categoria!==categoriaAtiva)return false;
-  if(!p.nome.toLowerCase().includes(q))return false;
-  return true;
+ const q = busca.value.toLowerCase();
+ grid.innerHTML = produtos.filter(p=>{
+   if(categoriaAtiva!=="ALL" && p.categoria!==categoriaAtiva) return false;
+   if(!p.nome.toLowerCase().includes(q)) return false;
+   return true;
  }).map(p=>`
   <div class="card" onclick="abrirProduto('${p.id}')">
     <img src="${p.imagem_url||""}">
@@ -262,20 +274,25 @@ function render(){
       <div class="card-price">R$ ${p.preco.toFixed(2).replace(".",",")}</div>
     </div>
   </div>
- `).join("");
+ `).join("") || "<p>Nenhum produto encontrado</p>";
 }
+busca.addEventListener("input",render);
 
+/* MODAL */
 function abrirProduto(id){
- produtoAtual=produtos.find(p=>p.id===id);
- mpImagem.src=produtoAtual.imagem_url;
- mpNome.innerText=produtoAtual.nome;
- mpPreco.innerText=produtoAtual.preco.toFixed(2).replace(".",",");
+ produtoAtual = produtos.find(p=>p.id===id);
+ mpImagem.src = produtoAtual.imagem_url||"";
+ mpNome.innerText = produtoAtual.nome;
+ mpDescricao.innerText = produtoAtual.descricao||"";
+ mpPreco.innerText = produtoAtual.preco.toFixed(2).replace(".",",");
  modalProduto.style.display="flex";
+ renderEstrelas();
+ carregarAvaliacoes();
  carregarRelacionados();
 }
-
 function fecharProduto(){modalProduto.style.display="none"}
 
+/* CARRINHO */
 function adicionarAoCarrinho(){
  const k="carrinho_"+lojaId;
  const c=JSON.parse(localStorage.getItem(k)||"[]");
@@ -285,19 +302,68 @@ function adicionarAoCarrinho(){
  fecharProduto();
 }
 
+/* AVALIAÇÕES */
+function renderEstrelas(){
+ mpAvaliacao.innerHTML=[1,2,3,4,5].map(n=>`
+  <i class="ri-star-${n<=notaSelecionada?'fill':'line'}"
+     style="font-size:22px;color:#facc15;cursor:pointer"
+     onclick="notaSelecionada=${n};renderEstrelas()"></i>
+ `).join("");
+}
+async function carregarAvaliacoes(){
+ const { data } = await sb
+  .from("avaliacoes_loja")
+  .select("*")
+  .eq("produto_id",produtoAtual.id)
+  .eq("loja_id",lojaId);
+
+ if(!data||!data.length){
+  mpMedia.innerText="Sem avaliações";
+  mpComentarios.innerHTML="";
+  return;
+ }
+
+ const media=(data.reduce((s,a)=>s+a.nota,0)/data.length).toFixed(1);
+ mpMedia.innerText=`⭐ ${media} • ${data.length} avaliações`;
+
+ mpComentarios.innerHTML=data.map(a=>`
+  <div class="avaliacao-item">
+    <div class="avaliacao-avatar">${(a.cliente_nome||"C")[0]}</div>
+    <div>
+      <strong>${a.cliente_nome||"Cliente"}</strong>
+      <div class="avaliacao-stars">${"★".repeat(a.nota)}${"☆".repeat(5-a.nota)}</div>
+      <div>${a.comentario}</div>
+    </div>
+  </div>
+ `).join("");
+}
+async function enviarAvaliacao(){
+ if(!mpComentario.value.trim()) return;
+ await sb.from("avaliacoes_loja").insert({
+  loja_id:lojaId,
+  produto_id:produtoAtual.id,
+  nota:notaSelecionada,
+  comentario:mpComentario.value
+ });
+ mpComentario.value="";
+ notaSelecionada=5;
+ renderEstrelas();
+ carregarAvaliacoes();
+}
+
+/* RELACIONADOS */
 function carregarRelacionados(){
- mpRelacionados.innerHTML=produtos
-  .filter(p=>p.categoria===produtoAtual.categoria&&p.id!==produtoAtual.id)
+ mpRelacionados.innerHTML = produtos
+  .filter(p=>p.categoria===produtoAtual.categoria && p.id!==produtoAtual.id)
   .slice(0,4)
   .map(p=>`
     <div class="card" onclick="abrirProduto('${p.id}')">
-      <img src="${p.imagem_url}">
+      <img src="${p.imagem_url||""}">
       <div class="card-body"><strong>${p.nome}</strong></div>
     </div>
   `).join("");
 }
 
-busca.addEventListener("input",render);
 load();
 </script>
 
