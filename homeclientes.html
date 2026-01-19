@@ -407,6 +407,24 @@ body{margin:0;background:var(--bg);padding:16px}
     font-size:14px;
   }
 }
+.card-info-extra{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  color:#6b7280;
+  margin:4px 0 6px;
+}
+
+.card-stars{
+  color:#facc15;
+  letter-spacing:-1px;
+  font-size:13px;
+}
+
+.card-vendidos{
+  font-weight:600;
+}
 
 </style>
 </head>
@@ -469,6 +487,8 @@ if(!lojaId){
 
 let todos = [];
 let tipoAtual = null;
+let vendasPorProduto = {};   // { produto_id: total_vendido }
+let avaliacoesPorItem = {}; // { produto_id: { total, soma } }
 
 /* ================= LOAD ================= */
 async function load(){
@@ -539,9 +559,60 @@ if (numero.startsWith("55")) numero = numero.slice(2);
   tabServicos.style.display = temServ ? "inline-block" : "none";
   tabProdutos.style.display = temProd ? "inline-block" : "none";
 
-  tipoAtual = temServ ? "SERVICO" : temProd ? "PRODUTO" : null;
-  setTab(tipoAtual);
+tipoAtual = temServ ? "SERVICO" : temProd ? "PRODUTO" : null;
+
+await carregarVendasProdutos();
+await carregarAvaliacoesResumo();
+
+setTab(tipoAtual);
+
 }
+
+async function carregarVendasProdutos(){
+  const { data, error } = await sb
+    .from("pedidos_itens")
+    .select(`
+      produto_id,
+      quantidade,
+      pedidos!inner(status)
+    `)
+    .in("pedidos.status", ["PAGO","CONCLUIDO","FINALIZADO"]);
+
+  if(error){
+    console.error("Erro vendas:", error);
+    return;
+  }
+
+  data.forEach(i=>{
+    vendasPorProduto[i.produto_id] =
+      (vendasPorProduto[i.produto_id] || 0) + i.quantidade;
+  });
+}
+async function carregarAvaliacoesResumo(){
+  const { data, error } = await sb
+    .from("avaliacoes_loja")
+    .select("produto_id, nota");
+
+  if(error){
+    console.error("Erro avaliações resumo:", error);
+    return;
+  }
+
+  data.forEach(a=>{
+    if(!avaliacoesPorItem[a.produto_id]){
+      avaliacoesPorItem[a.produto_id] = {
+        total: 0,
+        soma: 0
+      };
+    }
+    avaliacoesPorItem[a.produto_id].total += 1;
+    avaliacoesPorItem[a.produto_id].soma += a.nota;
+  });
+}
+
+
+
+  
 
 /* ================= RENDER ================= */
 function render(){
@@ -564,25 +635,52 @@ function render(){
         <img src="${i.imagem_url||""}">
       </div>
       <div class="card-body">
-        <strong>${i.nome}</strong>
-        <div class="meta">
-<span>
+  <strong>${i.nome}</strong>
+
   ${
-    i.tipo === "SERVICO"
-      ? `⏱ ${i.duracao_minutos || 0} min`
-      : i.controla_estoque
-        ? `📦 Estoque: ${i.estoque_atual}`
-        : `📦 Estoque livre`
-  }
-</span>
-<span class="price">R$ ${Number(i.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}</span>
+    avaliacoesPorItem[i.id]
+      ? `
+        <div class="card-info-extra">
+          <div class="card-stars">
+            ${"★".repeat(
+              Math.round(avaliacoesPorItem[i.id].soma / avaliacoesPorItem[i.id].total)
+            )}
+            ${"☆".repeat(
+              5 - Math.round(avaliacoesPorItem[i.id].soma / avaliacoesPorItem[i.id].total)
+            )}
+          </div>
+
+          ${
+            i.tipo === "PRODUTO"
+              ? `<span class="card-vendidos">• ${vendasPorProduto[i.id] || 0} vendidos</span>`
+              : `<span>• ${avaliacoesPorItem[i.id].total} avaliações</span>`
+          }
         </div>
-<button onclick="event.stopPropagation(); acao('${i.id}','${i.tipo}')">
-${i.tipo==="SERVICO"
-  ? (i.preco > 0 ? "Agendar" : "Orçamento")
-  : "Comprar"
-}
-        </button>
+      `
+      : ""
+  }
+
+  <div class="meta">
+    <span>
+      ${
+        i.tipo === "SERVICO"
+          ? `⏱ ${i.duracao_minutos || 0} min`
+          : i.controla_estoque
+            ? `📦 Estoque: ${i.estoque_atual}`
+            : `📦 Estoque livre`
+      }
+    </span>
+    <span class="price">
+      R$ ${Number(i.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+    </span>
+  </div>
+
+  <button onclick="event.stopPropagation(); acao('${i.id}','${i.tipo}')">
+    ${i.tipo==="SERVICO"
+      ? (i.preco > 0 ? "Agendar" : "Orçamento")
+      : "Comprar"}
+  </button>
+
       </div>
     </div>
   `).join("");
