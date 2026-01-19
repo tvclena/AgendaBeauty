@@ -220,25 +220,111 @@ body{margin:0;background:var(--bg);padding:16px}
 .loja-titulo a:hover i{
   transform:scale(1.15);
 }
-/* ================= MODAL ================= */
+/* ================= MODAL PRODUTO ================= */
 .modal{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.45);
+  background:rgba(0,0,0,.55);
   display:none;
   align-items:center;
   justify-content:center;
   z-index:999;
+  padding:16px;
 }
 
 .modal-box{
   background:#fff;
-  border-radius:18px;
-  width:90%;
+  border-radius:22px;
+  width:100%;
+  max-width:860px;
   max-height:90vh;
-  overflow-y:auto;
-  padding:16px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:row;
+  box-shadow:0 25px 60px rgba(0,0,0,.25);
 }
+
+/* IMAGEM */
+.modal-img{
+  width:45%;
+  background:#f3f4f6;
+}
+.modal-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* CONTEÚDO */
+.modal-content{
+  width:55%;
+  padding:20px;
+  overflow-y:auto;
+}
+
+.modal-content h2{
+  margin:0 0 6px;
+  font-size:20px;
+  font-weight:800;
+}
+
+.modal-content p{
+  font-size:14px;
+  color:#555;
+  line-height:1.4;
+}
+
+/* PREÇO */
+.modal-preco{
+  font-size:18px;
+  font-weight:900;
+  color:var(--primary);
+  margin:10px 0;
+}
+
+/* BOTÕES */
+.modal-actions{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+.modal-actions .btn,
+.modal-actions .btn-sec{
+  flex:1;
+  padding:12px;
+  font-size:14px;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+  .modal-box{
+    flex-direction:column;
+    max-width:420px;
+  }
+
+  .modal-img{
+    width:100%;
+    height:220px;
+  }
+
+  .modal-content{
+    width:100%;
+    padding:16px;
+  }
+
+  .modal-content h2{
+    font-size:17px;
+  }
+
+  .modal-preco{
+    font-size:16px;
+  }
+
+  .modal-actions{
+    flex-direction:column;
+  }
+}
+
 .btn-sec{
   width:100%;
   padding:12px;
@@ -738,71 +824,59 @@ function adicionarAoCarrinho(){
 
   
 </script>
-<!-- MODAL PRODUTO -->
 <div class="modal" id="modalProduto" onclick="fecharProduto()">
-  <div class="modal-box" style="max-width:420px" onclick="event.stopPropagation()">
+  <div class="modal-box" onclick="event.stopPropagation()">
 
     <!-- IMAGEM -->
-    <img id="mpImagem" style="width:100%;border-radius:14px;margin-bottom:10px">
-
-    <!-- NOME -->
-    <h2 id="mpNome"></h2>
-
-    <!-- DESCRIÇÃO -->
-    <p id="mpDescricao" style="font-size:14px;color:#555"></p>
-
-    <!-- PREÇO -->
-    <div style="margin:10px 0;font-weight:900;font-size:18px">
-      R$ <span id="mpPreco"></span>
+    <div class="modal-img">
+      <img id="mpImagem">
     </div>
 
-<div id="obsCarrinhoBox">
-  <label style="font-size:12px;font-weight:700;color:#555">
-    Observação para este produto (opcional)
-  </label>
-  <textarea id="mpObsCarrinho"
-    placeholder="Ex: sem cebola, embalagem separada, presente…"
-    style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border)">
-  </textarea>
-</div>
+    <!-- CONTEÚDO -->
+    <div class="modal-content">
 
+      <h2 id="mpNome"></h2>
 
-<button class="btn"
-  id="btnAcaoModal"
-  style="margin-top:10px">
-</button>
+      <p id="mpDescricao"></p>
 
+      <div class="modal-preco">
+        R$ <span id="mpPreco"></span>
+      </div>
 
-    <hr style="margin:16px 0;border:none;border-top:1px solid #eee">
+      <!-- OBS PRODUTO -->
+      <div id="obsCarrinhoBox">
+        <label style="font-size:12px;font-weight:700;color:#555">
+          Observação (opcional)
+        </label>
+        <textarea id="mpObsCarrinho"
+          style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border)">
+        </textarea>
+      </div>
 
-    <!-- AVALIAÇÃO -->
-    <div id="mpAvaliacao"></div>
-    <p id="mpMedia" style="font-size:13px;color:#666"></p>
+      <!-- BOTÃO PRINCIPAL -->
+      <div class="modal-actions">
+        <button class="btn" id="btnAcaoModal"></button>
+        <button class="btn-sec" onclick="fecharProduto()">Fechar</button>
+      </div>
 
-    <!-- COMENTÁRIO DE AVALIAÇÃO -->
-    <textarea id="mpComentario"
-      placeholder="Escreva sua avaliação"
-      style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border)">
-    </textarea>
+      <hr style="margin:16px 0;border:none;border-top:1px solid #eee">
 
-    <button class="btn"
-      style="margin-top:10px"
-      onclick="enviarAvaliacao()">
-      ⭐ Enviar avaliação
-    </button>
+      <!-- AVALIAÇÃO -->
+      <div id="mpAvaliacao"></div>
+      <p id="mpMedia" style="font-size:13px;color:#666"></p>
 
-    <!-- COMENTÁRIOS -->
-    <div id="mpComentarios" style="margin-top:14px"></div>
+      <textarea id="mpComentario"
+        placeholder="Escreva sua avaliação"
+        style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border)">
+      </textarea>
 
-    <!-- RELACIONADOS -->
-    <h3 style="margin-top:16px">Produtos relacionados</h3>
-    <div id="mpRelacionados" class="grid"></div>
+      <button class="btn" style="margin-top:10px" onclick="enviarAvaliacao()">
+        ⭐ Enviar avaliação
+      </button>
 
-    <!-- FECHAR -->
-    <button class="btn-sec" style="margin-top:12px" onclick="fecharProduto()">
-      Fechar
-    </button>
+      <div id="mpComentarios" style="margin-top:14px"></div>
 
+    </div>
   </div>
 </div>
 
