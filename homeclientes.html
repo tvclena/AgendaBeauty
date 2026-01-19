@@ -460,18 +460,27 @@ function abrirProduto(id){
   produtoAtual = todos.find(p => p.id === id);
   if(!produtoAtual) return;
 
+  // 🔥 SE FOR SERVIÇO → NÃO ABRE MODAL
+  if(produtoAtual.tipo === "SERVICO"){
+    localStorage.setItem("SERVICO_SELECIONADO", produtoAtual.id);
+    location.href = `agendar.html?l=${lojaId}&servico=${produtoAtual.id}`;
+    return;
+  }
+
+  // 🔥 PRODUTO → MODAL NORMAL
   mpImagem.src = produtoAtual.imagem_url || "";
   mpNome.innerText = produtoAtual.nome;
   mpDescricao.innerText = produtoAtual.descricao || "";
   mpPreco.innerText = Number(produtoAtual.preco)
     .toLocaleString("pt-BR",{minimumFractionDigits:2});
 
-renderEstrelas();
-carregarAvaliacoes();
-carregarRelacionados();
+  renderEstrelas();
+  carregarAvaliacoes();
+  carregarRelacionados();
 
   modalProduto.style.display = "flex";
 }
+
 
 function fecharProduto(){
   if (window.mpComentario) mpComentario.value = "";
@@ -569,7 +578,11 @@ function salvarCarrinho(carrinho){
 
 
 
- function adicionarAoCarrinho(){
+function adicionarAoCarrinho(){
+  if(produtoAtual.tipo !== "PRODUTO"){
+    return;
+  }
+
   const carrinho = getCarrinho();
   const comentario = mpObsCarrinho.value || "";
 
@@ -592,7 +605,6 @@ function salvarCarrinho(carrinho){
   }
 
   salvarCarrinho(carrinho);
-
   alert("Produto adicionado ao carrinho 🛒");
   fecharProduto();
 }
