@@ -657,11 +657,24 @@ if (!lista._dragBound) {
     e.preventDefault();
     if (!dragEl) return;
 
-    const after = getDragAfterElement(lista, e.clientY);
-    if (!after) lista.appendChild(dragEl);
-    else lista.insertBefore(dragEl, after);
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const target = el?.closest(".item");
+
+    if (!target || target === dragEl) return;
+
+    const rect = target.getBoundingClientRect();
+    const depois =
+      (e.clientY - rect.top) > rect.height / 2 ||
+      (e.clientX - rect.left) > rect.width / 2;
+
+    if (depois) {
+      target.after(dragEl);
+    } else {
+      target.before(dragEl);
+    }
   });
 }
+
 
   cards.forEach(card => {
 
@@ -672,10 +685,12 @@ if (!lista._dragBound) {
       e.dataTransfer.effectAllowed = "move";
     });
 
-    card.addEventListener("dragend", () => {
-      card.classList.remove("dragging");
-      salvarNovaOrdem();
-    });
+card.addEventListener("dragend", () => {
+  card.classList.remove("dragging");
+  dragEl = null; // ⬅️ ISSO FALTAVA
+  salvarNovaOrdem();
+});
+
 
 
 
@@ -698,28 +713,32 @@ if (!lista._dragBound) {
 
 card.addEventListener("touchmove", e => {
   if (!dragEl) return;
-  e.preventDefault(); // ⬅️ ISSO AQUI
+  e.preventDefault();
+
   const touch = e.touches[0];
+  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+  const target = el?.closest(".item");
 
-      const after = getDragAfterElement(lista, touch.clientY);
-      if (!after) lista.appendChild(dragEl);
-      else lista.insertBefore(dragEl, after);
-    });
+  if (!target || target === dragEl) return;
 
-  });
-}
-function getDragAfterElement(container, y) {
-  const els = [...container.querySelectorAll(".item:not(.dragging)")];
+  const rect = target.getBoundingClientRect();
+  const depois =
+    (touch.clientY - rect.top) > rect.height / 2 ||
+    (touch.clientX - rect.left) > rect.width / 2;
 
-  return els.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    if (offset < 0 && offset > closest.offset) {
-      return { offset, element: child };
-    }
-    return closest;
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
+  if (depois) {
+    target.after(dragEl);
+  } else {
+    target.before(dragEl);
+  }
+});
+
+  }); // 🔴 FECHA cards.forEach
+} // 🔴 FECHA ativarOrdenacao
+
+
+
+  
 async function salvarNovaOrdem() {
   if (search.value || filtroTipo.value) {
     alert("Remova os filtros para reordenar os itens.");
