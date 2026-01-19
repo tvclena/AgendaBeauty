@@ -257,7 +257,22 @@ ${carrinho.map((i,idx)=>{
 <img class="item-img" src="${i.imagem || produtosMap[i.produto_id] || 'https://via.placeholder.com/200'}">
             <div class="item-info">
               <div class="item-nome">${i.nome}</div>
-              <div class="item-preco">R$ ${moeda(i.preco)}</div>
+<div class="item-preco">
+  ${
+    i.promocao_ativa && i.preco_original
+      ? `
+        <span class="old">
+          R$ ${moeda(Number(i.preco_original))}
+        </span>
+        <span style="color:var(--primary)">
+          R$ ${moeda(Number(i.preco))}
+        </span>
+      `
+      : `
+        R$ ${moeda(Number(i.preco))}
+      `
+  }
+</div>
 
               <div class="item-controls">
                 <div class="qty">
