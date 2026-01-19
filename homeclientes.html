@@ -582,49 +582,76 @@ async function carregarAvaliacoes(){
     </div>
   `).join("");
 }
+function getCliente() {
+  try {
+    const raw = localStorage.getItem("CLIENTE_LOJA");
+    if (!raw) return null;
 
+    const c = JSON.parse(raw);
 
-async function enviarAvaliacao(){
+    if (!c?.nome) return null;
 
-  const nota = notaSelecionada;
-  const comentario = mpComentario.value.trim();
+    return {
+      nome: c.nome,
+      whatsapp: c.whatsapp || null
+    };
+  } catch (e) {
+    console.error("Erro ao ler CLIENTE_LOJA", e);
+    return null;
+  }
+}
 
-  if(!comentario){
-    alert("Escreva um comentário");
+async function enviarAvaliacao() {
+  if (!produtoAtual) {
+    alert("Item não identificado");
     return;
   }
 
   const cliente = getCliente();
-
-  if(!cliente){
-    alert("Identifique-se para avaliar");
+  if (!cliente) {
+    alert("Informe seu nome antes de avaliar");
     return;
   }
 
+  if (!notaSelecionada) {
+    alert("Selecione uma nota");
+    return;
+  }
+
+  const comentario = mpComentario.value.trim();
+  if (!comentario) {
+    alert("Escreva um comentário");
+    return;
+  }
+
+  const payload = {
+    loja_id: lojaId,
+    produto_id: produtoAtual.id,
+    nota: notaSelecionada,
+    comentario,
+    cliente_nome: cliente.nome,
+    cliente_whatsapp: cliente.whatsapp
+  };
+
   const { error } = await sb
     .from("avaliacoes_loja")
-    .insert({
-      loja_id: lojaId,
-      produto_id: produtoAtual.id,
+    .insert(payload);
 
-      nota,
-      comentario,
-
-      cliente_nome: cliente.nome,
-      cliente_whatsapp: cliente.whatsapp,
-      cliente_email: cliente.email || null,
-      cliente_id: usuarioLogado?.id || null
-    });
-
-  if(error){
-    console.error("❌ ERRO AVALIAÇÃO:", error);
+  if (error) {
+    console.error("Erro Supabase:", error);
     alert("Erro ao enviar avaliação");
     return;
   }
 
+  // reset UI
   mpComentario.value = "";
+  notaSelecionada = 5;
+  renderEstrelas();
   carregarAvaliacoes();
+
+  alert("⭐ Avaliação enviada com sucesso!");
 }
+
 
 function carregarRelacionados(){
   const relacionados = todos
