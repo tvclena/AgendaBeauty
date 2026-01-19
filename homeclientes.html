@@ -13,25 +13,7 @@
 
   
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<script>
-(function(){
-  const params = new URLSearchParams(location.search);
-  const lojaId = params.get("l");
-  if(!lojaId) return;
 
-  const tema = localStorage.getItem("loja_tema_" + lojaId);
-  if(!tema) return;
-
-  try{
-    const cfg = JSON.parse(tema);
-    const root = document.documentElement;
-
-    if(cfg.primary) root.style.setProperty("--primary", cfg.primary);
-    if(cfg.secondary) root.style.setProperty("--primary-2", cfg.secondary);
-    if(cfg.text) root.style.setProperty("--text", cfg.text);
-  }catch(e){}
-})();
-</script>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
@@ -843,33 +825,28 @@ let avaliacoesPorItem = {}; // { produto_id: { total, soma } }
 /* ================= LOAD ================= */
 async function load(){
 
-  /* CONFIG DE CORES */
-const { data:config } = await sb
+/* CONFIG DE CORES — SUPABASE É A ÚNICA FONTE DA VERDADE */
+const { data: config } = await sb
   .from("loja_config")
-  .select("primary_color,secondary_color,text_color")
-  .eq("user_id",lojaId)
+  .select("primary_color, secondary_color, text_color")
+  .eq("user_id", lojaId)
   .maybeSingle();
 
-if(config?.primary_color){
-  document.documentElement.style.setProperty("--primary", config.primary_color);
-}
+document.documentElement.style.setProperty(
+  "--primary",
+  config?.primary_color ?? "#ff6a00"
+);
 
-if(config?.secondary_color){
-  document.documentElement.style.setProperty("--primary-2", config.secondary_color);
-}
+document.documentElement.style.setProperty(
+  "--primary-2",
+  config?.secondary_color ?? config?.primary_color ?? "#ff9a57"
+);
 
-if(config?.text_color){
-  document.documentElement.style.setProperty("--text", config.text_color);
-}
+document.documentElement.style.setProperty(
+  "--text",
+  config?.text_color ?? "#111827"
+);
 
-
-if(config?.primary_color && !localStorage.getItem("loja_tema_" + lojaId)){
-  document.documentElement.style.setProperty("--primary",config.primary_color);
-}
-
-  if(config?.secondary_color){
-    document.documentElement.style.setProperty("--primary-2",config.secondary_color);
-  }
 
   /* LOJA */
  const { data:loja } = await sb
@@ -1422,16 +1399,28 @@ function adicionarAoCarrinho(){
     });
   }
 
-salvarCarrinho(carrinho);
+  salvarCarrinho(carrinho);
 
-// 🔥 animação visual
-animarParaCarrinho(
-  produtoAtual.imagem_url,
-  document.querySelector(".modal-img img") || event.target
-);
+  // 🔥 animação visual (FORMA CORRETA)
+  const origem = document.querySelector(".modal-img img");
+  if(origem){
+    animarParaCarrinho(produtoAtual.imagem_url, origem);
+  }
 
-fecharProduto();
+  fecharProduto();
+}
 
+
+
+
+
+
+
+
+
+
+
+  
 
 function formatarDataBR(dataISO){
   const d = new Date(dataISO);
@@ -1496,6 +1485,8 @@ function abrirNoMapa(){
   window.open(url, "_blank");
 }
 function animarParaCarrinho(imgUrl, origemEl){
+  if(!origemEl) return;
+
   const img = document.createElement("img");
   img.src = imgUrl;
   img.className = "fly-img";
@@ -1507,9 +1498,12 @@ function animarParaCarrinho(imgUrl, origemEl){
 
   document.body.appendChild(img);
 
-  // destino: ícone "Produtos" da navbar (ajuste se quiser outro)
-  const destinoEl = document.querySelector(".nav-item:nth-child(2)");
-  if(!destinoEl) return;
+  // destino: aba Produtos (ajuste depois se quiser um ícone de carrinho real)
+  const destinoEl = document.querySelector("#tabProdutos");
+  if(!destinoEl){
+    img.remove();
+    return;
+  }
 
   const destino = destinoEl.getBoundingClientRect();
 
