@@ -614,6 +614,19 @@ body{margin:0;background:var(--bg);padding:16px}
   font-size:14px;
 }
 
+.endereco-click{
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.endereco-click:hover{
+  text-decoration:underline;
+}
+
+
+
   
 
 
@@ -646,7 +659,9 @@ body{margin:0;background:var(--bg);padding:16px}
 </div>
 
 <p id="cidadeLoja"></p>
-<p id="enderecoLoja"></p>
+<p id="enderecoLoja" class="endereco-click" onclick="abrirMapaPopup()">
+  📍 <span id="enderecoTexto"></span>
+</p>
 
     </div>
   </div>
@@ -742,7 +757,10 @@ const btnWhatsLoja = document.getElementById("btnWhatsLoja");
   cidadeLoja.innerText = `${loja.cidade} • ${loja.uf}`;
 
   
-  enderecoLoja.innerText = `${loja.rua || ""}, ${loja.numero || ""}`;
+enderecoCompleto =
+  `${loja.rua || ""}, ${loja.numero || ""} - ${loja.cidade || ""}/${loja.uf || ""}`;
+
+document.getElementById("enderecoTexto").innerText = enderecoCompleto;
   // 🔥 BOTÃO WHATSAPP AO LADO DO NOME
 if (loja.whatsapp) {
 
@@ -1293,7 +1311,25 @@ async function verificarLojaVerificada(){
   }
 }
 
+let enderecoCompleto = "";
 
+function abrirMapaPopup(){
+  document.getElementById("mapaEndereco").innerText = enderecoCompleto;
+  document.getElementById("mapaPopup").style.display = "flex";
+}
+
+function fecharMapaPopup(){
+  document.getElementById("mapaPopup").style.display = "none";
+}
+
+function abrirNoMapa(){
+  const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoCompleto)}`;
+  window.open(url, "_blank");
+}
+
+
+
+  
 
 
 
@@ -1364,6 +1400,27 @@ async function verificarLojaVerificada(){
 
 
     </div>
+  </div>
+</div>
+<!-- POPUP MAPA -->
+<div class="modal" id="mapaPopup" onclick="fecharMapaPopup()">
+  <div class="modal-box" onclick="event.stopPropagation()"
+       style="max-width:360px;padding:20px;text-align:center">
+
+    <h3 style="margin:0 0 12px">📍 Localização da loja</h3>
+
+    <p id="mapaEndereco"
+       style="font-size:14px;color:#555;margin-bottom:16px"></p>
+
+    <button class="btn"
+            style="margin-bottom:10px"
+            onclick="abrirNoMapa()">
+      🗺️ Abrir no mapa
+    </button>
+
+    <button class="btn-sec" onclick="fecharMapaPopup()">
+      Fechar
+    </button>
   </div>
 </div>
 
