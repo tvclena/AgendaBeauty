@@ -1229,19 +1229,6 @@ function acao(id,tipo){
 busca.addEventListener("input", render);
 load();
 
-let produtoAtual = null;
-const mpStars = document.getElementById("mpStars");
-const mpVendidos = document.getElementById("mpVendidos");
-const modalProduto = document.getElementById("modalProduto");
-const mpImagem = document.getElementById("mpImagem");
-const mpNome = document.getElementById("mpNome");
-const mpDescricao = document.getElementById("mpDescricao");
-const mpPreco = document.getElementById("mpPreco");
-const mpAvaliacao = document.getElementById("mpAvaliacao");
-const mpMedia = document.getElementById("mpMedia");
-const mpComentarios = document.getElementById("mpComentarios");
-const mpRelacionados = document.getElementById("mpRelacionados");
-const mpObsCarrinho = document.getElementById("mpObsCarrinho");
 
 
   
@@ -1843,12 +1830,30 @@ requestAnimationFrame(()=>{
 <h3 class="relacionados-titulo">Produtos relacionados</h3>
 <div id="mpRelacionados" class="grid-relacionados"></div>
 
-
-    </div>
+</div>
   </div>
 </div>
+
+<script>
+let produtoAtual = null;
+
+const modalProduto = document.getElementById("modalProduto");
+const mpImagem = document.getElementById("mpImagem");
+const mpNome = document.getElementById("mpNome");
+const mpDescricao = document.getElementById("mpDescricao");
+const mpPreco = document.getElementById("mpPreco");
+const mpStars = document.getElementById("mpStars");
+const mpVendidos = document.getElementById("mpVendidos");
+const mpAvaliacao = document.getElementById("mpAvaliacao");
+const mpMedia = document.getElementById("mpMedia");
+const mpComentarios = document.getElementById("mpComentarios");
+const mpRelacionados = document.getElementById("mpRelacionados");
+const mpObsCarrinho = document.getElementById("mpObsCarrinho");
+</script>
+
 <!-- POPUP MAPA PREMIUM -->
 <div class="modal" id="mapaPopup" onclick="fecharMapaPopup()">
+
   <div class="mapa-card" onclick="event.stopPropagation()">
 
     <div class="mapa-header">
