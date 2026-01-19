@@ -477,14 +477,35 @@ body{margin:0;background:var(--bg);padding:16px}
     grid-template-columns: repeat(2, 1fr);
   }
 }
-.banner-bio{
-  margin-top:14px;
+/* ===== BIO PREMIUM ===== */
+.bio-card{
+  margin-top:16px;
+  background:rgba(255,255,255,.18);
+  border-radius:18px;
   padding:14px 16px;
-  border-radius:16px;
-  background:rgba(255,255,255,.15);
-  backdrop-filter: blur(6px);
-  font-size:13px;
-  line-height:1.45;
+  backdrop-filter: blur(8px);
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
+}
+
+.bio-header{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  opacity:.85;
+  margin-bottom:8px;
+}
+
+.bio-header i{
+  font-size:16px;
+}
+
+.bio-text{
+  font-size:14px;
+  line-height:1.55;
   color:#fff;
   opacity:.95;
 
@@ -494,9 +515,28 @@ body{margin:0;background:var(--bg);padding:16px}
   overflow:hidden;
 }
 
-.banner-bio{
-  position:relative;
+.bio-text.aberta{
+  -webkit-line-clamp:unset;
+  overflow:visible;
 }
+
+.bio-toggle{
+  margin-top:10px;
+  background:none;
+  border:none;
+  padding:0;
+  font-size:12px;
+  font-weight:800;
+  color:#fff;
+  cursor:pointer;
+  opacity:.85;
+}
+
+.bio-toggle:hover{
+  opacity:1;
+  text-decoration:underline;
+}
+
 
 .banner-bio::before{
   content:"";
@@ -559,20 +599,19 @@ body{margin:0;background:var(--bg);padding:16px}
     </div>
   </div>
 
-<div class="banner-bio" id="bioLoja"></div>
+<div class="bio-card" id="bioCard" style="display:none">
+  <div class="bio-header">
+    <i class="ri-information-line"></i>
+    <span>Sobre a loja</span>
+  </div>
 
-<button id="btnBio"
-  style="
-    margin-top:8px;
-    background:none;
-    border:none;
-    color:#fff;
-    font-size:12px;
-    font-weight:700;
-    cursor:pointer;
-    display:none">
-  Ver mais
-</button>
+  <div class="bio-text" id="bioLoja"></div>
+
+  <button id="btnBio" class="bio-toggle" style="display:none">
+    Ver mais
+  </button>
+</div>
+
 
 </div>
 
@@ -657,13 +696,14 @@ if (numero.startsWith("55")) numero = numero.slice(2);
 
   if(loja.avatar_url) logo.src = loja.avatar_url;
 
-  const bioBox = document.getElementById("bioLoja");
+const bioCard = document.getElementById("bioCard");
+const bioBox = document.getElementById("bioLoja");
 const btnBio = document.getElementById("btnBio");
 
 if (loja.bio) {
   bioBox.innerText = loja.bio;
+  bioCard.style.display = "block";
 
-  // verifica se estourou as linhas
   setTimeout(() => {
     if (bioBox.scrollHeight > bioBox.clientHeight) {
       btnBio.style.display = "inline-block";
@@ -671,11 +711,9 @@ if (loja.bio) {
   }, 50);
 
   btnBio.onclick = () => {
-    const aberto = bioBox.classList.toggle("bio-aberta");
+    const aberto = bioBox.classList.toggle("aberta");
     btnBio.innerText = aberto ? "Ver menos" : "Ver mais";
   };
-} else {
-  bioBox.style.display = "none";
 }
 
 
