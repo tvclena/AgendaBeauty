@@ -477,7 +477,52 @@ body{margin:0;background:var(--bg);padding:16px}
     grid-template-columns: repeat(2, 1fr);
   }
 }
+.banner-bio{
+  margin-top:14px;
+  padding:14px 16px;
+  border-radius:16px;
+  background:rgba(255,255,255,.15);
+  backdrop-filter: blur(6px);
+  font-size:13px;
+  line-height:1.45;
+  color:#fff;
+  opacity:.95;
 
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.banner-bio{
+  position:relative;
+}
+
+.banner-bio::before{
+  content:"";
+  position:absolute;
+  top:-8px;
+  left:0;
+  right:0;
+  height:1px;
+  background:rgba(255,255,255,.25);
+}
+
+
+.banner h1{
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:-0.2px;
+}
+
+.bio-aberta{
+  -webkit-line-clamp:unset;
+  overflow:visible;
+}
+
+
+
+  
 
 
 
@@ -514,11 +559,21 @@ body{margin:0;background:var(--bg);padding:16px}
     </div>
   </div>
 
-  <div class="banner-chips">
-    <div class="chip">⚡ Atendimento rápido</div>
-    <div class="chip">📲 Confirmação WhatsApp</div>
-    <div class="chip">💳 Pagamento facilitado</div>
-  </div>
+<div class="banner-bio" id="bioLoja"></div>
+
+<button id="btnBio"
+  style="
+    margin-top:8px;
+    background:none;
+    border:none;
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+    display:none">
+  Ver mais
+</button>
+
 </div>
 
 <div class="search">
@@ -570,7 +625,7 @@ if(config?.primary_color && !localStorage.getItem("loja_tema_" + lojaId)){
   /* LOJA */
  const { data:loja } = await sb
   .from("user_profile")
-  .select("*")
+  .select("*, bio")
   .eq("user_id",lojaId)
   .maybeSingle();
 
@@ -601,6 +656,28 @@ if (numero.startsWith("55")) numero = numero.slice(2);
 }
 
   if(loja.avatar_url) logo.src = loja.avatar_url;
+
+  const bioBox = document.getElementById("bioLoja");
+const btnBio = document.getElementById("btnBio");
+
+if (loja.bio) {
+  bioBox.innerText = loja.bio;
+
+  // verifica se estourou as linhas
+  setTimeout(() => {
+    if (bioBox.scrollHeight > bioBox.clientHeight) {
+      btnBio.style.display = "inline-block";
+    }
+  }, 50);
+
+  btnBio.onclick = () => {
+    const aberto = bioBox.classList.toggle("bio-aberta");
+    btnBio.innerText = aberto ? "Ver menos" : "Ver mais";
+  };
+} else {
+  bioBox.style.display = "none";
+}
+
 
   /* PRODUTOS */
   const { data } = await sb
