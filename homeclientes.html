@@ -429,7 +429,10 @@ function render(){
 <span class="price">R$ ${Number(i.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}</span>
         </div>
 <button onclick="event.stopPropagation(); acao('${i.id}','${i.tipo}')">
-          ${i.tipo==="SERVICO"?"Agendar":"Comprar"}
+${i.tipo==="SERVICO"
+  ? (i.preco > 0 ? "Agendar" : "Orçamento")
+  : "Comprar"
+}
         </button>
       </div>
     </div>
@@ -460,25 +463,80 @@ function abrirProduto(id){
   produtoAtual = todos.find(p => p.id === id);
   if(!produtoAtual) return;
 
-  // 🔥 SE FOR SERVIÇO → NÃO ABRE MODAL
-  if(produtoAtual.tipo === "SERVICO"){
-    localStorage.setItem("SERVICO_SELECIONADO", produtoAtual.id);
-    location.href = `agendar.html?l=${lojaId}&servico=${produtoAtual.id}`;
-    return;
-  }
-
-  // 🔥 PRODUTO → MODAL NORMAL
   mpImagem.src = produtoAtual.imagem_url || "";
   mpNome.innerText = produtoAtual.nome;
   mpDescricao.innerText = produtoAtual.descricao || "";
-  mpPreco.innerText = Number(produtoAtual.preco)
+  mpPreco.innerText = Number(produtoAtual.preco || 0)
     .toLocaleString("pt-BR",{minimumFractionDigits:2});
 
   renderEstrelas();
   carregarAvaliacoes();
   carregarRelacionados();
+  configurarBotaoAcaoModal(); // 👈 NOVO
 
   modalProduto.style.display = "flex";
+}
+
+function configurarBotaoAcaoModal(){
+  const btn = document.getElementById("btnAcaoModal");
+
+  const obsBox = document.getElementById("obsCarrinhoBox");
+  if (obsBox) {
+    obsBox.style.display =
+      produtoAtual.tipo === "PRODUTO" ? "block" : "none";
+  }
+
+  if(produtoAtual.tipo === "PRODUTO"){
+    btn.innerText = "🛒 Adicionar ao carrinho";
+    btn.onclick = adicionarAoCarrinho;
+    btn.style.display = "block";
+    return;
+  }
+
+  if(produtoAtual.preco > 0){
+    btn.innerText = "📅 Agendar";
+    btn.onclick = () => {
+      localStorage.setItem("SERVICO_SELECIONADO", produtoAtual.id);
+      location.href = `agendar.html?l=${lojaId}&servico=${produtoAtual.id}`;
+    };
+    btn.style.display = "block";
+    return;
+  }
+
+  btn.innerText = "💬 Solicitar orçamento";
+  btn.onclick = solicitarOrcamentoWhats();
+  btn.style.display = "block";
+}
+
+function solicitarOrcamentoWhats(){
+  return () => {
+    const cliente = JSON.parse(
+      localStorage.getItem("CLIENTE_LOJA") || "{}"
+    );
+
+    const nomeCliente = cliente.nome || "Cliente";
+    const whatsappCliente = cliente.whatsapp || "não informado";
+
+    const mensagem = encodeURIComponent(`
+Olá! Gostaria de solicitar um orçamento.
+
+📌 Serviço: ${produtoAtual.nome}
+📝 Descrição: ${produtoAtual.descricao || "—"}
+
+👤 Cliente: ${nomeCliente}
+📱 WhatsApp: ${whatsappCliente}
+`);
+
+    // whatsapp da loja (já carregado no banner)
+    const lojaLink = document.getElementById("btnWhatsLoja")?.href;
+
+    if(!lojaLink){
+      alert("WhatsApp da loja não disponível");
+      return;
+    }
+
+    window.open(lojaLink + `&text=${mensagem}`, "_blank");
+  };
 }
 
 
@@ -636,21 +694,22 @@ function adicionarAoCarrinho(){
       R$ <span id="mpPreco"></span>
     </div>
 
-    <!-- OBSERVAÇÃO DO CARRINHO -->
-    <label style="font-size:12px;font-weight:700;color:#555">
-      Observação para este produto (opcional)
-    </label>
-    <textarea id="mpObsCarrinho"
-      placeholder="Ex: sem cebola, embalagem separada, presente…"
-      style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border)">
-    </textarea>
+<div id="obsCarrinhoBox">
+  <label style="font-size:12px;font-weight:700;color:#555">
+    Observação para este produto (opcional)
+  </label>
+  <textarea id="mpObsCarrinho"
+    placeholder="Ex: sem cebola, embalagem separada, presente…"
+    style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border)">
+  </textarea>
+</div>
 
-    <!-- BOTÃO CARRINHO -->
-    <button class="btn"
-      style="margin-top:10px"
-      onclick="adicionarAoCarrinho()">
-      🛒 Adicionar ao carrinho
-    </button>
+
+<button class="btn"
+  id="btnAcaoModal"
+  style="margin-top:10px">
+</button>
+
 
     <hr style="margin:16px 0;border:none;border-top:1px solid #eee">
 
