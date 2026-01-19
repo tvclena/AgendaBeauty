@@ -919,21 +919,39 @@ if (loja.bio) {
 
   todos = data || [];
 
-  const temServ = todos.some(i=>i.tipo==="SERVICO");
-  const temProd = todos.some(i=>i.tipo==="PRODUTO");
+const servicosAtivos = todos.filter(
+  i => i.tipo === "SERVICO" && i.ativo
+);
 
-  tabServicos.style.display = temServ ? "inline-block" : "none";
-  tabProdutos.style.display = temProd ? "inline-block" : "none";
+const produtosAtivos = todos.filter(
+  i => i.tipo === "PRODUTO" && i.ativo
+);
 
-tipoAtual = temServ ? "SERVICO" : temProd ? "PRODUTO" : null;
+tabServicos.style.display = servicosAtivos.length > 0 ? "inline-block" : "none";
+tabProdutos.style.display = produtosAtivos.length > 0 ? "inline-block" : "none";
 
-await carregarVendasProdutos();
-await carregarAvaliacoesResumo();
+// define aba inicial
+if (servicosAtivos.length > 0) {
+  tipoAtual = "SERVICO";
+  setTab("SERVICO");
+} else if (produtosAtivos.length > 0) {
+  tipoAtual = "PRODUTO";
+  setTab("PRODUTO");
+} else {
+  // 🔥 NADA CADASTRADO
+  grid.innerHTML = `
+    <p style="
+      grid-column:1/-1;
+      text-align:center;
+      color:#6b7280;
+      padding:40px 0;
+      font-weight:600
+    ">
+      Nenhum serviço ou produto disponível no momento
+    </p>
+  `;
+}
 
-await carregarMediaLoja();
-await verificarLojaVerificada();
-
-setTab(tipoAtual);
 
 
 }
