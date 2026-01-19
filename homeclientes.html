@@ -250,11 +250,22 @@ body{margin:0;background:var(--bg);padding:16px}
   width:45%;
   background:#f3f4f6;
 }
-.modal-img img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
+.modal-img{
+  width:45%;
+  height:100%;              /* 👈 FALTAVA */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f3f4f6;
 }
+
+
+.modal-img img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain; /* 👈 NÃO CORTA */
+}
+
 
 /* CONTEÚDO */
 .modal-content{
@@ -807,7 +818,17 @@ body{margin:0;background:var(--bg);padding:16px}
 
 }
 
+body.modal-open{
+  overflow:hidden;
+  position:fixed;
+  width:100%;
+}
 
+.modal-header-info{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
 
   
 
@@ -1209,7 +1230,11 @@ busca.addEventListener("input", render);
 load();
 
 let produtoAtual = null;
+const mpStars = document.getElementById("mpStars");
+const mpVendidos = document.getElementById("mpVendidos");
 
+
+  
 function abrirProduto(id){
   produtoAtual = todos.find(p => p.id === id);
   if(!produtoAtual) return;
@@ -1217,29 +1242,56 @@ function abrirProduto(id){
   mpImagem.src = produtoAtual.imagem_url || "";
   mpNome.innerText = produtoAtual.nome;
   mpDescricao.innerText = produtoAtual.descricao || "";
-if (produtoAtual.promocao_ativa && produtoAtual.preco_promocional) {
-  mpPreco.innerHTML = `
-    <span class="old">
-      R$ ${Number(produtoAtual.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}
-    </span>
-    <span style="color:var(--primary)">
-      R$ ${Number(produtoAtual.preco_promocional).toLocaleString("pt-BR",{minimumFractionDigits:2})}
-    </span>
-  `;
-} else {
-  mpPreco.innerText =
-    Number(produtoAtual.preco || 0)
-      .toLocaleString("pt-BR",{minimumFractionDigits:2});
+
+  // preço
+  if (produtoAtual.promocao_ativa && produtoAtual.preco_promocional) {
+    mpPreco.innerHTML = `
+      <span class="old">
+        R$ ${Number(produtoAtual.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+      </span>
+      <span style="color:var(--primary)">
+        R$ ${Number(produtoAtual.preco_promocional).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+      </span>
+    `;
+  } else {
+    mpPreco.innerText =
+      Number(produtoAtual.preco || 0)
+        .toLocaleString("pt-BR",{minimumFractionDigits:2});
+  }
+
+  /* ===== 👇 COLE EXATAMENTE AQUI ===== */
+
+  // ⭐ estrelas do item
+  if(avaliacoesPorItem[produtoAtual.id]){
+    const media =
+      avaliacoesPorItem[produtoAtual.id].soma /
+      avaliacoesPorItem[produtoAtual.id].total;
+
+    mpStars.innerHTML =
+      "★".repeat(Math.round(media)) +
+      "☆".repeat(5 - Math.round(media));
+  }else{
+  mpStars.innerHTML = "☆☆☆☆☆";
 }
 
+
+  // 📦 vendidos / avaliações
+  mpVendidos.innerText =
+    produtoAtual.tipo === "PRODUTO"
+      ? `${vendasPorProduto[produtoAtual.id] || 0} vendidos`
+      : `${avaliacoesPorItem[produtoAtual.id]?.total || 0} avaliações`;
+
+  /* ===== 👆 ATÉ AQUI ===== */
 
   renderEstrelas();
   carregarAvaliacoes();
   carregarRelacionados();
-  configurarBotaoAcaoModal(); // 👈 NOVO
+  configurarBotaoAcaoModal();
 
+  document.body.classList.add("modal-open");
   modalProduto.style.display = "flex";
 }
+
 
 function configurarBotaoAcaoModal(){
   const btn = document.getElementById("btnAcaoModal");
@@ -1308,8 +1360,11 @@ function fecharProduto(){
   if (window.mpComentario) mpComentario.value = "";
   if (window.mpObsCarrinho) mpObsCarrinho.value = "";
   notaSelecionada = 5;
+
   modalProduto.style.display = "none";
+  document.body.classList.remove("modal-open"); // 🔓 LIBERA FUNDO
 }
+
 
 
 async function carregarAvaliacoes(){
@@ -1720,13 +1775,23 @@ requestAnimationFrame(()=>{
     <!-- CONTEÚDO -->
     <div class="modal-content">
 
-<h2 id="mpNome" class="item-nome"></h2>
+<div class="modal-header-info">
 
-      <p id="mpDescricao"></p>
+  <h2 id="mpNome" class="item-nome"></h2>
 
-      <div class="modal-preco">
-        R$ <span id="mpPreco"></span>
-      </div>
+  <div class="card-info-extra">
+    <div class="card-stars" id="mpStars"></div>
+    <span class="card-vendidos" id="mpVendidos"></span>
+  </div>
+
+  <div class="modal-preco">
+    R$ <span id="mpPreco"></span>
+  </div>
+
+</div>
+
+<p id="mpDescricao" style="margin-top:12px"></p>
+
 
       <!-- OBS PRODUTO -->
       <div id="obsCarrinhoBox">
