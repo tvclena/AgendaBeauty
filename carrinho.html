@@ -300,37 +300,58 @@ function menos(i){
 
 async function finalizarCompra(){
   try{
+
+    if (!lojaId) {
+      alert("Loja inválida");
+      return;
+    }
+
+    if (!cliente?.nome || !cliente?.whatsapp) {
+      alert("Complete seus dados antes de finalizar");
+      return;
+    }
+
+    if (!carrinho.length) {
+      alert("Carrinho vazio");
+      return;
+    }
+
+    const payload = {
+      loja_id: lojaId,
+      cliente: {
+        nome: cliente.nome,
+        whatsapp: cliente.whatsapp
+      },
+      itens: carrinho.map(i => ({
+        id: i.produto_id,
+        quantidade: i.quantidade
+      }))
+    };
+
     const res = await fetch("https://www.clena.com.br/api/create-pagamento",{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        loja_id: lojaId,
-        cliente,
-itens: carrinho
-      })
+      body: JSON.stringify(payload)
     });
 
     const data = await res.json();
 
-    // ✅ Pagamento online OK
     if(data?.init_point){
       localStorage.removeItem(KEY);
       location.href = data.init_point;
       return;
     }
 
-    // ❌ Falhou → abre PIX
     const loja = await buscarLoja();
     abrirPix(loja);
 
   }catch(err){
     console.error("Erro pagamento:", err);
-
-    // ❌ Erro geral → abre PIX
     const loja = await buscarLoja();
     abrirPix(loja);
   }
 }
+
 
 
 /* INIT */
