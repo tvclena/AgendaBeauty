@@ -1071,9 +1071,23 @@ const lista = todos
             : `📦 Estoque livre`
       }
     </span>
-    <span class="price">
-      R$ ${Number(i.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}
-    </span>
+<span class="price">
+  ${
+    i.promocao_ativa && i.preco_promocional
+      ? `
+        <span class="old">
+          R$ ${Number(i.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+        </span>
+        <span style="color:var(--primary)">
+          R$ ${Number(i.preco_promocional).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+        </span>
+      `
+      : `
+        R$ ${Number(i.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+      `
+  }
+</span>
+
   </div>
 
 <button onclick="event.stopPropagation(); acao('${i.id}','${i.tipo}', this)">
@@ -1114,8 +1128,21 @@ function abrirProduto(id){
   mpImagem.src = produtoAtual.imagem_url || "";
   mpNome.innerText = produtoAtual.nome;
   mpDescricao.innerText = produtoAtual.descricao || "";
-  mpPreco.innerText = Number(produtoAtual.preco || 0)
-    .toLocaleString("pt-BR",{minimumFractionDigits:2});
+if (produtoAtual.promocao_ativa && produtoAtual.preco_promocional) {
+  mpPreco.innerHTML = `
+    <span class="old">
+      R$ ${Number(produtoAtual.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+    </span>
+    <span style="color:var(--primary)">
+      R$ ${Number(produtoAtual.preco_promocional).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+    </span>
+  `;
+} else {
+  mpPreco.innerText =
+    Number(produtoAtual.preco || 0)
+      .toLocaleString("pt-BR",{minimumFractionDigits:2});
+}
+
 
   renderEstrelas();
   carregarAvaliacoes();
