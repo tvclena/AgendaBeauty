@@ -1532,14 +1532,19 @@ function animarParaCarrinhoIframe(imgUrl, origemEl){
 
   document.body.appendChild(img);
 
-  // sobe até o topo do iframe
-  requestAnimationFrame(()=>{
-    img.style.transform = `
-      translate(0, -${origem.top + 120}px)
-      scale(0.2)
-    `;
-    img.style.opacity = "0";
-  });
+const centerX = window.innerWidth / 2;
+const imgCenterX = origem.left + origem.width / 2;
+
+requestAnimationFrame(()=>{
+  img.style.transform = `
+    translate(
+      ${centerX - imgCenterX}px,
+      -${origem.top + 120}px
+    )
+    scale(0.2)
+  `;
+  img.style.opacity = "0";
+});
 
   setTimeout(()=>{
     img.remove();
