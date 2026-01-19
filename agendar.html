@@ -398,7 +398,9 @@ const { data } = await sb
 
     <div class="service-info">
       <div class="service-name">${s.nome}</div>
-      <div class="service-price">R$ ${s.preco}</div>
+<div class="service-price">
+  R$ ${formatarMoedaBR(s.preco)}
+</div>
     </div>
   </div>
 `).join("");
@@ -1047,7 +1049,22 @@ function formatarDataBR(dataISO){
   return `${dia}/${mes}/${ano}`;
 }
 
+function formatarMoedaBR(valor){
+  return Number(valor).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
 
+
+
+
+
+
+
+
+
+  
   
 </script>
 <!-- MODAL CLIENTE -->
