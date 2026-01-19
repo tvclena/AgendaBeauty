@@ -814,6 +814,11 @@ if(!lojaId){
   throw new Error("Sem loja");
 }
 
+const bannerStars = document.getElementById("bannerStars");
+const bannerVerificada = document.getElementById("bannerVerificada");
+
+
+  
 let todos = [];
 let tipoAtual = null;
 let vendasPorProduto = {};   // { produto_id: total_vendido }
@@ -864,8 +869,14 @@ if(!loja){
 const btnWhatsLoja = document.getElementById("btnWhatsLoja");
 
 
-  nomeLoja.innerText = loja.negocio;
-  cidadeLoja.innerText = `${loja.cidade} • ${loja.uf}`;
+const nomeLoja = document.getElementById("nomeLoja");
+const cidadeLoja = document.getElementById("cidadeLoja");
+const logo = document.getElementById("logo");
+const enderecoTexto = document.getElementById("enderecoTexto");
+
+nomeLoja.innerText = loja.negocio;
+cidadeLoja.innerText = `${loja.cidade} • ${loja.uf}`;
+logo.src = loja.avatar_url;
 
   
 enderecoCompleto =
