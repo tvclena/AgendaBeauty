@@ -438,7 +438,53 @@ body{margin:0;background:var(--bg);padding:16px}
 .card-vendidos{
   font-weight:600;
 }
+/* ===== PRODUTOS RELACIONADOS ===== */
+.relacionados-titulo{
+  margin-top:18px;
+  font-size:15px;
+  font-weight:800;
+}
 
+.grid-relacionados{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+}
+
+/* CARD RELACIONADO */
+.grid-relacionados .card{
+  border-radius:14px;
+  box-shadow:0 6px 16px rgba(0,0,0,.08);
+}
+
+.grid-relacionados img{
+  height:90px;
+  object-fit:cover;
+}
+
+.grid-relacionados .card-body{
+  padding:8px;
+}
+
+.grid-relacionados strong{
+  font-size:12px;
+  line-height:1.2;
+}
+
+/* MOBILE */
+@media (max-width: 768px){
+  .grid-relacionados{
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+
+
+
+
+
+  
 </style>
 </head>
 
@@ -948,16 +994,15 @@ function carregarRelacionados(){
       p.id !== produtoAtual.id
     )
     .slice(0,4);
-
-  mpRelacionados.innerHTML = relacionados.map(p=>`
-    <div class="card" onclick="abrirProduto('${p.id}')">
-      <img src="${p.imagem_url||""}">
-      <div class="card-body">
-        <strong>${p.nome}</strong>
-      </div>
+mpRelacionados.innerHTML = relacionados.map(p=>`
+  <div class="card" onclick="abrirProduto('${p.id}')">
+    <img src="${p.imagem_url || ''}">
+    <div class="card-body">
+      <strong>${p.nome}</strong>
     </div>
-  `).join("");
-}
+  </div>
+`).join("");
+
 
 let notaSelecionada = 5;
 
@@ -1081,8 +1126,9 @@ function formatarDataBR(dataISO){
       </button>
 
       <div id="mpComentarios" style="margin-top:14px"></div>
-<h3 style="margin-top:18px;font-size:15px">Produtos relacionados</h3>
-<div id="mpRelacionados" class="grid"></div>
+<h3 class="relacionados-titulo">Produtos relacionados</h3>
+<div id="mpRelacionados" class="grid-relacionados"></div>
+
 
     </div>
   </div>
