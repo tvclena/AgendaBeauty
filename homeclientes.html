@@ -1275,11 +1275,16 @@ function abrirProduto(id){
 }
 
 
-  // 📦 vendidos / avaliações
+if (produtoAtual.tipo === "PRODUTO") {
   mpVendidos.innerText =
-    produtoAtual.tipo === "PRODUTO"
-      ? `${vendasPorProduto[produtoAtual.id] || 0} vendidos`
-      : `${avaliacoesPorItem[produtoAtual.id]?.total || 0} avaliações`;
+    `${vendasPorProduto[produtoAtual.id] || 0} vendidos`;
+} else {
+  mpVendidos.innerText =
+    avaliacoesPorItem[produtoAtual.id]
+      ? `${avaliacoesPorItem[produtoAtual.id].total} avaliações`
+      : "Sem avaliações";
+}
+
 
   /* ===== 👆 ATÉ AQUI ===== */
 
