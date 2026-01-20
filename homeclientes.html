@@ -1600,7 +1600,7 @@ function configurarBotaoAcaoModal(){
   }
 
   btn.innerText = "💬 Solicitar orçamento";
-  btn.onclick = solicitarOrcamentoWhats();
+  btn.onclick = solicitarOrcamentoWhats;
   btn.style.display = "block";
 }
 
@@ -2105,6 +2105,35 @@ window.addEventListener("resize", ativarLoopCards);
 
 
 
+function solicitarOrcamentoWhats(){
+  return () => {
+    const cliente = JSON.parse(localStorage.getItem("CLIENTE_LOJA") || "{}");
+
+    const nomeCliente = cliente.nome || "Cliente";
+    const whatsappCliente = cliente.whatsapp || "não informado";
+
+    const mensagem = encodeURIComponent(`
+Olá! Gostaria de solicitar um orçamento.
+
+📌 Serviço: ${produtoAtual.nome}
+📝 Descrição: ${produtoAtual.descricao || "—"}
+
+👤 Cliente: ${nomeCliente}
+📱 WhatsApp: ${whatsappCliente}
+`);
+
+    // Verifica o link do WhatsApp da loja
+    const lojaLink = document.getElementById("btnWhatsLoja")?.href;
+
+    if(!lojaLink){
+      alert("WhatsApp da loja não disponível");
+      return;
+    }
+
+    // Abre o WhatsApp com a mensagem de orçamento
+    window.open(lojaLink + `&text=${mensagem}`, "_blank");
+  };
+}
 
 
 
