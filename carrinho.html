@@ -358,13 +358,17 @@ async function finalizarCompra(){
       return;
     }
 
-    const loja = await buscarLoja();
-    abrirPix(loja);
+const loja = await buscarLoja();
+await registrarPedidoOffline(loja);
+abrirPix(loja);
+;
 
   }catch(err){
-    console.error("Erro pagamento:", err);
-    const loja = await buscarLoja();
-    abrirPix(loja);
+console.error("Erro pagamento:", err);
+const loja = await buscarLoja();
+await registrarPedidoOffline(loja);
+abrirPix(loja);
+
   }
 }
 
@@ -416,7 +420,64 @@ function enviarComprovante(){
 
 window.open(`https://wa.me/${numero}?text=${msg}`, "_blank");
 }
+async function registrarPedidoOffline(loja){
+  try{
+    const total = carrinho.reduce(
+      (s,i)=> s + (i.preco * i.quantidade), 0
+    );
 
+    const payload = {
+      loja_id: lojaId,
+      loja_nome: loja.negocio || null,
+
+      cliente_nome: cliente.nome,
+      cliente_whatsapp: cliente.whatsapp,
+
+      itens: carrinho.map(i => ({
+        produto_id: i.produto_id,
+        nome: i.nome,
+        quantidade: i.quantidade,
+        preco_unitario: i.preco,
+        subtotal: i.preco * i.quantidade
+      })),
+
+      total,
+      status: "pendente_pagamento",
+      origem: "pix_fallback"
+    };
+
+    await sb
+      .from("pedidos_offline")
+      .insert(payload);
+
+  }catch(err){
+    console.error("Erro ao registrar pedido offline:", err);
+    // ❗ não bloqueia o fluxo do cliente
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 </script>
 <!-- MODAL PIX -->
 <div class="modal" id="modalPix">
