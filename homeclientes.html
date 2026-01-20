@@ -1044,11 +1044,17 @@ body.modal-open{
 }
 
 .modal-content #mpNome{
-  color: #111827 !important;
+  color:var(--text) !important;
 }
+
 .card{
-  background:linear-gradient(180deg,#f5f6f8,#eceff3);
+  background:linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg) 80%, #fff),
+    color-mix(in srgb, var(--bg) 95%, #000)
+  );
 }
+
 
 
 
