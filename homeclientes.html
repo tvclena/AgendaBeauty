@@ -1061,7 +1061,14 @@ body.modal-open{
   color: var(--text); /* 🔥 ESSENCIAL */
 }
 
+.badge{
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+  box-shadow:0 6px 14px rgba(220,38,38,.35);
+}
 
+
+
+  
 
 
 
@@ -2134,7 +2141,13 @@ const html = lote.map(i => {
   return `
     <div class="card" onclick="${onclick}">
       <div style="position:relative">
-        ${i.promocao_ativa ? `<div class="badge">Promoção</div>` : ""}
+${
+  i.promocao_ativa && i.preco_promocional
+    ? `<div class="badge">
+         -${calcularDescontoPercentual(i.preco, i.preco_promocional)}%
+       </div>`
+    : ""
+}
         <img 
           loading="lazy"
           src="${extrairImagens(i.imagem_url)[0] || ''}"
@@ -2172,9 +2185,22 @@ const html = lote.map(i => {
             }
           </span>
 
-          <span class="price">
-            R$ ${Number(i.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}
-          </span>
+<span class="price">
+  ${
+    i.promocao_ativa && i.preco_promocional
+      ? `
+        <span class="old">
+          R$ ${Number(i.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+        </span>
+        R$ ${Number(i.preco_promocional).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+      `
+      : `
+        R$ ${Number(i.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+      `
+  }
+</span>
+
+
         </div>
 
       </div>
@@ -2246,6 +2272,14 @@ function abrirCustomizacao(caminhoHtml, produtoId){
 
 
 
+function calcularDescontoPercentual(precoOriginal, precoPromocional){
+  if(!precoOriginal || !precoPromocional) return 0;
+
+  const desconto =
+    ((precoOriginal - precoPromocional) / precoOriginal) * 100;
+
+  return Math.round(desconto);
+}
 
 
 
