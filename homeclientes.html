@@ -1273,14 +1273,17 @@ function detectarCustomizacao(nomeProduto){
       .map(p => p.trim().toLowerCase());
 
     for(const palavra of palavras){
-      if(nome.includes(palavra)){
-        return cfg.caminho_html; // 👈 retorna o HTML correto
+      const marcador = `#${palavra}#`;
+
+      if(nome.includes(marcador)){
+        return cfg.caminho_html; // ✅ só obedece com #
       }
     }
   }
 
   return null;
 }
+
 
 
 const lojaId = new URLSearchParams(location.search).get("l");
