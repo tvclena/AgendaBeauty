@@ -196,8 +196,6 @@ let fotoScale = 1;
 let fotoX = 0;
 let fotoY = 0;
 
-/* FOTO */
-let foto=null;
 function carregarFoto(e){
   const f = e.target.files[0];
   if(!f) return;
@@ -214,11 +212,15 @@ function carregarFoto(e){
     fotoX = 0;
     fotoY = 0;
 
+    img.style.width = "100%";
+    img.style.height = "auto";
     img.style.transformOrigin = "center center";
+
     aplicarTransformFoto();
     dragFoto(img, fotoArea);
   };
 }
+
 
 function setZoom(valor){
   if(!foto) return;
