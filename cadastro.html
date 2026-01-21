@@ -288,13 +288,10 @@ button{
       <input id="whatsapp" placeholder="WhatsApp" required>
       <input id="negocio" placeholder="Nome do negócio" required>
 
-      <select id="tipo" required>
-        <option value="">Tipo do negócio</option>
-        <option>SALAO DE BELEZA</option>
-        <option>BARBEARIA</option>
-        <option>LOJA</option>
-        <option>STUDIO</option>
-      </select>
+<select id="tipo" required>
+  <option value="">Tipo do negócio</option>
+</select>
+
 
       <input id="cidade" placeholder="Cidade" required>
       <input id="uf" placeholder="UF" maxlength="2" required>
@@ -313,6 +310,32 @@ const sb = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
+async function carregarTipos() {
+  const { data, error } = await sb
+    .from("tipos_loja_com_quantidade")
+    .select("*")
+    .eq("ativo", true)
+    .order("nome");
+
+  if (error) {
+    console.error("Erro ao carregar tipos", error);
+    return;
+  }
+
+  const select = document.getElementById("tipo");
+  select.innerHTML = `<option value="">Tipo do negócio</option>`;
+
+  data.forEach(t => {
+    select.innerHTML += `
+      <option value="${t.nome}">
+        ${t.nome} (${t.total_lojas})
+      </option>
+    `;
+  });
+}
+
+// carrega assim que a página abre
+carregarTipos();
 
 function slugify(text) {
   return text
