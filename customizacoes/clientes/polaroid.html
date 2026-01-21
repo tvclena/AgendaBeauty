@@ -191,22 +191,40 @@ function criarEstrelas(){
   }
 }
 criarEstrelas();
+let foto = null;
+let fotoScale = 1;
+let fotoX = 0;
+let fotoY = 0;
 
 /* FOTO */
 let foto=null;
 function carregarFoto(e){
-  const f=e.target.files[0];
+  const f = e.target.files[0];
   if(!f) return;
-  const img=document.createElement("img");
-  img.src=URL.createObjectURL(f);
-  img.onload=()=>{
-    fotoArea.innerHTML="";
+
+  const img = document.createElement("img");
+  img.src = URL.createObjectURL(f);
+
+  img.onload = () => {
+    fotoArea.innerHTML = "";
     fotoArea.appendChild(img);
-    foto=img;
-    drag(img,fotoArea);
-  }
+
+    foto = img;
+    fotoScale = 1;
+    fotoX = 0;
+    fotoY = 0;
+
+    img.style.transformOrigin = "center center";
+    aplicarTransformFoto();
+    dragFoto(img, fotoArea);
+  };
 }
-function setZoom(z){if(foto) foto.style.transform=`scale(${z})`}
+
+function setZoom(valor){
+  if(!foto) return;
+  fotoScale = parseFloat(valor);
+  aplicarTransformFoto();
+}
 
 /* EMOJIS */
 function toggleEmojiPicker(){
@@ -249,19 +267,49 @@ function gestosEmoji(el){
 }
 
 /* DRAG GENÉRICO */
-function drag(el,lim){
-  let x,y,d=false;
-  el.onpointerdown=e=>{
-    d=true;x=e.clientX-el.offsetLeft;y=e.clientY-el.offsetTop;
-    el.setPointerCapture(e.pointerId);
+function dragFoto(img, limite){
+  let startX = 0, startY = 0;
+
+  img.onpointerdown = e => {
+    img.setPointerCapture(e.pointerId);
+    startX = e.clientX - fotoX;
+    startY = e.clientY - fotoY;
   };
-  el.onpointermove=e=>{
-    if(!d) return;
-    let nx=e.clientX-x,ny=e.clientY-y;
-    el.style.left=nx+"px";el.style.top=ny+"px";
+
+  img.onpointermove = e => {
+    if(!img.hasPointerCapture(e.pointerId)) return;
+    fotoX = e.clientX - startX;
+    fotoY = e.clientY - startY;
+    aplicarTransformFoto();
   };
-  el.onpointerup=()=>d=false;
+
+  img.onpointerup = () => {};
 }
+let pinchStartDist = 0;
+let pinchStartScale = 1;
+
+fotoArea.addEventListener("touchstart", e => {
+  if(e.touches.length === 2 && foto){
+    pinchStartDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    pinchStartScale = fotoScale;
+  }
+},{passive:false});
+
+fotoArea.addEventListener("touchmove", e => {
+  if(e.touches.length === 2 && foto){
+    e.preventDefault();
+    const dist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    fotoScale = Math.min(3, Math.max(1, pinchStartScale * (dist / pinchStartDist)));
+    aplicarTransformFoto();
+  }
+},{passive:false});
+
 
 /* SALVAR */
 function salvar(){
@@ -297,6 +345,30 @@ function render(){
   `).join("");
 }
 render();
+
+function aplicarTransformFoto(){
+  foto.style.transform =
+    `translate(${fotoX}px, ${fotoY}px) scale(${fotoScale})`;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
 </script>
 
 </body>
