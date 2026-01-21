@@ -24,211 +24,104 @@
   --card-bg:rgba(255,255,255,.12);
   --border:rgba(255,255,255,.18);
 }
-
-*{
-  box-sizing:border-box;
-  font-family:Inter;
-  touch-action:manipulation;
-}
-
-body{
-  margin:0;
-  color:var(--text);
-  background:#000;
-  overflow-x:hidden;
-}
+*{box-sizing:border-box;font-family:Inter;touch-action:manipulation}
+body{margin:0;background:#000;color:#fff;overflow-x:hidden}
 
 /* ===== ESTRELAS ===== */
-.stars{
-  position:fixed;
-  inset:0;
-  z-index:-2;
-  overflow:hidden;
-}
-.star{
-  position:absolute;
-  background:var(--primary);
-  border-radius:50%;
-  animation:fall linear infinite;
-}
-@keyframes fall{
-  from{transform:translateY(-10vh)}
-  to{transform:translateY(110vh)}
-}
-
-/* ===== CONTAINER ===== */
-.page{
-  max-width:1200px;
-  margin:auto;
-  padding:24px 16px 40px;
-}
+.stars{position:fixed;inset:0;z-index:-2}
+.star{position:absolute;background:var(--primary);border-radius:50%;animation:fall linear infinite}
+@keyframes fall{from{transform:translateY(-10vh)}to{transform:translateY(110vh)}}
 
 /* ===== LAYOUT ===== */
-.layout{
-  display:grid;
-  gap:24px;
-}
-
-/* DESKTOP */
-@media(min-width:900px){
-  .layout{
-    grid-template-columns: 420px 1fr;
-    align-items:start;
-  }
-}
+.page{max-width:1200px;margin:auto;padding:24px 16px}
+.layout{display:grid;gap:24px}
+@media(min-width:900px){.layout{grid-template-columns:420px 1fr}}
 
 /* ===== EDITOR ===== */
-.editor{
+.editor,.galeria{
   background:var(--card-bg);
   backdrop-filter:blur(18px);
   border-radius:28px;
-  padding:20px;
+  padding:18px;
   border:1px solid var(--border);
   box-shadow:0 25px 60px rgba(0,0,0,.6);
 }
 
 /* ===== POLAROID ===== */
 .polaroid{
-  width:100%;
-  max-width:300px;
-  height:390px;
-  background:rgba(255,255,255,.95);
-  border-radius:18px;
-  padding:14px;
-  margin:0 auto 18px;
-  position:relative;
-  overflow:hidden;
+  width:100%;max-width:300px;height:390px;
+  background:#fff;border-radius:18px;
+  padding:14px;margin:0 auto 18px;
+  position:relative;overflow:hidden
 }
-
 .foto-area{
-  width:100%;
-  height:260px;
-  background:#e5e7eb;
-  border-radius:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:700;
-  color:#6b7280;
-  cursor:pointer;
-  position:relative;
-  overflow:hidden;
+  width:100%;height:260px;background:#e5e7eb;
+  border-radius:14px;display:flex;
+  align-items:center;justify-content:center;
+  font-weight:700;color:#6b7280;
+  cursor:pointer;position:relative;overflow:hidden
 }
-.foto-area img{
-  position:absolute;
-  touch-action:none;
-}
-
-/* TEXTO */
+.foto-area img{position:absolute;touch-action:none}
 .legenda{
-  height:80px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  font-size:20px;
-  font-weight:600;
-  color:#111;
-  word-break:break-word;
+  height:80px;display:flex;align-items:center;
+  justify-content:center;text-align:center;
+  font-size:20px;font-weight:600;color:#111
 }
 
-/* EMOJI */
+/* ===== EMOJI ===== */
 .emoji{
   position:absolute;
-  font-size:28px;
-  cursor:grab;
+  font-size:32px;
   user-select:none;
+  touch-action:none;
+  cursor:grab;
 }
 
-/* ===== MARCA D’ÁGUA ===== */
-.watermark{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  z-index:5;
-  opacity:.15;
-}
+/* ===== WATERMARK ===== */
+.watermark{position:absolute;inset:0;pointer-events:none;opacity:.15}
 .watermark span{
-  position:absolute;
-  font-size:12px;
-  font-weight:800;
-  color:var(--secondary);
-  transform:rotate(-30deg);
-  white-space:nowrap;
+  position:absolute;font-size:12px;
+  font-weight:800;color:var(--secondary);
+  transform:rotate(-30deg);white-space:nowrap
 }
 
 /* ===== CONTROLES ===== */
-.controls{
-  display:grid;
-  gap:12px;
-}
-.controls input,
-.controls select,
-.controls button{
-  width:100%;
-  padding:13px;
-  border-radius:16px;
+.controls{display:grid;gap:12px}
+.controls input,.controls select,.controls button{
+  padding:13px;border-radius:16px;
   border:1px solid var(--border);
   background:rgba(255,255,255,.12);
-  color:#fff;
-  font-weight:700;
+  color:#fff;font-weight:700
 }
-.controls input::placeholder{color:#ddd}
 .controls button.primary{
   background:linear-gradient(135deg,var(--primary),var(--secondary));
-  border:none;
-  font-weight:900;
+  border:none;font-weight:900
 }
 
-/* ===== SELECT DARK ===== */
-select{
-  background-color:rgba(0,0,0,.35);
+/* ===== EMOJI PICKER ===== */
+.emoji-picker{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:8px;
+  background:rgba(0,0,0,.55);
+  border-radius:18px;
+  padding:12px;
 }
-select option{
-  background:#0b0b0b;
-  color:#fff;
+.emoji-picker span{
+  font-size:26px;
+  text-align:center;
+  cursor:pointer;
 }
 
 /* ===== GALERIA ===== */
-.galeria{
-  background:var(--card-bg);
-  backdrop-filter:blur(16px);
-  border-radius:28px;
-  padding:18px;
-  border:1px solid var(--border);
-  box-shadow:0 25px 60px rgba(0,0,0,.6);
-}
-.galeria h3{
-  margin:0 0 12px;
-  font-size:16px;
-  font-weight:900;
-}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  gap:14px;
-}
-.item{
-  background:rgba(0,0,0,.35);
-  border-radius:16px;
-  padding:8px;
-  border:1px solid var(--border);
-  position:relative;
-}
-.item img{
-  width:100%;
-  border-radius:12px;
-}
+.galeria h3{margin:0 0 12px;font-weight:900}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
+.item{background:rgba(0,0,0,.35);border-radius:16px;padding:8px;position:relative}
+.item img{width:100%;border-radius:12px}
 .item button{
-  position:absolute;
-  top:6px;
-  right:6px;
-  width:26px;
-  height:26px;
-  border-radius:50%;
-  border:none;
-  background:#ef4444;
-  color:#fff;
+  position:absolute;top:6px;right:6px;
+  width:26px;height:26px;border-radius:50%;
+  border:none;background:#ef4444;color:#fff
 }
 </style>
 </head>
@@ -240,7 +133,6 @@ select option{
 <div class="page">
   <div class="layout">
 
-    <!-- EDITOR -->
     <div class="editor">
 
       <div class="polaroid" id="polaroid">
@@ -254,20 +146,24 @@ select option{
       <div class="controls">
         <input type="file" id="fileInput" hidden accept="image/*" onchange="carregarFoto(event)">
         <input type="range" min="1" max="3" step="0.1" value="1" onchange="setZoom(this.value)">
-        <input type="text" placeholder="Emoji 😀" oninput="addEmoji(this.value)">
         <input type="text" placeholder="Texto do polaroid" oninput="legenda.innerText=this.value">
-        <input type="color" onchange="legenda.style.color=this.value)">
+        <input type="color" onchange="legenda.style.color=this.value">
         <select onchange="legenda.style.fontFamily=this.value">
           <option value="Inter">Inter</option>
           <option value="Pacifico">Pacifico</option>
           <option value="Montserrat">Montserrat</option>
         </select>
+
+        <button onclick="toggleEmojiPicker()">😀 Adicionar emoji</button>
+
+        <div class="emoji-picker" id="emojiPicker" style="display:none">
+          😀 😍 🥰 😎 🤍 ⭐ ✨ 🎉 🎂 💖 📸 🌈
+        </div>
+
         <button class="primary" onclick="salvar()">Salvar Polaroid</button>
       </div>
-
     </div>
 
-    <!-- GALERIA -->
     <div class="galeria">
       <h3>Seus Polaroids</h3>
       <div class="grid" id="grid"></div>
@@ -277,144 +173,154 @@ select option{
 </div>
 
 <script>
-/* ===== SUPABASE ===== */
+/* ===== SUPABASE / CORES ===== */
 const sb=supabase.createClient(
-  "https://egxjgmzukjyyxmkukwub.supabase.co",
-  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+ "https://egxjgmzukjyyxmkukwub.supabase.co",
+ "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 const lojaId=new URLSearchParams(location.search).get("l");
 let nomeLojaTxt="SUA LOJA";
 
 (async()=>{
-  if(!lojaId) return;
-
-  const {data:loja}=await sb.from("user_profile")
-    .select("negocio").eq("user_id",lojaId).maybeSingle();
-
-  if(loja?.negocio) nomeLojaTxt=loja.negocio.toUpperCase();
-
-  const {data:cfg}=await sb.from("loja_config")
-    .select("primary_color,secondary_color,text_color")
-    .eq("user_id",lojaId).maybeSingle();
-
-  if(cfg){
-    document.documentElement.style.setProperty("--primary",cfg.primary_color);
-    document.documentElement.style.setProperty("--secondary",cfg.secondary_color||cfg.text_color||"#999");
-    criarEstrelas();
-    gerarMarca();
-  }
+ if(!lojaId) return;
+ const {data:cfg}=await sb.from("loja_config")
+  .select("primary_color,secondary_color,text_color")
+  .eq("user_id",lojaId).maybeSingle();
+ if(cfg){
+  document.documentElement.style.setProperty("--primary",cfg.primary_color);
+  document.documentElement.style.setProperty("--secondary",cfg.secondary_color||cfg.text_color||"#999");
+ }
+ criarEstrelas();
+ gerarMarca();
 })();
 
 /* ===== ESTRELAS ===== */
 function criarEstrelas(){
-  const s=document.getElementById("stars");
-  for(let i=0;i<140;i++){
-    const e=document.createElement("div");
-    e.className="star";
-    const size=1+Math.random()*2;
-    e.style.width=size+"px";
-    e.style.height=size+"px";
-    e.style.left=Math.random()*100+"%";
-    e.style.opacity=0.4+Math.random()*0.6;
-    e.style.animationDuration=(6+Math.random()*10)+"s";
-    s.appendChild(e);
-  }
+ const s=document.getElementById("stars");
+ for(let i=0;i<140;i++){
+  const e=document.createElement("div");
+  e.className="star";
+  const size=1+Math.random()*2;
+  e.style.width=size+"px";
+  e.style.height=size+"px";
+  e.style.left=Math.random()*100+"%";
+  e.style.opacity=0.4+Math.random()*0.6;
+  e.style.animationDuration=(6+Math.random()*10)+"s";
+  s.appendChild(e);
+ }
 }
 
 /* ===== MARCA ===== */
 function gerarMarca(){
-  const wm=document.getElementById("watermark");
-  wm.innerHTML="";
-  for(let i=0;i<6;i++){
-    for(let j=0;j<3;j++){
-      const s=document.createElement("span");
-      s.innerText=nomeLojaTxt;
-      s.style.top=`${i*65}px`;
-      s.style.left=`${j*120}px`;
-      wm.appendChild(s);
-    }
+ const wm=document.getElementById("watermark");
+ wm.innerHTML="";
+ for(let i=0;i<6;i++){
+  for(let j=0;j<3;j++){
+   const s=document.createElement("span");
+   s.innerText=nomeLojaTxt;
+   s.style.top=`${i*65}px`;
+   s.style.left=`${j*120}px`;
+   wm.appendChild(s);
   }
+ }
 }
 
-/* ===== EDITOR ===== */
+/* ===== FOTO ===== */
 let foto=null,zoom=1;
 function carregarFoto(e){
-  const f=e.target.files[0];
-  if(!f) return;
-  const img=document.createElement("img");
-  img.src=URL.createObjectURL(f);
-  img.onload=()=>{
-    fotoArea.innerHTML="";
-    fotoArea.appendChild(img);
-    foto=img;
-    foto.style.width="100%";
-    foto.style.left="0";
-    foto.style.top="0";
-    drag(img,fotoArea);
-  }
+ const f=e.target.files[0];
+ if(!f) return;
+ const img=document.createElement("img");
+ img.src=URL.createObjectURL(f);
+ img.onload=()=>{
+  fotoArea.innerHTML="";
+  fotoArea.appendChild(img);
+  foto=img;
+  foto.style.width="100%";
+  drag(img,fotoArea);
+ };
 }
-function setZoom(z){
-  zoom=z;
-  if(foto) foto.style.transform=`scale(${zoom})`;
+function setZoom(z){if(foto) foto.style.transform=`scale(${z})`}
+
+/* ===== EMOJIS ===== */
+function toggleEmojiPicker(){
+ emojiPicker.style.display =
+  emojiPicker.style.display==="none"?"grid":"none";
 }
-function addEmoji(v){
-  if(!v) return;
-  const e=document.createElement("div");
-  e.className="emoji";
-  e.innerText=v;
-  e.style.left="50%";
-  e.style.top="50%";
-  polaroid.appendChild(e);
-  drag(e,polaroid);
+document.querySelectorAll(".emoji-picker").forEach(p=>{
+ p.addEventListener("click",e=>{
+  if(!e.target.innerText) return;
+  addEmoji(e.target.innerText);
+ });
+});
+function addEmoji(char){
+ const e=document.createElement("div");
+ e.className="emoji";
+ e.innerText=char;
+ e.style.left="50%";
+ e.style.top="50%";
+ polaroid.appendChild(e);
+ emojiGestos(e);
 }
-function drag(el,lim){
-  let x,y,d=false;
-  el.onpointerdown=e=>{
-    d=true;x=e.clientX-el.offsetLeft;y=e.clientY-el.offsetTop;
-    el.setPointerCapture(e.pointerId);
-  };
-  el.onpointermove=e=>{
-    if(!d) return;
-    let nx=e.clientX-x,ny=e.clientY-y;
-    nx=Math.max(0,Math.min(nx,lim.clientWidth-el.offsetWidth));
-    ny=Math.max(0,Math.min(ny,lim.clientHeight-el.offsetHeight));
-    el.style.left=nx+"px";el.style.top=ny+"px";
-  };
-  el.onpointerup=()=>d=false;
+
+/* ===== GESTOS EMOJI ===== */
+function emojiGestos(el){
+ let startDist=0,startSize=32,lastTap=0;
+ el.style.fontSize=startSize+"px";
+
+ el.addEventListener("pointerdown",e=>{
+  el.setPointerCapture(e.pointerId);
+  el.dataset.x=e.clientX-el.offsetLeft;
+  el.dataset.y=e.clientY-el.offsetTop;
+ });
+
+ el.addEventListener("pointermove",e=>{
+  if(!el.hasPointerCapture(e.pointerId)) return;
+  el.style.left=e.clientX-el.dataset.x+"px";
+  el.style.top=e.clientY-el.dataset.y+"px";
+ });
+
+ el.addEventListener("dblclick",()=>el.remove());
+
+ el.addEventListener("wheel",e=>{
+  e.preventDefault();
+  startSize+=e.deltaY<0?2:-2;
+  el.style.fontSize=startSize+"px";
+ });
 }
 
 /* ===== SALVAR ===== */
 function salvar(){
-  html2canvas(polaroid).then(c=>{
-    const img=c.toDataURL("image/png");
-    const lista=JSON.parse(localStorage.getItem("polaroids")||"[]");
-    lista.push(img);
-    localStorage.setItem("polaroids",JSON.stringify(lista));
-    limpar();render();
-  });
+ html2canvas(polaroid).then(c=>{
+  const img=c.toDataURL("image/png");
+  const lista=JSON.parse(localStorage.getItem("polaroids")||"[]");
+  lista.push(img);
+  localStorage.setItem("polaroids",JSON.stringify(lista));
+  limpar();render();
+ });
 }
 function limpar(){
-  fotoArea.innerHTML="📸 Toque para adicionar foto";
-  legenda.innerText="";
-  document.querySelectorAll(".emoji").forEach(e=>e.remove());
-  foto=null;
+ fotoArea.innerHTML="📸 Toque para adicionar foto";
+ legenda.innerText="";
+ document.querySelectorAll(".emoji").forEach(e=>e.remove());
+ foto=null;
 }
 
 /* ===== GALERIA ===== */
 function excluir(i){
-  const lista=JSON.parse(localStorage.getItem("polaroids"));
-  lista.splice(i,1);
-  localStorage.setItem("polaroids",JSON.stringify(lista));
-  render();
+ const lista=JSON.parse(localStorage.getItem("polaroids"));
+ lista.splice(i,1);
+ localStorage.setItem("polaroids",JSON.stringify(lista));
+ render();
 }
 function render(){
-  const lista=JSON.parse(localStorage.getItem("polaroids")||"[]");
-  grid.innerHTML=lista.map((i,idx)=>`
-    <div class="item">
-      <img src="${i}">
-      <button onclick="excluir(${idx})">✕</button>
-    </div>
-  `).join("");
+ const lista=JSON.parse(localStorage.getItem("polaroids")||"[]");
+ grid.innerHTML=lista.map((i,idx)=>`
+  <div class="item">
+    <img src="${i}">
+    <button onclick="excluir(${idx})">✕</button>
+  </div>
+ `).join("");
 }
 render();
 </script>
