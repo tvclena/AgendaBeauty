@@ -15,15 +15,15 @@
 :root{
   --primary:#ff6a00;
   --bg:#f4f6fb;
-  --card:#fff;
+  --card:#ffffff;
   --border:#e5e7eb;
   --text:#111827;
   --muted:#6b7280;
   --success:#16a34a;
   --warning:#f59e0b;
   --danger:#ef4444;
-  --radius:20px;
-  --shadow:0 14px 40px rgba(0,0,0,.08);
+  --radius:22px;
+  --shadow:0 16px 45px rgba(0,0,0,.08);
 }
 
 *{box-sizing:border-box;font-family:Inter}
@@ -34,14 +34,11 @@ body{margin:0;background:var(--bg);padding:16px;color:var(--text)}
   padding:20px;
   border-radius:22px;
   box-shadow:var(--shadow);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:22px
+  margin-bottom:22px;
 }
 
-.brand strong{font-size:22px;font-weight:900}
-.brand span{font-size:12px;color:var(--muted)}
+.header strong{font-size:22px;font-weight:900}
+.header span{font-size:12px;color:var(--muted)}
 
 .card{
   background:var(--card);
@@ -74,7 +71,7 @@ body{margin:0;background:var(--bg);padding:16px;color:var(--text)}
   color:#92400e;
 }
 
-.PAGO,.pago{background:#dcfce7;color:#166534}
+.pago{background:#dcfce7;color:#166534}
 .pendente_pagamento{background:#fff7ed;color:#9a3412}
 .cancelado{background:#fee2e2;color:#991b1b}
 
@@ -111,16 +108,25 @@ select{
   border:1px solid var(--border);
   font-weight:800
 }
+
+/* ===== PRINT ===== */
+@media print{
+  body *{visibility:hidden}
+  .print-only,.print-only *{visibility:visible}
+  .print-only{
+    position:absolute;
+    inset:0;
+    padding:0;
+  }
+}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-  <div class="brand">
-    <strong>CLENA</strong><br>
-    <span>Pedidos</span>
-  </div>
+  <strong>CLENA</strong><br>
+  <span>Pedidos</span>
 </div>
 
 <div id="lista"></div>
@@ -137,11 +143,18 @@ const money = v => Number(v||0).toLocaleString("pt-BR",{style:"currency",currenc
 async function carregar(){
   const { data: auth } = await sb.auth.getUser();
   if(!auth?.user){
-    lista.innerHTML = "<div class='card'>Faça login</div>";
+    lista.innerHTML = "<div class='card'>Faça login para acessar</div>";
     return;
   }
 
-  /* ONLINE */
+  /* ===== PERFIL ===== */
+  const { data: loja } = await sb
+    .from("user_profile")
+    .select("*")
+    .eq("user_id", auth.user.id)
+    .single();
+
+  /* ===== ONLINE ===== */
   const { data: pedidos } = await sb
     .from("pedidos")
     .select("*")
@@ -157,13 +170,14 @@ async function carregar(){
     ? await sb.from("movimentacoes_pagamento").select("*").in("pedido_id", ids)
     : { data: [] };
 
-  /* OFFLINE */
+  /* ===== OFFLINE ===== */
   const { data: offline } = await sb
     .from("pedidos_offline")
     .select("*")
     .eq("loja_id", auth.user.id);
 
-  const todos = [
+  /* ===== NORMALIZA ===== */
+  const pedidosUnificados = [
     ...(pedidos||[]).map(p=>{
       const its = itens.filter(i=>i.pedido_id===p.id);
       const pg = pagamentos.find(x=>x.pedido_id===p.id);
@@ -173,9 +187,13 @@ async function carregar(){
         data:p.created_at,
         cliente:p.cliente_nome,
         whatsapp:p.cliente_whatsapp,
-        itens:its,
+        itens:its.map(i=>({
+          nome:i.nome,
+          quantidade:i.quantidade,
+          subtotal:i.subtotal
+        })),
         total:p.valor_total,
-        pago: pg?.status==="APROVED"
+        status: pg?.status === "APROVED" ? "pago" : "pendente_pagamento"
       };
     }),
     ...(offline||[]).map(p=>({
@@ -184,14 +202,14 @@ async function carregar(){
       data:p.created_at,
       cliente:p.cliente_nome,
       whatsapp:p.cliente_whatsapp,
-      itens:JSON.parse(p.itens||"[]"),
+      itens: Array.isArray(p.itens) ? p.itens : JSON.parse(p.itens||"[]"),
       total:p.total,
       status:p.status,
       origem:p.origem
     }))
   ].sort((a,b)=>new Date(b.data)-new Date(a.data));
 
-  lista.innerHTML = todos.map(p=>`
+  lista.innerHTML = pedidosUnificados.map(p=>`
     <div class="card">
 
       <div class="grid">
@@ -205,6 +223,10 @@ async function carregar(){
         <div>
           <div class="small">Data</div>
           <div class="bold">${new Date(p.data).toLocaleString("pt-BR")}</div>
+        </div>
+        <div>
+          <div class="small">Status</div>
+          <span class="badge ${p.status}">${p.status}</span>
         </div>
       </div>
 
@@ -227,11 +249,12 @@ async function carregar(){
       <div style="margin-top:14px">
         <div class="small">Total</div>
         <div class="value">${money(p.total)}</div>
+        ${p.origem ? `<div class="small">Origem: ${p.origem}</div>`:""}
       </div>
 
       ${p.tipo==="offline" ? `
         <div style="margin-top:14px">
-          <div class="small">Status do pagamento</div>
+          <div class="small">Alterar status do pagamento</div>
           <select onchange="atualizarOffline('${p.id}',this.value)">
             <option value="pendente_pagamento" ${p.status==="pendente_pagamento"?"selected":""}>Pendente</option>
             <option value="pago" ${p.status==="pago"?"selected":""}>Pago</option>
@@ -242,7 +265,7 @@ async function carregar(){
 
       <div class="actions">
         ${(p.tipo==="online" || p.status==="pago")
-          ? `<button class="print" onclick="window.print()">Imprimir</button>`
+          ? `<button class="print" onclick="imprimir(this)">Imprimir</button>`
           : ``}
         ${p.tipo==="offline"
           ? `<button class="cancel" onclick="atualizarOffline('${p.id}','cancelado')">Cancelar</button>`
@@ -251,6 +274,13 @@ async function carregar(){
 
     </div>
   `).join("");
+}
+
+function imprimir(btn){
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('print-only'));
+  btn.closest('.card').classList.add('print-only');
+  window.print();
+  setTimeout(()=>btn.closest('.card').classList.remove('print-only'),500);
 }
 
 async function atualizarOffline(id,status){
