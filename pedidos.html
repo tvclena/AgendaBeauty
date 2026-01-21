@@ -195,6 +195,65 @@ button{
   50%{transform:scale(1.2);opacity:.6}
   100%{transform:scale(1);opacity:1}
 }
+/* ===== OFFLINE CARD ===== */
+.offline-card{
+  background:#fff;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+  margin-bottom:18px;
+}
+
+.offline-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+
+.offline-id{
+  font-size:12px;
+  font-weight:900;
+  word-break:break-all;
+}
+
+.offline-date{
+  font-size:11px;
+  color:var(--muted);
+}
+
+.offline-section{
+  margin-top:14px;
+}
+
+.offline-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.offline-item{
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+  margin-top:6px;
+}
+
+.offline-total{
+  font-size:18px;
+  font-weight:900;
+}
+
+.status-select{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  font-weight:800;
+  font-size:14px;
+  margin-top:10px;
+}
 
 </style>
 </head>
@@ -402,7 +461,6 @@ function fecharPedidosOffline(){
   document.getElementById("modalPedidos").style.display = "none";
 }
 
-/* ================= CARREGAR OFFLINE ================= */
 async function carregarPedidosOffline(){
   const container = document.getElementById("conteudoPedidosOffline");
   container.innerHTML = "<div class='card'>Carregando pedidos offline...</div>";
@@ -425,84 +483,74 @@ async function carregarPedidosOffline(){
   }
 
   container.innerHTML = data.map(p=>{
-const itens = Array.isArray(p.itens)
-  ? p.itens
-  : JSON.parse(p.itens || "[]");
+    const itens = Array.isArray(p.itens)
+      ? p.itens
+      : JSON.parse(p.itens || "[]");
 
     return `
-      <div class="card" style="margin-bottom:20px">
+      <div class="offline-card">
 
         <!-- HEADER -->
-        <div class="grid" style="align-items:center">
+        <div class="offline-header">
           <div>
-            <div class="small">Pedido</div>
-            <div class="bold">#${p.id}</div>
-          </div>
-          <div>
-            <div class="small">Status</div>
-            <span class="badge ${p.status}">${p.status}</span>
-          </div>
-          <div>
-            <div class="small">Data</div>
-            <div class="bold">
+            <div class="offline-id">#${p.id}</div>
+            <div class="offline-date">
               ${new Date(p.created_at).toLocaleString("pt-BR")}
             </div>
           </div>
-        </div>
-
-        <!-- LOJA -->
-        <div class="section-title">🏪 Loja</div>
-        <div class="grid">
-          <div>
-            <div class="small">Nome</div>
-            <div class="bold">${p.loja_nome}</div>
-          </div>
+          <span class="badge ${p.status}">${p.status}</span>
         </div>
 
         <!-- CLIENTE -->
-        <div class="section-title">👤 Cliente</div>
-        <div class="grid">
-          <div>
-            <div class="small">Nome</div>
-            <div class="bold">${p.cliente_nome}</div>
-          </div>
-          <div>
-            <div class="small">WhatsApp</div>
-            <div class="bold">${p.cliente_whatsapp}</div>
-          </div>
+        <div class="offline-section">
+          <div class="small">Cliente</div>
+          <div class="bold">${p.cliente_nome}</div>
+          <div class="small">${p.cliente_whatsapp}</div>
         </div>
 
         <!-- ITENS -->
-        <div class="section-title">🛒 Itens</div>
-        ${itens.map(i=>`
-          <div class="item">
-            <div>
-              <div class="bold">${i.nome}</div>
-              <div class="small">
-                ${i.quantidade} × ${money(i.preco_unitario)}
-              </div>
+        <div class="offline-section">
+          <div class="small">Itens</div>
+          ${itens.map(i=>`
+            <div class="offline-item">
+              <span>${i.quantidade}× ${i.nome}</span>
+              <strong>${money(i.subtotal)}</strong>
             </div>
-            <div class="value">${money(i.subtotal)}</div>
-          </div>
-        `).join("")}
+          `).join("")}
+        </div>
 
         <!-- TOTAL -->
-        <div class="section-title">💰 Pagamento</div>
-        <div class="grid">
-          <div>
-            <div class="small">Total</div>
-            <div class="value">${money(p.total)}</div>
-          </div>
-          <div>
-            <div class="small">Origem</div>
-            <div class="bold">${p.origem}</div>
-          </div>
+        <div class="offline-section offline-row">
+          <span class="small">Total</span>
+          <span class="offline-total">${money(p.total)}</span>
+        </div>
+
+        <!-- STATUS -->
+        <div class="offline-section">
+          <div class="small">Status do pagamento</div>
+          <select class="status-select"
+            onchange="atualizarStatusOffline('${p.id}', this.value)">
+            <option value="pendente_pagamento" ${p.status==="pendente_pagamento"?"selected":""}>Pendente</option>
+            <option value="pago" ${p.status==="pago"?"selected":""}>Pago</option>
+            <option value="cancelado" ${p.status==="cancelado"?"selected":""}>Cancelado</option>
+          </select>
         </div>
 
       </div>
     `;
   }).join("");
 }
+async function atualizarStatusOffline(id, status){
+  await sb
+    .from("pedidos_offline")
+    .update({ status })
+    .eq("id", id);
+
+  // atualiza badge e lista
+  verificarPedidosOffline();
+  carregarPedidosOffline();
+}
+
 /* INIT */
 verificarPedidosOffline();
 
