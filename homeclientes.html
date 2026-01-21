@@ -1336,8 +1336,70 @@ let tipoAtual = null;
 let vendasPorProduto = {};   // { produto_id: total_vendido }
 let avaliacoesPorItem = {}; // { produto_id: { total, soma } }
 
+const CACHE_KEY = "CACHE_PRODUTOS_" + lojaId;
+const CACHE_TIME = "CACHE_TIMESTAMP_" + lojaId;
+const CACHE_TTL = 1000 * 60 * 5; // 5 minutos
+
+function salvarCacheProdutos(lista){
+  localStorage.setItem(CACHE_KEY, JSON.stringify(lista));
+  localStorage.setItem(CACHE_TIME, Date.now());
+}
+
+function lerCacheProdutos(){
+  try{
+    const raw = localStorage.getItem(CACHE_KEY);
+    const time = localStorage.getItem(CACHE_TIME);
+
+    if(!raw || !time) return null;
+
+    // cache válido
+    if(Date.now() - Number(time) > CACHE_TTL) return null;
+
+    return JSON.parse(raw);
+  }catch{
+    return null;
+  }
+}
+
+
+
+
+
+
+
+  
+
 /* ================= LOAD ================= */
 async function load(){
+
+
+  /* 🔥 TENTA CACHE PRIMEIRO */
+const cache = lerCacheProdutos();
+
+if(cache && Array.isArray(cache)){
+  todos = cache;
+
+  await carregarVendasProdutos();
+  await carregarAvaliacoesResumo();
+  await carregarMediaLoja();
+  await verificarLojaVerificada();
+
+  // define aba
+  const temServico = todos.some(i => i.tipo === "SERVICO" && i.ativo);
+  const temProduto = todos.some(i => i.tipo === "PRODUTO" && i.ativo);
+
+  if(temServico){
+    tipoAtual = "SERVICO";
+    setTab("SERVICO");
+  }else if(temProduto){
+    tipoAtual = "PRODUTO";
+    setTab("PRODUTO");
+  }
+
+  // 🔥 segue carregando em segundo plano
+  atualizarProdutosEmBackground();
+}
+
 
 /* CONFIG DE CORES — SUPABASE É A ÚNICA FONTE DA VERDADE */
 const { data: config } = await sb
@@ -1416,15 +1478,6 @@ if (loja.bio) {
 }
 
 
-  /* PRODUTOS */
-  const { data } = await sb
-    .from("produtos_servicos")
-    .select("*")
-    .eq("user_id",lojaId)
-    .eq("ativo",true)
-    .order("ordem_exibicao");
-
-todos = data || [];
 
 // 🔥 carrega dados auxiliares ANTES de renderizar
 await carregarVendasProdutos();
@@ -2445,7 +2498,34 @@ function adicionarDireto(id){
 }
 
 
+async function atualizarProdutosEmBackground(){
+  const { data, error } = await sb
+    .from("produtos_servicos")
+    .select("*")
+    .eq("user_id", lojaId)
+    .eq("ativo", true)
+    .order("ordem_exibicao");
 
+  if(error || !data) return;
+
+  const atual = JSON.stringify(todos);
+  const novo  = JSON.stringify(data);
+
+  // 🔒 só atualiza se mudou
+  if(atual !== novo){
+    todos = data;
+    salvarCacheProdutos(data);
+
+    render(true); // 🔥 UM render controlado
+  }
+}
+
+
+
+
+
+
+  
   
 
   
