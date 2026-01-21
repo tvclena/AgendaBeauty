@@ -2,8 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Importador de Produtos • CLENA</title>
-
+<title>Importador SQL • CLENA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -16,40 +15,37 @@ body{margin:0;background:#f4f6fb;color:#111827}
 :root{
   --primary:#ff6a00;
   --border:#e5e7eb;
-  --card:#ffffff;
+  --card:#fff;
   --muted:#6b7280;
+  --ok:#16a34a;
+  --warn:#f59e0b;
+  --err:#dc2626;
 }
 
 .container{
-  max-width:900px;
+  max-width:1200px;
   margin:40px auto;
   background:var(--card);
-  border-radius:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
-  padding:28px;
+  border-radius:18px;
+  box-shadow:0 15px 40px rgba(0,0,0,.08);
+  padding:30px;
 }
 
-h1{margin:0 0 6px;font-size:22px;font-weight:800}
-.subtitle{font-size:13px;color:var(--muted);margin-bottom:20px}
+h1{margin:0;font-size:24px;font-weight:800}
+.subtitle{font-size:13px;color:var(--muted);margin-bottom:18px}
 
-input{
-  width:100%;
+input,button{
   height:44px;
   border-radius:12px;
   border:1px solid var(--border);
   padding:0 14px;
   font-size:14px;
-  margin-bottom:12px;
 }
 
 button{
-  width:100%;
-  height:46px;
-  border-radius:999px;
-  border:none;
-  font-weight:800;
-  font-size:14px;
   cursor:pointer;
+  font-weight:800;
+  border:none;
 }
 
 .btn-primary{
@@ -57,122 +53,169 @@ button{
   color:#fff;
 }
 
+.btn-secondary{
+  background:#0f172a;
+  color:#fff;
+}
+
+.btn-danger{
+  background:#dc2626;
+  color:#fff;
+}
+
+.row{display:flex;gap:12px;flex-wrap:wrap}
+
 .box{
   border:2px dashed var(--border);
-  border-radius:14px;
+  border-radius:16px;
   padding:30px;
   text-align:center;
   cursor:pointer;
-  transition:.2s;
 }
-.box:hover{
-  border-color:var(--primary);
-  background:rgba(255,106,0,.03);
-}
-.box input{display:none}
+.box:hover{border-color:var(--primary)}
 
-.output{
-  margin-top:30px;
-  background:#0f172a;
+.hidden{display:none}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+  font-size:12px;
+}
+th,td{
+  border-bottom:1px solid var(--border);
+  padding:8px;
+  text-align:left;
+}
+th{background:#f9fafb;font-weight:800}
+
+.tag{
+  padding:3px 8px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:800;
+  color:#fff;
+}
+.ok{background:var(--ok)}
+.warn{background:var(--warn)}
+.err{background:var(--err)}
+
+pre{
+  background:#020617;
   color:#e5e7eb;
   padding:20px;
-  border-radius:14px;
-  font-size:12px;
-  max-height:420px;
+  border-radius:16px;
+  max-height:400px;
   overflow:auto;
+  font-size:12px;
   white-space:pre-wrap;
 }
 
-.hidden{display:none}
-.error{color:#dc2626;font-size:13px;margin-bottom:10px}
+.footer{
+  display:flex;
+  gap:12px;
+  margin-top:20px;
+}
 </style>
 </head>
 
 <body>
 
 <!-- LOGIN -->
-<div class="container" id="loginBox">
+<div class="container" id="login">
   <h1>Acesso restrito</h1>
-  <div class="subtitle">Informe a senha para acessar o importador</div>
-
-  <div class="error" id="loginError" style="display:none"></div>
-
+  <div class="subtitle">Importador SQL protegido</div>
   <input type="password" id="senha" placeholder="Senha de acesso">
   <button class="btn-primary" onclick="login()">Entrar</button>
 </div>
 
-<!-- SISTEMA -->
+<!-- APP -->
 <div class="container hidden" id="app">
-  <h1>Importador de Produtos</h1>
-  <div class="subtitle">Geração automática de SQL via planilha</div>
+  <div class="row" style="justify-content:space-between">
+    <div>
+      <h1>Importador SQL</h1>
+      <div class="subtitle">Planilha → SQL Supabase</div>
+    </div>
+    <button class="btn-danger" onclick="logout()">Sair</button>
+  </div>
 
   <label class="box">
-    <input type="file" id="file" accept=".xlsx">
+    <input type="file" id="file" accept=".xlsx" hidden>
     📄 Clique para selecionar a planilha
   </label>
 
-  <button class="btn-primary" onclick="processar()">🚀 Gerar SQL</button>
+  <div class="row" style="margin-top:14px">
+    <button class="btn-primary" onclick="processar()">Gerar SQL</button>
+    <button class="btn-secondary" onclick="copiar()">Copiar SQL</button>
+    <button class="btn-secondary" onclick="baixar()">Baixar .sql</button>
+  </div>
 
-  <pre class="output hidden" id="saida"></pre>
+  <table id="preview" class="hidden"></table>
+  <pre id="sql" class="hidden"></pre>
 </div>
 
 <script>
-/* ================= AUTH ================= */
-if(sessionStorage.getItem("importador_auth")==="ok"){
-  liberar();
-}
+/* ===== AUTH ===== */
+if(sessionStorage.getItem("auth")==="ok") liberar();
 
 async function login(){
-  const senha = document.getElementById("senha").value;
-  const error = document.getElementById("loginError");
-
-  error.style.display="none";
-
-  const res = await fetch("/api/auth-importador",{
+  const senha=document.getElementById("senha").value;
+  const res=await fetch("/api/auth-importador",{
     method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ password: senha })
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({password:senha})
   });
-
-  if(!res.ok){
-    error.innerText="Senha incorreta";
-    error.style.display="block";
-    return;
-  }
-
-  sessionStorage.setItem("importador_auth","ok");
+  if(!res.ok){alert("Senha inválida");return;}
+  sessionStorage.setItem("auth","ok");
   liberar();
 }
 
 function liberar(){
-  document.getElementById("loginBox").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
+  login.classList.add("hidden");
+  app.classList.remove("hidden");
 }
 
-/* ================= IMPORT ================= */
+function logout(){
+  sessionStorage.clear();
+  location.reload();
+}
+
+/* ===== IMPORT ===== */
+let SQL_FINAL="";
+
 async function processar(){
-  const fileInput = document.getElementById("file");
-  const saida = document.getElementById("saida");
+  const file=document.getElementById("file").files[0];
+  if(!file){alert("Selecione a planilha");return;}
 
-  if(!fileInput.files.length){
-    alert("Selecione a planilha");
-    return;
-  }
+  const buf=await file.arrayBuffer();
+  const wb=XLSX.read(buf);
+  const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
 
-  const buffer = await fileInput.files[0].arrayBuffer();
-  const wb = XLSX.read(buffer);
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet);
-
-  const res = await fetch("/api/importar-produtos",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ rows })
+  const res=await fetch("/api/importar-produtos",{method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({rows})
   });
 
-  const json = await res.json();
-  saida.classList.remove("hidden");
-  saida.textContent = json.sql || "Erro ao gerar SQL";
+  const json=await res.json();
+  SQL_FINAL=json.sql;
+
+  document.getElementById("preview").innerHTML=json.preview;
+  document.getElementById("preview").classList.remove("hidden");
+  document.getElementById("sql").textContent=json.sql;
+  document.getElementById("sql").classList.remove("hidden");
+}
+
+function copiar(){
+  navigator.clipboard.writeText(SQL_FINAL);
+  alert("SQL copiado");
+}
+
+function baixar(){
+  const blob=new Blob([SQL_FINAL],{type:"text/sql"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="importacao.sql";
+  a.click();
 }
 </script>
 
