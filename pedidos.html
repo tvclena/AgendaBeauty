@@ -141,6 +141,12 @@ function parseItensSeguro(itens){
   }
   return [];
 }
+function getImagemProduto(item){
+  if(item.produto_id && produtosMap[item.produto_id]){
+    return produtosMap[item.produto_id];
+  }
+  return "https://via.placeholder.com/150?text=Produto";
+}
 
 async function carregar(){
   const { data: auth } = await sb.auth.getUser();
@@ -153,6 +159,15 @@ async function carregar(){
     .from("pedidos")
     .select("*")
     .eq("loja_id", auth.user.id);
+/* ================= PRODUTOS (IMAGENS) ================= */
+const { data: produtos } = await sb
+  .from("produtos_servicos")
+  .select("id, imagem_url");
+
+const produtosMap = {};
+(produtos || []).forEach(p => {
+  produtosMap[p.id] = p.imagem_url;
+});
 
   const ids = (pedidos||[]).map(p=>p.id);
 
@@ -227,7 +242,7 @@ async function carregar(){
       <div class="section-title"><i class="ri-shopping-cart-line"></i> Itens</div>
       ${p.itens.map(i=>`
         <div class="item">
-          <img src="https://via.placeholder.com/150">
+<img src="${getImagemProduto(i)}">
           <div>
             <div class="bold">${i.nome}</div>
             <div class="small">${i.quantidade} × ${money(i.preco_unitario || i.subtotal/i.quantidade)}</div>
