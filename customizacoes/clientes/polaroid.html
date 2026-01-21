@@ -30,26 +30,29 @@
 body{margin:0;color:var(--text);background:#000;overflow-x:hidden}
 
 /* ESTRELAS */
+/* ===== ESTRELAS ===== */
 .stars{
   position:fixed;
   inset:0;
-  z-index:-2;
+  z-index:0;              /* 🔥 NÃO NEGATIVO */
   pointer-events:none;
 }
 
 .star{
   position:absolute;
+  width:2px;
+  height:2px;
   border-radius:50%;
-  background: var(--primary);
+
+  background: #ffffff;
 
   box-shadow:
-    0 0 6px var(--primary),
-    0 0 14px var(--secondary),
-    0 0 32px color-mix(in srgb, var(--primary) 60%, transparent);
+    0 0 4px #ffffff,
+    0 0 10px rgba(255,255,255,.8);
 
-  animation:fall linear infinite;
-  opacity:.85;
+  opacity:.8;
 }
+
 
 @keyframes fall{
   from{
