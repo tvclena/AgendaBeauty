@@ -350,7 +350,36 @@ iframe{
   pointer-events:none;
   user-select:none;
 }
+.content iframe{
+  width:100%;
+  height:100%;
+  border:none;
+  display:none;
+}
 
+.content iframe.active{
+  display:block;
+}
+
+
+.content iframe{
+  background:#fff;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 </style>
 </head>
 
@@ -398,38 +427,66 @@ iframe{
   <h1>CONSOLE</h1>
   <div class="avatar" id="avatar" onclick="openProfile()">A</div>
 </div>
-
 <!-- CONTENT -->
 <div class="content">
-  <iframe id="frame" src="home.html"></iframe>
+
+  <iframe
+    id="frame-home"
+    src="home.html"
+    class="active">
+  </iframe>
+
+  <iframe
+    id="frame-produtos"
+    src="produtos.html">
+  </iframe>
+
+  <iframe
+    id="frame-agenda"
+    src="agenda.html">
+  </iframe>
+
+  <iframe
+    id="frame-pedidos"
+    src="pedidos.html">
+  </iframe>
+
+  <iframe
+    id="frame-config"
+    src="config.html">
+  </iframe>
+
 </div>
+
 
 <!-- NAVBAR -->
 <nav class="navbar">
-  <div class="nav-item active" onclick="go(this,'home.html')">
+
+  <div class="nav-item active" onclick="go(this,'home')">
     <i class="ri-home-5-line"></i>
     Home
   </div>
 
-  <div class="nav-item" onclick="go(this,'produtos.html')">
+  <div class="nav-item" onclick="go(this,'produtos')">
     <i class="ri-store-2-line"></i>
     Loja
   </div>
 
-  <div class="nav-item" onclick="go(this,'agenda.html')">
+  <div class="nav-item" onclick="go(this,'agenda')">
     <i class="ri-calendar-line"></i>
     Agenda
   </div>
 
-  <div class="nav-item" onclick="go(this,'pedidos.html')">
+  <div class="nav-item" onclick="go(this,'pedidos')">
     <i class="ri-shopping-bag-3-line"></i>
     Pedidos
   </div>
 
-  <div class="nav-item" onclick="go(this,'config.html')">
+  <div class="nav-item" onclick="go(this,'config')">
     <i class="ri-settings-3-line"></i>
     Ajustes
   </div>
+
 </nav>
 
 
@@ -898,13 +955,37 @@ function finalizarPagamento() {
 
 
   
-
 /* ================= NAV ================= */
-function go(el,page){
-  document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
+
+const frames = {
+  home: document.getElementById("frame-home"),
+  produtos: document.getElementById("frame-produtos"),
+  agenda: document.getElementById("frame-agenda"),
+  pedidos: document.getElementById("frame-pedidos"),
+  config: document.getElementById("frame-config")
+};
+window.addEventListener("load", () => {
+  frames.home.classList.add("active");
+});
+
+function go(el, key){
+
+  // navbar
+  document.querySelectorAll(".nav-item")
+    .forEach(i => i.classList.remove("active"));
+
   el.classList.add("active");
-  frame.src = page;
+
+  // iframes
+  Object.values(frames)
+    .forEach(f => f.classList.remove("active"));
+
+  if (frames[key]) {
+    frames[key].classList.add("active");
+  }
 }
+
+
 
 /* ================= PROFILE MODAL ================= */
 function openProfile(){ profileModal.style.display="flex"; }
