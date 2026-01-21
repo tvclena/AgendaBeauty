@@ -10,16 +10,8 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
-*{
-  box-sizing:border-box;
-  font-family:Inter;
-}
-
-body{
-  margin:0;
-  background:#f4f6fb;
-  color:#111827;
-}
+*{box-sizing:border-box;font-family:Inter}
+body{margin:0;background:#f4f6fb;color:#111827}
 
 :root{
   --primary:#ff6a00;
@@ -37,50 +29,22 @@ body{
   padding:28px;
 }
 
-h1{
-  margin:0 0 6px;
-  font-size:22px;
-  font-weight:800;
-}
+h1{margin:0 0 6px;font-size:22px;font-weight:800}
+.subtitle{font-size:13px;color:var(--muted);margin-bottom:20px}
 
-.subtitle{
-  font-size:13px;
-  color:var(--muted);
-  margin-bottom:20px;
-}
-
-.box{
-  border:2px dashed var(--border);
-  border-radius:14px;
-  padding:30px;
-  text-align:center;
-  cursor:pointer;
-  transition:.2s;
-}
-
-.box:hover{
-  border-color:var(--primary);
-  background:rgba(255,106,0,.03);
-}
-
-.box input{
-  display:none;
-}
-
-.box strong{
-  color:var(--primary);
-}
-
-.preview{
-  margin-top:20px;
-  font-size:13px;
-  color:#374151;
+input{
+  width:100%;
+  height:44px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  padding:0 14px;
+  font-size:14px;
+  margin-bottom:12px;
 }
 
 button{
-  margin-top:20px;
   width:100%;
-  height:48px;
+  height:46px;
   border-radius:999px;
   border:none;
   font-weight:800;
@@ -93,10 +57,19 @@ button{
   color:#fff;
 }
 
-.btn-primary:disabled{
-  opacity:.6;
-  cursor:not-allowed;
+.box{
+  border:2px dashed var(--border);
+  border-radius:14px;
+  padding:30px;
+  text-align:center;
+  cursor:pointer;
+  transition:.2s;
 }
+.box:hover{
+  border-color:var(--primary);
+  background:rgba(255,106,0,.03);
+}
+.box input{display:none}
 
 .output{
   margin-top:30px;
@@ -110,98 +83,96 @@ button{
   white-space:pre-wrap;
 }
 
-.footer{
-  margin-top:20px;
-  font-size:12px;
-  color:var(--muted);
-  text-align:center;
-}
+.hidden{display:none}
+.error{color:#dc2626;font-size:13px;margin-bottom:10px}
 </style>
 </head>
 
 <body>
 
-<div class="container">
-  <h1>Importador de Produtos</h1>
-  <div class="subtitle">
-    Gera SQL automaticamente a partir de planilha Excel.<br>
-    Imagens ausentes podem ser geradas por IA (quando ativado).
-  </div>
+<!-- LOGIN -->
+<div class="container" id="loginBox">
+  <h1>Acesso restrito</h1>
+  <div class="subtitle">Informe a senha para acessar o importador</div>
 
-  <!-- UPLOAD -->
+  <div class="error" id="loginError" style="display:none"></div>
+
+  <input type="password" id="senha" placeholder="Senha de acesso">
+  <button class="btn-primary" onclick="login()">Entrar</button>
+</div>
+
+<!-- SISTEMA -->
+<div class="container hidden" id="app">
+  <h1>Importador de Produtos</h1>
+  <div class="subtitle">Geração automática de SQL via planilha</div>
+
   <label class="box">
     <input type="file" id="file" accept=".xlsx">
-    <div>
-      📄 Arraste ou <strong>clique para selecionar</strong> a planilha<br>
-      <span class="subtitle">Formato .xlsx • Aba: produtos</span>
-    </div>
+    📄 Clique para selecionar a planilha
   </label>
 
-  <!-- PREVIEW -->
-  <div class="preview" id="preview"></div>
+  <button class="btn-primary" onclick="processar()">🚀 Gerar SQL</button>
 
-  <!-- BOTÃO -->
-  <button class="btn-primary" id="btnGerar" onclick="processar()">
-    🚀 Gerar SQL
-  </button>
-
-  <!-- SAÍDA -->
-  <pre class="output" id="saida" style="display:none"></pre>
-
-  <div class="footer">
-    CLENA • Importação segura e auditável
-  </div>
+  <pre class="output hidden" id="saida"></pre>
 </div>
 
 <script>
-async function processar(){
-  const fileInput = document.getElementById("file");
-  const preview = document.getElementById("preview");
-  const saida = document.getElementById("saida");
-  const btn = document.getElementById("btnGerar");
+/* ================= AUTH ================= */
+if(sessionStorage.getItem("importador_auth")==="ok"){
+  liberar();
+}
 
-  if(!fileInput.files.length){
-    alert("Selecione uma planilha");
+async function login(){
+  const senha = document.getElementById("senha").value;
+  const error = document.getElementById("loginError");
+
+  error.style.display="none";
+
+  const res = await fetch("/api/auth-importador",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ password: senha })
+  });
+
+  if(!res.ok){
+    error.innerText="Senha incorreta";
+    error.style.display="block";
     return;
   }
 
-  btn.disabled = true;
-  btn.innerText = "⏳ Processando planilha...";
+  sessionStorage.setItem("importador_auth","ok");
+  liberar();
+}
 
-  try{
-    const file = fileInput.files[0];
-    const buffer = await file.arrayBuffer();
+function liberar(){
+  document.getElementById("loginBox").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+}
 
-    const wb = XLSX.read(buffer);
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sheet);
+/* ================= IMPORT ================= */
+async function processar(){
+  const fileInput = document.getElementById("file");
+  const saida = document.getElementById("saida");
 
-    preview.innerHTML = `✔ ${rows.length} itens encontrados na planilha`;
-
-    const res = await fetch("/api/importar-produtos",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ rows })
-    });
-
-    const json = await res.json();
-
-    if(!json.sql){
-      throw new Error("Falha ao gerar SQL");
-    }
-
-    saida.style.display = "block";
-    saida.textContent = json.sql;
-
-    btn.innerText = "✅ SQL gerado com sucesso";
-
-  }catch(err){
-    console.error(err);
-    alert("Erro ao processar a planilha");
-    btn.innerText = "❌ Erro";
+  if(!fileInput.files.length){
+    alert("Selecione a planilha");
+    return;
   }
 
-  btn.disabled = false;
+  const buffer = await fileInput.files[0].arrayBuffer();
+  const wb = XLSX.read(buffer);
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet);
+
+  const res = await fetch("/api/importar-produtos",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ rows })
+  });
+
+  const json = await res.json();
+  saida.classList.remove("hidden");
+  saida.textContent = json.sql || "Erro ao gerar SQL";
 }
 </script>
 
