@@ -425,7 +425,9 @@ async function carregarPedidosOffline(){
   }
 
   container.innerHTML = data.map(p=>{
-    const itens = JSON.parse(p.itens || "[]");
+const itens = Array.isArray(p.itens)
+  ? p.itens
+  : JSON.parse(p.itens || "[]");
 
     return `
       <div class="card" style="margin-bottom:20px">
