@@ -15,10 +15,31 @@ const ASSETS = [
 ============================= */
 self.addEventListener("install", event => {
   self.skipWaiting();
+
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+
+      const validAssets = [];
+
+      for (const url of ASSETS) {
+        try {
+          const res = await fetch(url, { method: "GET" });
+          if (res.ok) {
+            validAssets.push(url);
+          } else {
+            console.warn("Arquivo inválido (ignorado):", url);
+          }
+        } catch {
+          console.warn("Arquivo não encontrado (ignorado):", url);
+        }
+      }
+
+      await cache.addAll(validAssets);
+    })()
   );
 });
+
 
 /* =============================
    ACTIVATE
