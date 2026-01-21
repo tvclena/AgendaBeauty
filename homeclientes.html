@@ -1155,6 +1155,29 @@ html.theme-ready{
 }
 
 
+.status{
+  display:inline-block;
+  margin:4px 0 6px;
+  padding:4px 10px;
+  font-size:11px;
+  font-weight:800;
+  border-radius:999px;
+  letter-spacing:.02em;
+}
+
+.status.ativo{
+  background:#ecfdf5;
+  color:#065f46;
+}
+
+.status.inativo{
+  background:#fef2f2;
+  color:#991b1b;
+}
+.card.inativo{
+  opacity:0.45;
+  filter:grayscale(1);
+}
 
 
 
@@ -1420,12 +1443,12 @@ if (loja.bio) {
 
 
   /* PRODUTOS */
-  const { data } = await sb
-    .from("produtos_servicos")
-    .select("*")
-    .eq("user_id",lojaId)
-    .eq("ativo",true)
-    .order("ordem_exibicao");
+const { data } = await sb
+  .from("produtos_servicos")
+  .select("*")
+  .eq("user_id", lojaId)
+  .order("ordem_exibicao");
+
 
 todos = data || [];
 
@@ -1526,8 +1549,9 @@ function render(reset = true){
     paginaAtual = 0;
   }
 
-  itensVisiveis = todos
-    .filter(i => i.tipo === tipoAtual && i.ativo)
+itensVisiveis = todos
+  .filter(i => i.tipo === tipoAtual)
+
 .filter(i =>
   i.nome
     .replace(/#[^#]+#/g, "")
@@ -2222,7 +2246,7 @@ const onclickCard = customizacao
   : `abrirProduto('${i.id}')`;
 
 return `
-<div class="card" onclick="${onclickCard}">
+<div class="card ${i.ativo ? '' : 'inativo'}" onclick="${onclickCard}">
   <div style="position:relative">
 
     ${
@@ -2254,9 +2278,14 @@ return `
 
   <div class="card-body">
 
-    <strong class="item-nome">
-      ${i.nome.replace(/#[^#]+#/g, "").trim()}
-    </strong>
+<strong class="item-nome">
+  ${i.nome.replace(/#[^#]+#/g, "").trim()}
+</strong>
+
+<span class="status ${i.ativo ? 'ativo' : 'inativo'}">
+  ${i.ativo ? "🟢 Ativo" : "🔴 Inativo"}
+</span>
+
 
     <div class="card-info-extra">
       <span class="card-stars">
@@ -2320,9 +2349,14 @@ ${
 
       <div class="card-body">
 
-        <strong class="item-nome">
-          ${i.nome.replace(/#[^#]+#/g, "").trim()}
-        </strong>
+<strong class="item-nome">
+  ${i.nome.replace(/#[^#]+#/g, "").trim()}
+</strong>
+
+<span class="status ${i.ativo ? 'ativo' : 'inativo'}">
+  ${i.ativo ? "🟢 Ativo" : "🔴 Inativo"}
+</span>
+
 
         <div class="card-info-extra">
           <span class="card-stars">
