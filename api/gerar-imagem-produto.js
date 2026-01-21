@@ -1,15 +1,5 @@
 import OpenAI from "openai";
 import { createClient } from "@supabase/supabase-js";
-import crypto from "crypto";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE
-);
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -17,68 +7,85 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { user_id, nome, descricao, categoria, tipo } = req.body;
+    const {
+      user_id,
+      nome,
+      descricao = "",
+      categoria = "",
+      tipo = "PRODUTO"
+    } = req.body;
 
     if (!user_id || !nome) {
       return res.status(400).json({ error: "Dados obrigatórios ausentes" });
     }
 
-    // ================= PROMPT INTELIGENTE =================
-    const prompt =
-      tipo === "SERVICO"
-        ? `
-Imagem profissional representando um serviço.
-Nome: ${nome}
-Descrição: ${descricao || ""}
-Ambiente limpo, profissional, realista.
-Fotografia moderna, iluminação suave.
-`
-        : `
-Foto profissional de produto comercial para e-commerce.
-Nome: ${nome}
-Descrição: ${descricao || ""}
-Categoria: ${categoria || ""}
-Fundo branco, iluminação suave, fotografia realista,
-estilo premium.
-`;
+    // 🔑 OpenAI
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
 
-    // ================= OPENAI IMAGE =================
+    const prompt = `
+Foto profissional de ${tipo === "SERVICO" ? "serviço" : "produto"}.
+Nome: ${nome}
+Categoria: ${categoria}
+Descrição: ${descricao}
+
+Estilo: fotografia de estúdio, fundo neutro, iluminação suave,
+alta qualidade, realista, e-commerce, sem texto, sem marcas.
+    `.trim();
+
+    // 🎨 GERA IMAGEM
     const image = await openai.images.generate({
       model: "gpt-image-1",
       prompt,
-      size: "1024x1024",
+      size: "1024x1024"
     });
 
-    const base64Image = image.data[0].b64_json;
-    const buffer = Buffer.from(base64Image, "base64");
-
-    // ================= STORAGE =================
-    const fileName = `${crypto.randomUUID()}.png`;
-    const filePath = `${user_id}/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from(process.env.SUPABASE_STORAGE_BUCKET)
-      .upload(filePath, buffer, {
-        contentType: "image/png",
-        upsert: false,
-      });
-
-    if (uploadError) {
-      throw uploadError;
+    const base64 = image.data[0].b64_json;
+    if (!base64) {
+      throw new Error("OpenAI não retornou imagem");
     }
 
-    // ================= URL PÚBLICA =================
-    const { data: publicUrl } = supabase.storage
-      .from(process.env.SUPABASE_STORAGE_BUCKET)
+    const buffer = Buffer.from(base64, "base64");
+
+    // ☁️ Supabase
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE
+    );
+
+    const filePath = `${user_id}/${Date.now()}.jpg`;
+
+    const upload = await supabase.storage
+      .from("produtos")
+      .upload(filePath, buffer, {
+        contentType: "image/jpeg",
+        upsert: true
+      });
+
+    if (upload.error) {
+      throw upload.error;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("produtos")
       .getPublicUrl(filePath);
 
+    if (!urlData?.publicUrl) {
+      throw new Error("Falha ao gerar URL pública");
+    }
+
+    // ✅ SUCESSO
     return res.status(200).json({
-      imagem_url: publicUrl.publicUrl,
+      imagem_url: urlData.publicUrl
     });
+
   } catch (err) {
-    console.error("Erro IA:", err);
+    console.error("❌ ERRO REAL:", err);
+
     return res.status(500).json({
-      error: "Erro ao gerar imagem com IA",
+      error: err.message || "Erro interno",
+      stack: err.stack
     });
   }
 }
