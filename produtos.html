@@ -330,7 +330,84 @@ body{
 }
 
 
+/* ================= BOTÃO IA ================= */
+.btn-ia{
+  margin-top:10px;
+  width:100%;
+  height:42px;
+  border-radius:14px;
+  border:1px solid rgba(255,106,0,.6);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,106,0,.95),
+      rgba(255,154,87,.95)
+    );
+  color:#fff;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.3px;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  box-shadow:
+    0 0 0 rgba(255,106,0,0),
+    0 12px 30px rgba(255,106,0,.45);
+  transition:.25s ease;
+}
 
+/* brilho animado */
+.btn-ia::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(
+      120deg,
+      transparent 30%,
+      rgba(255,255,255,.55),
+      transparent 70%
+    );
+  transform:translateX(-100%);
+  animation:shine 2.8s infinite;
+}
+
+@keyframes shine{
+  0%{transform:translateX(-100%)}
+  60%{transform:translateX(100%)}
+  100%{transform:translateX(100%)}
+}
+
+.btn-ia:hover{
+  transform:translateY(-1px) scale(1.01);
+  box-shadow:
+    0 0 12px rgba(255,106,0,.65),
+    0 18px 40px rgba(255,106,0,.55);
+}
+
+.btn-ia:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
+.btn-ia .sparkle{
+  margin-right:6px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 
   
 
@@ -451,6 +528,15 @@ body{
         <img id="preview" style="display:none">
         <input type="file" id="imagem" hidden accept="image/*">
       </div>
+<button
+  id="btnIA"
+  type="button"
+  class="btn-ia"
+  onclick="gerarImagemIA()"
+>
+  <span class="sparkle">✨</span>
+  Gerar imagem com IA
+</button>
 
     </div>
     <!-- FIM sheet-body -->
@@ -555,6 +641,53 @@ function moedaParaNumero(valor){
       .replace(',','.')
   );
 }
+async function gerarImagemIA(){
+  if(!nome.value){
+    alert("Informe o nome antes de gerar a imagem");
+    return;
+  }
+
+  btnIA.disabled = true;
+  btnIA.innerText = "✨ Gerando imagem com IA...";
+
+  try{
+    const res = await fetch("/api/gerar-imagem-produto",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        user_id:userId,
+        nome:nome.value,
+        descricao:descricao.value,
+        categoria:categoria.value,
+        tipo:tipo.value
+      })
+    });
+
+    const data = await res.json();
+
+    if(!data.imagem_url){
+      throw new Error("Falha ao gerar imagem");
+    }
+
+    preview.src = data.imagem_url;
+    preview.style.display = "block";
+
+    atualizarBotaoIA();
+
+  }catch(err){
+    alert("Erro ao gerar imagem com IA");
+    console.error(err);
+  }
+
+  btnIA.disabled = false;
+  btnIA.innerHTML = `<span class="sparkle">✨</span> Gerar imagem com IA`;
+}
+function atualizarBotaoIA(){
+  btnIA.style.display =
+    preview.style.display === "block"
+      ? "none"
+      : "block";
+}
 
 async function salvar(){
  loading.style.display="flex";
@@ -586,6 +719,10 @@ preco_promocional: promoAtiva.checked
   ativo:ativo.checked,
   observacoes_internas:obs.value
  };
+// ✅ salva imagem gerada por IA
+if(preview.src && !blob){
+  payload.imagem_url = preview.src;
+}
 
  let data;
  if(editId){
@@ -864,9 +1001,12 @@ function abrirModalNovo(){
   preview.src = "";
   blob = null;
 document.getElementById("btnExcluir").style.display = "none";
-  modal.classList.add("show");
+atualizarBotaoIA();
+modal.classList.add("show");
 }
 function abrirModalEditar(){
+  atualizarBotaoIA();
+
   modal.classList.add("show");
 }
 
@@ -891,9 +1031,10 @@ imagem.addEventListener("change", () => {
   if (!file) return;
 
   blob = file;
-
   preview.src = URL.createObjectURL(file);
   preview.style.display = "block";
+
+  atualizarBotaoIA(); // ✅ FALTAVA
 });
 
 
