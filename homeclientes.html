@@ -1169,6 +1169,26 @@ let itensVisiveis = [];
 let paginaAtual = 0;
 const TAMANHO_PAGINA = window.innerWidth < 768 ? 8 : 18;
 let carregandoScroll = false;
+let customizacoesLoja = [];
+function detectarCustomizacao(nomeProduto){
+  if(!nomeProduto || !customizacoesLoja.length) return null;
+
+  const nome = nomeProduto.toLowerCase();
+
+  for(const cfg of customizacoesLoja){
+    const palavras = cfg.palavras_chave
+      .split(",")
+      .map(p => p.trim().toLowerCase());
+
+    for(const palavra of palavras){
+      if(nome.includes(palavra)){
+        return cfg.caminho_html; // 👈 retorna o HTML correto
+      }
+    }
+  }
+
+  return null;
+}
 
 
 const lojaId = new URLSearchParams(location.search).get("l");
@@ -1261,6 +1281,9 @@ if(!loja){
   document.body.innerHTML = "<p style='text-align:center'>Loja não encontrada</p>";
   return;
 }
+
+/* 🔥 AQUI */
+await carregarCustomizacoesLoja();
 const btnWhatsLoja = document.getElementById("btnWhatsLoja");
 
 
@@ -1490,12 +1513,6 @@ function abrirProduto(id){
 
 
   
-// 🔥 REGRA POLAROID
-if (produtoAtual.nome.toLowerCase().includes("#polaroid#")) {
-  abrirPolaroidPopup(produtoAtual);
-  return;
-}
-
 
 
 
@@ -1504,7 +1521,6 @@ if (produtoAtual.nome.toLowerCase().includes("#polaroid#")) {
 
   
 
-const imagens = extrairImagens(produtoAtual.imagem_url);
 
 galeria = extrairImagens(produtoAtual.imagem_url);
 if(!galeria.length) galeria = [""]; // segurança
@@ -1519,7 +1535,6 @@ mpImagemMobile.src = galeria[0] || "";
 
 
   
-mpNome.innerText = limparNomePolaroid(produtoAtual.nome);
   mpDescricao.innerText = produtoAtual.descricao || "";
 mpImagemMobile.onclick = () => {
   if (!galeria.length) return;
@@ -1942,40 +1957,7 @@ function abrirNoMapa(){
   const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoCompleto)}`;
   window.open(url, "_blank");
 }
-function animarParaCarrinho(imgUrl, origemEl){
-  if(!origemEl) return;
 
-  const img = document.createElement("img");
-  img.src = imgUrl;
-  img.className = "fly-img";
-
-  const origem = origemEl.getBoundingClientRect();
-
-  img.style.left = origem.left + "px";
-  img.style.top  = origem.top  + "px";
-
-  document.body.appendChild(img);
-
-  // destino: aba Produtos (ajuste depois se quiser um ícone de carrinho real)
-  const destinoEl = document.querySelector("#tabProdutos");
-  if(!destinoEl){
-    img.remove();
-    return;
-  }
-
-  const destino = destinoEl.getBoundingClientRect();
-
-  requestAnimationFrame(()=>{
-    img.style.transform = `
-      translate(${destino.left - origem.left}px,
-                ${destino.top - origem.top}px)
-      scale(0.2)
-    `;
-    img.style.opacity = "0";
-  });
-
-  setTimeout(()=> img.remove(), 800);
-}
 
 function animarParaCarrinhoIframe(imgUrl, origemEl){
   if(!origemEl) return;
@@ -2030,10 +2012,6 @@ function extrairImagens(imagem_url){
 
 
 
-
-  function limparNomePolaroid(nome){
-  return nome.replace(/#polaroid#/gi, "").trim();
-}
 
 function imgNext(){
   if(!galeria.length) return;
@@ -2145,8 +2123,16 @@ function carregarProximaPagina(){
     return;
   }
 
-  const html = lote.map(i => `
-    <div class="card" onclick="abrirProduto('${i.id}')">
+const html = lote.map(i => {
+
+  const customizacao = detectarCustomizacao(i.nome);
+
+  const onclick = customizacao
+    ? `abrirCustomizacao('${customizacao}', '${i.id}')`
+    : `abrirProduto('${i.id}')`;
+
+  return `
+    <div class="card" onclick="${onclick}">
       <div style="position:relative">
         ${i.promocao_ativa ? `<div class="badge">Promoção</div>` : ""}
         <img 
@@ -2157,7 +2143,23 @@ function carregarProximaPagina(){
       </div>
 
       <div class="card-body">
-<strong class="item-nome">${limparNomePolaroid(i.nome)}</strong>
+
+        <strong class="item-nome">
+          ${i.nome.replace(/#[^#]+#/g, "").trim()}
+        </strong>
+
+        <div class="card-info-extra">
+          <span class="card-stars">
+            ${
+              avaliacoesPorItem[i.id]
+                ? "★".repeat(Math.round(avaliacoesPorItem[i.id].soma / avaliacoesPorItem[i.id].total))
+                : "☆☆☆☆☆"
+            }
+          </span>
+          <span class="card-vendidos">
+            ${vendasPorProduto[i.id] || 0} vendidos
+          </span>
+        </div>
 
         <div class="meta">
           <span>
@@ -2175,17 +2177,10 @@ function carregarProximaPagina(){
           </span>
         </div>
 
-${isPolaroid(i.nome) ? "" : `
-  <button onclick="event.stopPropagation(); acao('${i.id}','${i.tipo}')">
-    ${i.tipo==="SERVICO"
-      ? (i.preco > 0 ? "Agendar" : "Orçamento")
-      : "Comprar"}
-  </button>
-`}
-
       </div>
     </div>
-  `).join("");
+  `;
+}).join("");
 
   grid.insertAdjacentHTML("beforeend", html);
 
@@ -2224,39 +2219,29 @@ busca.addEventListener("input", () => {
 });
 
   
-  
-function abrirPolaroidPopup(produto){
-  const modal = document.createElement("div");
-  modal.style.cssText = `
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.65);
-    z-index:999999;
-    display:flex;
-  `;
 
-  const iframe = document.createElement("iframe");
-  iframe.src = `customizacoes/clientes/polaroid.html?produto=${produto.id}&l=${lojaId}`;
-  iframe.style.cssText = `
-    width:100%;
-    height:100%;
-    border:none;
-    background:#fff;
-  `;
 
-  modal.appendChild(iframe);
+async function carregarCustomizacoesLoja(){
+  const { data, error } = await sb
+    .from("loja_customizacoes")
+    .select("palavras_chave, caminho_html")
+    .eq("loja_id", lojaId)
+    .eq("ativo", true);
 
-  modal.onclick = () => modal.remove();
+  if(error){
+    console.error("Erro ao carregar customizações:", error);
+    customizacoesLoja = [];
+    return;
+  }
 
-  iframe.onclick = e => e.stopPropagation();
-
-  document.body.appendChild(modal);
-}
-function isPolaroid(nome){
-  return nome?.toLowerCase().includes("#polaroid#");
+  customizacoesLoja = data || [];
 }
 
 
+function abrirCustomizacao(caminhoHtml, produtoId){
+  location.href =
+    `${caminhoHtml}?l=${lojaId}&produto=${produtoId}`;
+}
 
 
 
