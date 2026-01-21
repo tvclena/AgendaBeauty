@@ -19,8 +19,8 @@
 <style>
 /* === SEU CSS ORIGINAL (INALTERADO) === */
 :root{
-  --primary:#ff6a00;
-  --secondary:#6b7280;
+  --primary: #ff6a00;
+  --secondary: #ff9a57;
   --text:#ffffff;
   --card-bg:rgba(255,255,255,.12);
   --border:rgba(255,255,255,.18);
@@ -30,9 +30,36 @@
 body{margin:0;color:var(--text);background:#000;overflow-x:hidden}
 
 /* ESTRELAS */
-.stars{position:fixed;inset:0;z-index:-2}
-.star{position:absolute;background:var(--primary);border-radius:50%;animation:fall linear infinite}
-@keyframes fall{from{transform:translateY(-10vh)}to{transform:translateY(110vh)}}
+.stars{
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  pointer-events:none;
+}
+
+.star{
+  position:absolute;
+  border-radius:50%;
+  background: var(--primary);
+
+  box-shadow:
+    0 0 6px var(--primary),
+    0 0 14px var(--secondary),
+    0 0 32px color-mix(in srgb, var(--primary) 60%, transparent);
+
+  animation:fall linear infinite;
+  opacity:.85;
+}
+
+@keyframes fall{
+  from{
+    transform:translateY(-10vh);
+  }
+  to{
+    transform:translateY(110vh);
+  }
+}
+
 
 /* LAYOUT */
 .page{max-width:1200px;margin:auto;padding:24px 16px 40px}
@@ -125,6 +152,24 @@ body{margin:0;color:var(--text);background:#000;overflow-x:hidden}
   width:26px;height:26px;border-radius:50%;
   border:none;background:#ef4444;color:#fff
 }
+
+
+
+
+
+
+.rain-particle{
+  background: color-mix(
+    in srgb,
+    var(--primary) 80%,
+    transparent
+  );
+
+  box-shadow:
+    0 0 6px var(--primary),
+    0 0 18px color-mix(in srgb, var(--secondary), transparent 40%);
+}
+
 </style>
 </head>
 
@@ -175,6 +220,51 @@ body{margin:0;color:var(--text);background:#000;overflow-x:hidden}
 </div>
 
 <script>
+
+
+const sb = supabase.createClient(
+  "https://egxjgmzukjyyxmkukwub.supabase.co",
+  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+);
+
+const lojaId =
+  new URLSearchParams(location.search).get("l");
+async function carregarTemaLoja(){
+  if(!lojaId) return;
+
+  const { data } = await sb
+    .from("loja_config")
+    .select(`
+      primary_color,
+      secondary_color,
+      background_color,
+      text_color,
+      border_color
+    `)
+    .eq("user_id", lojaId)
+    .maybeSingle();
+
+  document.documentElement.style.setProperty(
+    "--primary",
+    data?.primary_color || "#ff6a00"
+  );
+
+  document.documentElement.style.setProperty(
+    "--secondary",
+    data?.secondary_color || data?.primary_color || "#ff9a57"
+  );
+
+  document.documentElement.style.setProperty(
+    "--text",
+    data?.text_color || "#ffffff"
+  );
+
+  document.documentElement.style.setProperty(
+    "--border",
+    data?.border_color || "rgba(255,255,255,.18)"
+  );
+}
+
 /* CORES + ESTRELAS */
 function criarEstrelas(){
   const s=document.getElementById("stars");
@@ -188,9 +278,13 @@ function criarEstrelas(){
     e.style.opacity=0.4+Math.random()*0.6;
     e.style.animationDuration=(6+Math.random()*10)+"s";
     s.appendChild(e);
+      
   }
 }
-criarEstrelas();
+(async ()=>{
+  await carregarTemaLoja();
+  criarEstrelas();
+})();
 let foto = null;
 let fotoScale = 1;
 let fotoX = 0;
