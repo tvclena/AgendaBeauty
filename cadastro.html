@@ -313,32 +313,36 @@ const sb = supabase.createClient(
 );
 async function carregarTipos() {
   const { data, error } = await sb
-    .from("tipos_loja_com_quantidade")
-    .select("*")
-    .eq("ativo", true)
+    .from("tipos_loja")
+    .select("slug, nome, app_path")
     .order("nome");
 
+  console.log("TIPOS:", data);
+  console.log("ERRO:", error);
+
   if (error) {
-    console.error("Erro ao carregar tipos", error);
+    console.error("Erro ao carregar tipos:", error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    console.warn("Nenhum tipo encontrado");
     return;
   }
 
   const select = document.getElementById("tipo");
   select.innerHTML = `<option value="">Tipo do negócio</option>`;
 
-data.forEach(t => {
-  select.innerHTML += `
-    <option value="${t.nome}">
-      ${t.nome}
-    </option>
-  `;
-});
-
+  data.forEach(t => {
+    const opt = document.createElement("option");
+    opt.value = t.slug;          // ex: "salao"
+    opt.textContent = t.nome;    // ex: "Salão de Beleza"
+    opt.dataset.app = t.app_path; // ex: app.html
+    select.appendChild(opt);
+  });
 }
 
-// carrega assim que a página abre
-carregarTipos();
-
+document.addEventListener("DOMContentLoaded", carregarTipos);
 function slugify(text) {
   return text
     .toLowerCase()
