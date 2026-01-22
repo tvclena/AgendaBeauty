@@ -122,3 +122,25 @@ self.addEventListener("notificationclick", event => {
     clients.openWindow(event.notification.data.url)
   );
 });
+
+
+
+
+/* ================= FORCE CLEAR CACHE ================= */
+
+self.addEventListener("message", async (event) => {
+  if (event.data === "CLEAR_CACHE") {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => caches.delete(k)));
+
+    // força controle imediato
+    self.clients.claim();
+
+    // avisa todos os clientes para recarregar
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage("CACHE_CLEARED");
+    });
+  }
+});
+
