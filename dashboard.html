@@ -1002,6 +1002,124 @@ setInterval(() => {
   iframeAtivo.contentWindow.location.reload();
 }, REFRESH_INTERVAL);
 
+/* ================= ADMIN: LIMPAR CACHE GLOBAL ================= */
+
+// 10 cliques no título CONSOLE
+let consoleClicks = 0;
+let consoleTimer = null;
+
+const consoleTitle = document.querySelector(".topbar h1");
+
+if (consoleTitle) {
+  consoleTitle.addEventListener("click", () => {
+    consoleClicks++;
+    clearTimeout(consoleTimer);
+
+    consoleTimer = setTimeout(() => {
+      consoleClicks = 0;
+    }, 1500);
+
+    if (consoleClicks === 10) {
+      consoleClicks = 0;
+      abrirPopupSenhaAdmin();
+    }
+  });
+}
+
+// popup de senha
+function abrirPopupSenhaAdmin() {
+  const modal = document.createElement("div");
+  modal.id = "adminCacheModal";
+  modal.style.cssText = `
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.6);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:999999;
+  `;
+
+  modal.innerHTML = `
+    <div style="
+      background:#fff;
+      width:90%;
+      max-width:340px;
+      border-radius:22px;
+      padding:22px;
+      text-align:center;
+      box-shadow:0 30px 80px rgba(0,0,0,.35);
+    ">
+      <h3 style="margin-bottom:6px">Acesso restrito</h3>
+      <p id="adminMsg" style="font-size:13px;color:#6b7280;margin-bottom:14px">
+        Digite a senha administrativa
+      </p>
+
+      <input id="adminSenha" type="password" placeholder="Senha"
+        style="
+          width:100%;
+          padding:14px;
+          border-radius:12px;
+          border:1px solid #e5e7eb;
+          margin-bottom:12px;
+          font-size:14px;
+        " />
+
+      <button id="btnAdminConfirmar"
+        style="
+          width:100%;
+          padding:14px;
+          border:none;
+          border-radius:999px;
+          background:#ff6a00;
+          color:#fff;
+          font-weight:900;
+        ">
+        Confirmar
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector("#btnAdminConfirmar").onclick = () => {
+    const senha = modal.querySelector("#adminSenha").value;
+    if (!senha) return;
+    validarSenhaAdmin(senha, modal);
+  };
+}
+
+// valida senha na Vercel
+async function validarSenhaAdmin(senha, modal) {
+  const btn = modal.querySelector("#btnAdminConfirmar");
+  const msg = modal.querySelector("#adminMsg");
+
+  btn.innerText = "Validando...";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch("/api/validate-admin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ senha })
+    });
+
+    if (!res.ok) throw new Error();
+
+    msg.innerText = "Limpando cache global…";
+    btn.innerText = "Processando…";
+
+    setTimeout(() => {
+      limparCacheGlobal();
+      modal.remove();
+    }, 800);
+
+  } catch {
+    msg.innerText = "Senha incorreta";
+    btn.innerText = "Confirmar";
+    btn.disabled = false;
+  }
+}
 
 
 /* ================= PROFILE MODAL ================= */
@@ -1188,6 +1306,20 @@ function verificarAssinatura() {
     app.classList.remove("locked");
   }
 }
+async function limparCacheGlobal() {
+  if (!navigator.serviceWorker?.controller) {
+    alert("Service Worker não ativo");
+    return;
+  }
+
+  navigator.serviceWorker.controller.postMessage("CLEAR_CACHE");
+}
+navigator.serviceWorker.addEventListener("message", (event) => {
+  if (event.data === "CACHE_CLEARED") {
+    console.warn("🔄 Cache limpo — atualizando app");
+    location.reload(true);
+  }
+});
 
   
 </script>
