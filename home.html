@@ -561,33 +561,25 @@ function dataISO(d){
 }
 function mudarDia(direcao){
   dataAtual.setDate(dataAtual.getDate() + direcao);
-  carregarAgendaDia(APP.userId);
+
+  sbHome.auth.getSession().then(({data:{session}})=>{
+    if(session){
+      carregarAgendaDia(session.user.id);
+    }
+  });
 }
 
 const sbHome = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
-let APP = {};
-let CONTEXTO_PRONTO = false;
 
-/* 🔥 recebe contexto do app shell */
-window.addEventListener("message", (event) => {
-  if (event.data?.type === "APP_CONTEXT") {
-    APP = event.data.payload || {};
-    CONTEXTO_PRONTO = !!APP.userId;
-    if (CONTEXTO_PRONTO) {
-      initHome(); // inicia somente quando seguro
-    }
-  }
-});
+async function carregarHome(){
 
+  const { data:{ session } } = await sbHome.auth.getSession();
+  if(!session) return;
 
-async function initHome(){
-
-  const lojaId = APP.userId;
-  if (!lojaId) return;
-
+  const lojaId = session.user.id;
 
   const hoje = new Date().toLocaleDateString("en-CA");
   const inicioMes = new Date();
@@ -637,6 +629,8 @@ const total = faturamento?.reduce(
   await carregarAgendaDia(lojaId);
 }
 
+carregarHome();
+
 /* swipe dias */
 let startX = 0;
 document.addEventListener("touchstart",e=>{
@@ -646,8 +640,9 @@ document.addEventListener("touchend",e=>{
   const diff = e.changedTouches[0].clientX - startX;
   if(Math.abs(diff)<60) return;
   dataAtual.setDate(dataAtual.getDate() + (diff<0?1:-1));
-carregarAgendaDia(APP.userId);
-
+  sbHome.auth.getSession().then(({data:{session}})=>{
+    if(session) carregarAgendaDia(session.user.id);
+  });
 });
 
 async function carregarAgendaDia(lojaId){
@@ -752,15 +747,14 @@ agenda.forEach(a => {
 
 async function alterarStatus(id, status) {
 
-const lojaId = APP.userId;
-if (!lojaId) return;
-
+  const { data:{ session } } = await sbHome.auth.getSession();
+  if (!session) return;
 
   const { error } = await sbHome
     .from("agendamentos")
     .update({ status })
 .eq("id", id)
-.eq("user_id", lojaId);
+.eq("user_id", session.user.id);
 
 
   if (error) {
@@ -769,17 +763,14 @@ if (!lojaId) return;
     return;
   }
 
-carregarAgendaDia(lojaId);
+  carregarAgendaDia(session.user.id);
 }
 async function carregarCalendarioFaturamento(){
-  if (!CONTEXTO_PRONTO) return;
 
-  const lojaId = APP.userId;
-  if (!lojaId) return;
+  const { data:{ session } } = await sbHome.auth.getSession();
+  if(!session) return;
 
-  // resto da função continua igual
-}
-
+  const lojaId = session.user.id;
 
   const hoje = new Date();
   const ano = hoje.getFullYear();
@@ -854,9 +845,10 @@ async function carregarCalendarioFaturamento(){
 
 async function carregarServicos(){
 
-const lojaId = APP.userId;
-if (!lojaId) return;
+  const { data:{ session } } = await sbHome.auth.getSession();
+  if(!session) return;
 
+  const lojaId = session.user.id;
 
   const { data: servicos, error } = await sbHome
     .from("produtos_servicos")
@@ -920,11 +912,9 @@ function fecharClientes(){
 }
 
 function abrirFaturamentoMes(){
-  if (!CONTEXTO_PRONTO) return;
   document.getElementById("faturamentoModal").style.display = "flex";
   carregarCalendarioFaturamento();
 }
-
 
 function fecharFaturamentoMes(){
   document.getElementById("faturamentoModal").style.display = "none";
@@ -939,16 +929,19 @@ function fecharServicos(){
 }
 function abrirNovoAgendamento(){
 
-  const lojaId = APP.userId;
-  if (!lojaId) return;
+  sbHome.auth.getSession().then(({data:{session}})=>{
+    if(!session) return;
 
-  const iframe = document.getElementById("iframeAgendar");
+    const lojaId = session.user.id;
 
-  iframe.src = `agendar.html?l=${lojaId}&novo=1`;
+    const iframe = document.getElementById("iframeAgendar");
 
-  document.getElementById("novoAgendamentoModal").style.display = "flex";
+    // 🔥 abre o agendar reutilizando tudo que já existe
+iframe.src = `agendar.html?l=${lojaId}&novo=1`;
+
+    document.getElementById("novoAgendamentoModal").style.display = "flex";
+  });
 }
-
 
 function fecharNovoAgendamento(){
   const modal = document.getElementById("novoAgendamentoModal");
@@ -958,18 +951,20 @@ function fecharNovoAgendamento(){
   modal.style.display = "none";
 
   // 🔄 atualiza agenda do dia automaticamente
-carregarAgendaDia(APP.userId);
-
+  sbHome.auth.getSession().then(({data:{session}})=>{
+    if(session) carregarAgendaDia(session.user.id);
+  });
 }
 function abrirResumoDia(data){
+  sbHome.auth.getSession().then(({data:{session}})=>{
+    if(!session) return;
 
-  const lojaId = APP.userId;
-  if (!lojaId) return;
+    const lojaId = session.user.id;
+    const iframe = document.getElementById("iframeResumoDia");
 
-  const iframe = document.getElementById("iframeResumoDia");
-
-  iframe.src = `resumodia.html?data=${data}&loja=${lojaId}`;
-  document.getElementById("resumoDiaModal").style.display = "flex";
+    iframe.src = `resumodia.html?data=${data}&loja=${lojaId}`;
+    document.getElementById("resumoDiaModal").style.display = "flex";
+  });
 }
 
 function fecharResumoDia(){
