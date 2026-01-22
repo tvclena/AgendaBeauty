@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 
+<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-T97MS35TJ6"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -11,7 +12,6 @@ gtag('js', new Date());
 gtag('config', 'G-T97MS35TJ6');
 </script>
 
-  
 <title>Planos • Clena Store</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
@@ -20,7 +20,6 @@ gtag('config', 'G-T97MS35TJ6');
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-/* ================= ROOT ================= */
 :root{
   --primary:#ff6a00;
   --primary-dark:#e55d00;
@@ -31,15 +30,10 @@ gtag('config', 'G-T97MS35TJ6');
   --card:#ffffff;
   --border:#e5e7eb;
   --radius:28px;
-  --shadow:0 18px 40px rgba(0,0,0,.12);
+  --shadow:0 22px 50px rgba(0,0,0,.14);
 }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Inter,sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
 
 body{
   background:var(--bg);
@@ -47,7 +41,7 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* ================= NAV BAR ================= */
+/* ================= HEADER ================= */
 header{
   position:sticky;
   top:0;
@@ -68,7 +62,6 @@ header{
 .logo{
   font-size:22px;
   font-weight:800;
-  letter-spacing:-.4px;
   color:var(--primary);
 }
 
@@ -96,9 +89,7 @@ nav a::after{
   transition:.25s;
 }
 
-nav a:hover::after{
-  width:100%;
-}
+nav a:hover::after{width:100%}
 
 .actions{
   display:flex;
@@ -127,43 +118,46 @@ nav a:hover::after{
 .hero{
   max-width:1200px;
   margin:auto;
-  padding:90px 22px 50px;
+  padding:90px 22px 40px;
   text-align:center;
 }
 
 .hero h1{
   font-size:46px;
   line-height:1.1;
-  letter-spacing:-1px;
 }
 
-.hero h1 span{
-  color:var(--primary);
-}
+.hero h1 span{color:var(--primary)}
 
 .hero p{
   margin-top:18px;
   color:var(--muted);
   font-size:18px;
-  max-width:620px;
-  margin-left:auto;
-  margin-right:auto;
 }
 
-/* ================= PLAN ================= */
+/* ================= GRID ================= */
 .section{
+  max-width:1200px;
+  margin:auto;
   padding:40px 22px 120px;
 }
 
+.grid{
+  display:grid;
+  grid-template-columns:460px 1fr;
+  gap:60px;
+  align-items:flex-start;
+}
+
+/* ================= CARD ================= */
 .card{
-  max-width:460px;
-  margin:auto;
   background:var(--card);
   border-radius:36px;
   padding:44px 32px;
   box-shadow:var(--shadow);
   border:2px solid var(--primary);
-  position:relative;
+  position:sticky;
+  top:110px;
 }
 
 .badge{
@@ -177,13 +171,11 @@ nav a:hover::after{
   border-radius:999px;
   font-size:12px;
   font-weight:800;
-  letter-spacing:.4px;
 }
 
-/* PRICE */
 .price{
   text-align:center;
-  margin-top:28px;
+  margin-top:30px;
 }
 
 .price strong{
@@ -199,30 +191,25 @@ nav a:hover::after{
   margin-top:6px;
 }
 
-/* FEATURES */
-.features{
-  margin-top:36px;
-  display:grid;
-  gap:16px;
+/* TIMER */
+.timer{
+  margin:26px auto 10px;
+  text-align:center;
+  background:#fff4ec;
+  border:1px dashed var(--primary);
+  padding:14px;
+  border-radius:16px;
+  font-weight:700;
 }
 
-.features div{
-  display:flex;
-  align-items:flex-start;
-  gap:12px;
-  font-size:16px;
-}
-
-.features div::before{
-  content:"✔";
+.timer span{
   color:var(--primary);
-  font-weight:800;
-  margin-top:2px;
+  font-size:20px;
 }
 
 /* CTA */
 .cta{
-  margin-top:38px;
+  margin-top:28px;
 }
 
 .cta button{
@@ -235,43 +222,63 @@ nav a:hover::after{
   font-size:17px;
   font-weight:800;
   cursor:pointer;
-  transition:.25s;
 }
 
-.cta button:hover{
-  transform:translateY(-2px);
-  box-shadow:0 18px 36px rgba(255,106,0,.45);
-}
-
-/* INFO */
 .info{
   text-align:center;
-  margin-top:22px;
+  margin-top:18px;
   font-size:14px;
   color:var(--muted);
 }
 
+/* ================= FEATURES ================= */
+.features-box{
+  background:#fff;
+  border-radius:36px;
+  padding:50px;
+  box-shadow:var(--shadow);
+}
+
+.features-box h2{
+  font-size:32px;
+  margin-bottom:26px;
+}
+
+.features{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px 30px;
+}
+
+.feature{
+  display:flex;
+  gap:12px;
+  font-size:16px;
+}
+
+.feature::before{
+  content:"✔";
+  color:var(--primary);
+  font-weight:800;
+}
+
 /* ================= RESPONSIVE ================= */
-@media(max-width:900px){
-  nav,.actions{display:none}
+@media(max-width:980px){
+  .grid{
+    grid-template-columns:1fr;
+  }
+  .card{
+    position:relative;
+    top:0;
+  }
+  .features{
+    grid-template-columns:1fr;
+  }
 }
 
 @media(max-width:520px){
-  .hero{
-    padding:70px 20px 40px;
-  }
-
-  .hero h1{
-    font-size:34px;
-  }
-
-  .price strong{
-    font-size:48px;
-  }
-
-  .card{
-    padding:38px 26px;
-  }
+  .hero h1{font-size:34px}
+  .price strong{font-size:48px}
 }
 </style>
 </head>
@@ -295,41 +302,51 @@ nav a:hover::after{
 </header>
 
 <section class="hero">
-  <h1>
-    Um sistema <span>simples</span>, poderoso<br>
-    e feito para seu negócio
-  </h1>
-  <p>
-    Agenda online + loja virtual + gestão completa
-    em um único sistema profissional.
-  </p>
+  <h1>Um sistema <span>simples</span>, poderoso<br>e feito para seu negócio</h1>
+  <p>Agenda online + loja virtual + gestão completa em um único sistema.</p>
 </section>
 
 <section class="section">
-  <div class="card">
-    <div class="badge">PLANO ÚNICO</div>
+  <div class="grid">
 
-    <div class="price">
-      <strong>R$ 129,90</strong>
-      <span>por mês • sem taxas escondidas</span>
+    <!-- CARD -->
+    <div class="card">
+      <div class="badge">OFERTA ATIVA</div>
+
+      <div class="price">
+        <strong>R$ 129,90</strong>
+        <span>por mês • sem taxas escondidas</span>
+      </div>
+
+      <div class="timer">
+        Oferta expira em<br>
+        <span id="countdown">--:--:--</span>
+      </div>
+
+      <div class="cta">
+        <button onclick="irCadastro()">Teste grátis por 10 dias</button>
+      </div>
+
+      <div class="info">
+        Sem cartão • Cancele quando quiser
+      </div>
     </div>
 
-    <div class="features">
-      <div>Agenda online 24h para clientes</div>
-      <div>Loja virtual integrada</div>
-      <div>Cadastro e histórico de clientes</div>
-      <div>Serviços, produtos e profissionais</div>
-      <div>Relatórios e controle financeiro</div>
-      <div>Acesso pelo celular, tablet e computador</div>
+    <!-- FEATURES -->
+    <div class="features-box">
+      <h2>Tudo que seu negócio precisa 🚀</h2>
+      <div class="features">
+        <div class="feature">Agenda online 24h</div>
+        <div class="feature">Loja virtual integrada</div>
+        <div class="feature">Histórico completo de clientes</div>
+        <div class="feature">Serviços, produtos e profissionais</div>
+        <div class="feature">Relatórios financeiros</div>
+        <div class="feature">Controle de vendas</div>
+        <div class="feature">Acesso em qualquer dispositivo</div>
+        <div class="feature">Sistema rápido e seguro</div>
+      </div>
     </div>
 
-    <div class="cta">
-      <button onclick="irCadastro()">Teste grátis por 10 dias</button>
-    </div>
-
-    <div class="info">
-      Não precisa cartão • Cancele quando quiser
-    </div>
   </div>
 </section>
 
@@ -337,6 +354,35 @@ nav a:hover::after{
 function irCadastro(){
   window.location.href = "cadastro.html";
 }
+
+/* ================= COUNTDOWN ================= */
+const KEY = "clena_offer_end";
+
+function gerarTempo(){
+  const horas = Math.floor(Math.random() * (20 - 10 + 1)) + 10;
+  return Date.now() + horas * 60 * 60 * 1000;
+}
+
+let end = localStorage.getItem(KEY);
+if(!end){
+  end = gerarTempo();
+  localStorage.setItem(KEY, end);
+}
+
+function tick(){
+  const diff = end - Date.now();
+  if(diff <= 0){
+    document.getElementById("countdown").innerText = "00:00:00";
+    return;
+  }
+  const h = String(Math.floor(diff / 3600000)).padStart(2,"0");
+  const m = String(Math.floor(diff % 3600000 / 60000)).padStart(2,"0");
+  const s = String(Math.floor(diff % 60000 / 1000)).padStart(2,"0");
+  document.getElementById("countdown").innerText = `${h}:${m}:${s}`;
+}
+
+tick();
+setInterval(tick,1000);
 </script>
 
 </body>
