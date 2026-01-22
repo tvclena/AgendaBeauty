@@ -288,6 +288,51 @@ nav a:hover::after{width:100%}
   .hero h1{font-size:34px}
   .price strong{font-size:48px}
 }
+
+.old-price{
+  position:relative;
+  text-align:center;
+  font-size:18px;
+  font-weight:600;
+  color:#9ca3af;
+  margin-bottom:6px;
+}
+
+/* linha animada */
+.old-price .strike{
+  position:absolute;
+  left:0;
+  top:50%;
+  height:2px;
+  width:100%;
+  background:linear-gradient(90deg, transparent, #ff6a00, transparent);
+  transform:scaleX(0);
+  transform-origin:left;
+  animation:strikeAnim 2.8s ease-in-out infinite;
+}
+
+/* animação */
+@keyframes strikeAnim{
+  0%{
+    transform:scaleX(0);
+    opacity:0;
+  }
+  25%{
+    opacity:1;
+  }
+  50%{
+    transform:scaleX(1);
+    opacity:1;
+  }
+  70%{
+    opacity:1;
+  }
+  100%{
+    transform:scaleX(0);
+    opacity:0;
+  }
+}
+
 </style>
 </head>
 
@@ -322,7 +367,10 @@ nav a:hover::after{width:100%}
       <div class="badge">OFERTA ATIVA</div>
 
 <div class="price">
-  <div class="old-price">De R$ 158,90</div>
+<div class="old-price animated">
+  De R$ 158,90
+  <span class="strike"></span>
+</div>
   <strong>R$ 129,90</strong>
   <span>por mês • sem taxas escondidas</span>
 </div>
