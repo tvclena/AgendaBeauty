@@ -312,10 +312,11 @@ const sb = supabase.createClient(
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 async function carregarTipos() {
-  const { data, error } = await sb
-    .from("tipos_loja")
-    .select("nome, app_path")
-    .order("nome");
+ const { data, error } = await sb
+  .from("tipos_loja")
+  .select("nome")
+  .order("nome");
+
 
   if (error) {
     console.error("Erro ao carregar tipos:", error.message);
@@ -325,13 +326,13 @@ async function carregarTipos() {
   const select = document.getElementById("tipo");
   select.innerHTML = `<option value="">Tipo do negócio</option>`;
 
-  data.forEach(t => {
-    const opt = document.createElement("option");
-    opt.value = t.nome;          // EX: "STUDIO"
-    opt.textContent = t.nome;    // EX: "STUDIO"
-    opt.dataset.app = t.app_path; // EX: "app.html"
-    select.appendChild(opt);
-  });
+data.forEach(t => {
+  const opt = document.createElement("option");
+  opt.value = t.nome;      // ex: STUDIO
+  opt.textContent = t.nome;
+  select.appendChild(opt);
+});
+
 }
 
 document.addEventListener("DOMContentLoaded", carregarTipos);
@@ -367,20 +368,18 @@ async function cadastrar(e){
   }
 
   const userId = data.user.id;
-const tipoSelecionado = document.querySelector("#tipo option:checked");
 
   /* 2️⃣ CRIA PERFIL (UPSERT + SLUG ÚNICO) */
   const slug = `${slugify(negocio.value)}-${userId.slice(0,6)}`;
 
- const { error: erroPerfil } = await sb
+const { error: erroPerfil } = await sb
   .from("user_profile")
   .upsert({
     user_id: userId,
     responsavel: responsavel.value.trim(),
     whatsapp: whatsapp.value.replace(/\D/g,''),
     negocio: negocio.value.trim(),
-    tipo: tipoSelecionado.value,
-    app_path: tipoSelecionado.dataset.app,
+    tipo: tipo.value, // 🔒 IGUAL AO HTML ANTIGO
     cidade: cidade.value.trim(),
     uf: uf.value.trim().toUpperCase(),
     email_contato: emailValue,
