@@ -1,4 +1,4 @@
-const CACHE_NAME = "agenda-facil-v1";
+const CACHE_NAME = "clena-store-v10";
 
 const ASSETS = [
   "/login.html",
@@ -93,7 +93,7 @@ self.addEventListener("push", event => {
     data = event.data.json();
   } catch {
     data = {
-      title: "Agenda Fácil",
+      title: "Clena Store",
       body: "Você tem uma nova notificação"
     };
   }
