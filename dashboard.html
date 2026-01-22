@@ -986,6 +986,16 @@ function go(el, key){
     frames[key].classList.add("active");
   }
 }
+
+// ⬇️ DEFINA AQUI QUAIS IFRAMES PODEM ATUALIZAR
+const AUTO_REFRESH_FRAMES = [
+  "frame-home",
+  "frame-pedidos"
+];
+
+
+
+  
 /* ================= AUTO REFRESH IFRAME ATIVO ================= */
 
 const REFRESH_INTERVAL = 60000; // 60 segundos
@@ -994,13 +1004,18 @@ setInterval(() => {
   // só executa se o app estiver visível
   if (document.hidden) return;
 
-  // pega apenas o iframe aberto
+  // pega o iframe ativo
   const iframeAtivo = document.querySelector(".content iframe.active");
   if (!iframeAtivo) return;
 
-  // recarrega SOMENTE o iframe visível
+  // ✅ CONTROLE POR ID
+  if (!AUTO_REFRESH_FRAMES.includes(iframeAtivo.id)) return;
+
+  // recarrega SOMENTE se estiver autorizado
   iframeAtivo.contentWindow.location.reload();
+
 }, REFRESH_INTERVAL);
+
 
 /* ================= ADMIN: LIMPAR CACHE GLOBAL ================= */
 
