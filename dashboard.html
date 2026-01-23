@@ -606,6 +606,19 @@ iframe{
 <button class="btn-primary" id="btnSalvar" onclick="salvarPerfil()">
   Salvar alterações
 </button>
+    <!-- ================= COLABORADORES ================= -->
+<div id="boxColaboradores" style="display:none;margin-top:18px">
+  <h3>Equipe</h3>
+
+  <button class="btn-primary" onclick="abrirGestaoColaboradores()">
+    Gerenciar colaboradores
+  </button>
+
+  <div class="tip">
+    Cadastre e gerencie profissionais da sua loja
+  </div>
+</div>
+
     <button class="btn-logout" onclick="sair()">Sair da conta</button>
 
     <div class="tip">Nada é obrigatório — mas preencher ajuda na organização ✅</div>
@@ -1383,6 +1396,9 @@ navigator.serviceWorker.addEventListener("message", (event) => {
     location.reload(true);
   }
 });
+function abrirGestaoColaboradores(){
+  location.href = "colaboradores.html";
+}
 
   
 </script>
