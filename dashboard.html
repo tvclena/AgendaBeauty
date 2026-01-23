@@ -706,6 +706,18 @@ pEmailContato.value = p.email_contato || "";
     avatar.textContent = "";
   }
   verificarAssinatura();
+// ================= COLABORADORES (REGRA DE EXIBIÇÃO) =================
+const boxColaboradores = document.getElementById("boxColaboradores");
+
+if (
+  profile.assinatura_plano === "MASTER" &&
+  (profile.status === "active" || profile.status === "trial") &&
+  ["LOJA", "STUDIO", "BARBEARIA"].includes(profile.tipo)
+) {
+  boxColaboradores.style.display = "block";
+} else {
+  boxColaboradores.style.display = "none";
+}
 
 } 
 async function criarAssinatura() {
