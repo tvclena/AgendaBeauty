@@ -2001,7 +2001,6 @@ async function enviarAvaliacao() {
   alert("⭐ Avaliação enviada com sucesso!");
 }
 
-
 function carregarRelacionados(){
   const relacionados = todos
     .filter(p =>
@@ -2010,15 +2009,69 @@ function carregarRelacionados(){
     )
     .slice(0,4);
 
-  mpRelacionados.innerHTML = relacionados.map(p=>`
-    <div class="card" onclick="abrirProduto('${p.id}')">
-<img src="${extrairImagens(p.imagem_url)[1] || extrairImagens(p.imagem_url)[0] || ''}">
-      <div class="card-body">
-        <strong>${p.nome}</strong>
+  mpRelacionados.innerHTML = relacionados.map(p => {
+
+    const estrelas = avaliacoesPorItem[p.id]
+      ? "★".repeat(
+          Math.round(
+            avaliacoesPorItem[p.id].soma /
+            avaliacoesPorItem[p.id].total
+          )
+        ) + "☆".repeat(
+          5 - Math.round(
+            avaliacoesPorItem[p.id].soma /
+            avaliacoesPorItem[p.id].total
+          )
+        )
+      : "☆☆☆☆☆";
+
+    const precoHtml = p.promocao_ativa && p.preco_promocional
+      ? `
+        <span class="old">
+          R$ ${Number(p.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+        </span>
+        <span class="price">
+          R$ ${Number(p.preco_promocional).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+        </span>
+      `
+      : `
+        <span class="price">
+          R$ ${Number(p.preco).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+        </span>
+      `;
+
+    return `
+      <div class="card" onclick="abrirProduto('${p.id}')">
+
+        <img
+          src="${extrairImagens(p.imagem_url)[0] || ''}"
+          loading="lazy"
+        >
+
+        <div class="card-body">
+
+          <strong class="item-nome">
+            ${p.nome.replace(/#[^#]+#/g, "").trim()}
+          </strong>
+
+          <div class="card-info-extra">
+            <span class="card-stars">${estrelas}</span>
+          </div>
+
+          <div class="meta">
+            ${precoHtml}
+          </div>
+
+          <button class="btn" style="margin-top:6px">
+            Ver
+          </button>
+
+        </div>
       </div>
-    </div>
-  `).join("");
+    `;
+  }).join("");
 }
+
 
 
 let notaSelecionada = 5;
