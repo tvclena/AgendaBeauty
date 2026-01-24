@@ -595,20 +595,15 @@ body::-webkit-scrollbar{
 
 
 <script>
-/* ================== VARIÁVEIS GLOBAIS (TOPO) ================== */
-let profissionalSelecionado = "LOJA";
+const PLANO_PERMITE_COLABORADOR = false; 
+
+let profissionalSelecionado = "LOJA"; 
 let dataAtual = new Date();
 let filtroInicializado = false;
-const PLANO_PERMITE_COLABORADOR = false; 
-let profissionalSelecionado = "LOJA";
-
-if (!PLANO_PERMITE_COLABORADOR) {
-  profissionalSelecionado = "LOJA";
-}
 
 
 
-/* ================== FUNÇÕES AUXILIARES ================== */
+
 function dataISO(d){
   return d.toLocaleDateString("en-CA");
 }
@@ -748,19 +743,18 @@ sbHome.auth.getSession().then(({ data:{ session } })=>{
 /* ================== SWIPE ================== */
 let startX = 0;
 
-/* ================== FILTRO ================== */
 async function carregarFiltroProfissionais(lojaId){
 
   const filtro = document.getElementById("filtroProfissional");
 
-  // 🚫 PLANO NÃO PERMITE → some tudo
+  // 🚫 PLANO NÃO PERMITE → some tudo e força loja
   if (!PLANO_PERMITE_COLABORADOR) {
     filtro.style.display = "none";
     profissionalSelecionado = "LOJA";
     return;
   }
 
-  // ⬇️ DAQUI PRA BAIXO SÓ RODA SE O PLANO PERMITIR
+  // ⬇️ só roda se plano permitir
   const { data: colaboradores } = await sbHome
     .from("colaboradores")
     .select("id, nome")
@@ -786,6 +780,7 @@ async function carregarFiltroProfissionais(lojaId){
     carregarHome();
   };
 }
+
 
 
   
