@@ -528,8 +528,14 @@ body{
 
       <label>Imagem</label>
       <div class="image-box" onclick="imagem.click()">
-        <img id="preview" style="display:none">
-        <input type="file" id="imagem" hidden accept="image/*">
+<div id="preview" style="display:none"></div>
+<input
+  type="file"
+  id="imagem"
+  hidden
+  accept="image/*"
+  multiple
+>
       </div>
 
 <button
@@ -581,6 +587,8 @@ let pagamentoOnlineAtivo = false;
 let userId,itens=[],editId=null,blob=null;
 let dragEl = null;
 let pressTimer = null;
+let blobs = [];
+let planoUsuario = "";
 
 const TIPO_LABEL = {
   SERVICO: "SERVIÇO",
@@ -594,11 +602,15 @@ const TIPO_LABEL = {
   userId = session.user.id;
 
   // 🔐 VERIFICA SE A LOJA TEM PAGAMENTO ONLINE ATIVO
-  const { data: perfil } = await sb
-    .from("user_profile")
-    .select("pagamento_online_ativo")
-    .eq("user_id", userId)
-    .single();
+const { data: perfil } = await sb
+  .from("user_profile")
+  .select("pagamento_online_ativo, assinatura_plano")
+  .eq("user_id", userId)
+  .single();
+
+pagamentoOnlineAtivo = !!perfil?.pagamento_online_ativo;
+planoUsuario = perfil?.assinatura_plano || "";
+
 
   pagamentoOnlineAtivo = !!perfil?.pagamento_online_ativo;
 
@@ -675,8 +687,10 @@ async function gerarImagemIA(){
       throw new Error("Falha ao gerar imagem");
     }
 
-    preview.src = data.imagem_url;
-    preview.style.display = "block";
+preview.innerHTML = `
+  <img src="${data.imagem_url}" style="width:100%;border-radius:12px">
+`;
+preview.style.display = "block";
 
     atualizarBotaoIA();
 
@@ -755,22 +769,32 @@ async function salvar(){
   }
 
   // 🛡️ PROTEÇÃO TOTAL (NUNCA MAIS ERRO)
-  if (blob && data?.id) {
-    const path = `${userId}/${data.id}.jpg`;
+ if (blobs.length && data?.id) {
+  const urls = [];
+
+  for (let i = 0; i < blobs.length; i++) {
+    const path = `${userId}/${data.id}_${i + 1}.jpg`;
 
     await sb.storage
       .from("produtos")
-      .upload(path, blob, { upsert: true });
+      .upload(path, blobs[i], { upsert: true });
 
-    const { data: s } = await sb.storage
+    const { data: signed } = await sb.storage
       .from("produtos")
       .createSignedUrl(path, 31536000);
 
-    await sb
-      .from("produtos_servicos")
-      .update({ imagem_url: s.signedUrl })
-      .eq("id", data.id);
+    urls.push(signed.signedUrl);
   }
+
+  await sb
+    .from("produtos_servicos")
+    .update({
+      imagens: urls.join(", "),
+      imagem_url: urls[0]
+    })
+    .eq("id", data.id);
+}
+
 
   loading.style.display = "none";
   fecharModal();
@@ -992,7 +1016,12 @@ pgOnline.checked = pagamentoOnlineAtivo ? i.pg_online : false;
  ordem.value=i.ordem_exibicao||0;
  ativo.checked=i.ativo;
  obs.value=i.observacoes_internas||"";
- if(i.imagem_url){preview.src=i.imagem_url;preview.style.display="block"}
+if (i.imagem_url) {
+  preview.innerHTML = `
+    <img src="${i.imagem_url}" style="width:100%;border-radius:12px">
+  `;
+  preview.style.display = "block";
+}
 abrirModalEditar();
 document.getElementById("btnExcluir").style.display = "block";
 }
@@ -1005,6 +1034,7 @@ document.getElementById("btnExcluir").style.display = "block";
   
 function abrirModalNovo(){
   editId = null;
+  blobs = []; // ✅ LIMPA IMAGENS ANTERIORES
   formTitle.innerText = "Novo item";
 
   nome.value = "";
@@ -1061,16 +1091,42 @@ filtroTipo.addEventListener("change", () => {
 
 // 📸 CAPTURA DA IMAGEM (ESTE ERA O QUE FALTAVA)
 imagem.addEventListener("change", () => {
-  const file = imagem.files[0];
-  if (!file) return;
+  const files = Array.from(imagem.files);
+  if (!files.length) return;
 
-  blob = file;
-  preview.src = URL.createObjectURL(file);
-  preview.style.display = "block";
+  let maxFotos = 1;
 
-  atualizarBotaoIA(); // ✅ FALTAVA
+  if (planoUsuario === "MASTER") {
+    maxFotos = 3;
+  } else if (planoUsuario === "PROFISSIONAL") {
+    maxFotos = 2;
+  }
+
+  if (files.length > maxFotos) {
+    alert(`Seu plano ${planoUsuario} permite até ${maxFotos} imagem(ns).`);
+    imagem.value = "";
+    return;
+  }
+
+  // Guarda todos os arquivos
+  blobs = files;
+
+  // Exibe múltiplas imagens no preview
+  preview.innerHTML = "";
+  preview.style.display = "flex";
+  preview.style.flexDirection = "column";
+  preview.style.gap = "8px";
+
+  files.forEach(file => {
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.style.width = "100%";
+    img.style.borderRadius = "12px";
+    preview.appendChild(img);
+  });
+
+  atualizarBotaoIA();
 });
-
 
 
   
