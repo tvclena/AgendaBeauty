@@ -589,6 +589,7 @@ let dragEl = null;
 let pressTimer = null;
 let blobs = [];
 let planoUsuario = "";
+let previewUrl = null;
 
 const TIPO_LABEL = {
   SERVICO: "SERVIÇO",
@@ -818,7 +819,15 @@ function render(){
 <div class="item"
      draggable="true"
      data-id="${i.id}">
-  ${i.imagem_url?`<img src="${i.imagem_url}">`:""}
+${
+  i.imagens
+    ? i.imagens.split(", ").map(url => `
+        <img src="${url}">
+      `).join("")
+    : i.imagem_url
+      ? `<img src="${i.imagem_url}">`
+      : ""
+}
   <div class="item-body">
    <h4>${i.nome}</h4>
 
@@ -1016,12 +1025,25 @@ pgOnline.checked = pagamentoOnlineAtivo ? i.pg_online : false;
  ordem.value=i.ordem_exibicao||0;
  ativo.checked=i.ativo;
  obs.value=i.observacoes_internas||"";
-if (i.imagem_url) {
+preview.innerHTML = "";
+preview.style.display = "flex";
+preview.style.flexDirection = "column";
+preview.style.gap = "8px";
+
+if (i.imagens) {
+  i.imagens.split(", ").forEach(url => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.style.width = "100%";
+    img.style.borderRadius = "12px";
+    preview.appendChild(img);
+  });
+} else if (i.imagem_url) {
   preview.innerHTML = `
     <img src="${i.imagem_url}" style="width:100%;border-radius:12px">
   `;
-  preview.style.display = "block";
 }
+
 abrirModalEditar();
 document.getElementById("btnExcluir").style.display = "block";
 }
