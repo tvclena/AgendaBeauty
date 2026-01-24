@@ -634,9 +634,10 @@ async function carregarHome(){
   .eq("data", hoje)
   .neq("status","CANCELADO");
 
-if (profissionalSelecionado !== "LOJA") {
+if (isUUID(profissionalSelecionado)) {
   kpiQuery = kpiQuery.eq("colaborador_id", profissionalSelecionado);
 }
+
 
 const { count: qtdHoje } = await kpiQuery;
 document.getElementById("kpiHoje").innerText = qtdHoje || 0;
@@ -763,9 +764,10 @@ async function carregarAgendaDia(lojaId){
   .eq("data", data)
   .neq("status", "CANCELADO");
 
-if (profissionalSelecionado !== "LOJA") {
+if (isUUID(profissionalSelecionado)) {
   query = query.eq("colaborador_id", profissionalSelecionado);
 }
+
 
 const { data: agenda, error } = await query.order("hora_inicio");
 
@@ -1125,7 +1127,21 @@ function formatarDataBR(dataISO){
   const [y,m,d] = dataISO.split("-");
   return `${d}/${m}/${y}`;
 }
+function isUUID(v){
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+}
 
+
+
+
+
+
+
+
+
+
+
+  
 
 
 
