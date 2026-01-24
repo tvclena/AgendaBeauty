@@ -651,8 +651,9 @@ async function carregarHome(){
     );
   }
 
-  const { count: qtdHoje } = await kpiAgendamentos;
-  document.getElementById("kpiHoje").innerText = qtdHoje || 0;
+const { count } = await kpiAgendamentos;
+document.getElementById("kpiHoje").innerText = count ?? 0;
+
 
   /* ======================================================
      KPI 2 — CLIENTES (clientes_profile)
@@ -730,7 +731,12 @@ await carregarAgendaDia(lojaId);
 
 
 /* ================== INICIALIZA ================== */
-carregarHome();
+sbHome.auth.getSession().then(({ data:{ session } })=>{
+  if(session){
+    carregarFiltroProfissionais(session.user.id);
+    carregarHome();
+  }
+});
 
 /* ================== SWIPE ================== */
 let startX = 0;
@@ -803,10 +809,9 @@ let query = sbHome
 
 
 if (isUUID(profissionalSelecionado)) {
-  query = query
-    .not("colaborador_id", "is", null)
-    .eq("colaborador_id", profissionalSelecionado);
+  query = query.eq("colaborador_id", profissionalSelecionado);
 }
+
 
 
 const { data: agenda, error } = await query.order("hora_inicio");
@@ -1082,12 +1087,14 @@ function fecharNovoAgendamento(){
   modal.style.display = "none";
 
   // 🔄 atualiza agenda do dia automaticamente
-sbHome.auth.getSession().then(({data:{session}})=>{
-  if(session){
-    carregarFiltroProfissionais(session.user.id);
-    carregarHome();
-  }
-});
+  sbHome.auth.getSession().then(({data:{session}})=>{
+    if(session){
+      carregarAgendaDia(session.user.id);
+      carregarHome();
+    }
+  });
+}
+
 
 function abrirResumoDia(data){
   sbHome.auth.getSession().then(({data:{session}})=>{
