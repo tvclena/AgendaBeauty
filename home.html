@@ -627,14 +627,15 @@ async function carregarHome(){
   if(!session) return;
 
   const lojaId = session.user.id;
-  const hoje = new Date().toLocaleDateString("en-CA");
 
-  /* ================== KPI AGENDAMENTOS ================== */
+  /* ================== KPI AGENDAMENTOS DO DIA ================== */
+  const hojeISO = new Date().toLocaleDateString("en-CA");
+
   let kpiQuery = sbHome
     .from("agendamentos")
     .select("*", { count:"exact", head:true })
     .eq("user_id", lojaId)
-    .eq("data", hoje)
+    .eq("data", hojeISO)
     .neq("status", "CANCELADO");
 
   if (isUUID(profissionalSelecionado)) {
@@ -652,10 +653,38 @@ async function carregarHome(){
 
   document.getElementById("kpiClientes").innerText = qtdClientes || 0;
 
+  /* ================== KPI FATURAMENTO MÊS ================== */
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = hoje.getMonth();
+
+  const inicioMes = new Date(ano, mes, 1).toLocaleDateString("en-CA");
+  const fimMes = new Date(ano, mes + 1, 0).toLocaleDateString("en-CA");
+
+  const { data: faturamentoMes } = await sbHome
+    .from("agendamentos")
+    .select("valor_total")
+    .eq("user_id", lojaId)
+    .gte("data", inicioMes)
+    .lte("data", fimMes)
+    .in("status", ["CONFIRMADO", "CONCLUIDO"]);
+
+  const totalMes = faturamentoMes?.reduce(
+    (soma, a) => soma + Number(a.valor_total || 0),
+    0
+  ) || 0;
+
+  document.getElementById("kpiFaturamento").innerText =
+    totalMes.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    });
+
   /* ================== CONTINUA ================== */
   await carregarFiltroProfissionais(lojaId);
   await carregarAgendaDia(lojaId);
 }
+
 
 
 /* ================== INICIALIZA ================== */
