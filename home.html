@@ -629,6 +629,7 @@ async function carregarHome(){
   const lojaId = session.user.id;
   const hoje = new Date().toLocaleDateString("en-CA");
 
+  /* ================== KPI AGENDAMENTOS ================== */
   let kpiQuery = sbHome
     .from("agendamentos")
     .select("*", { count:"exact", head:true })
@@ -637,17 +638,25 @@ async function carregarHome(){
     .neq("status", "CANCELADO");
 
   if (isUUID(profissionalSelecionado)) {
-    kpiQuery = kpiQuery
-      .not("colaborador_id", "is", null)
-      .eq("colaborador_id", profissionalSelecionado);
+    kpiQuery = kpiQuery.eq("colaborador_id", profissionalSelecionado);
   }
 
   const { count: qtdHoje } = await kpiQuery;
   document.getElementById("kpiHoje").innerText = qtdHoje || 0;
 
+  /* ================== KPI CLIENTES ================== */
+  const { count: qtdClientes } = await sbHome
+    .from("clientes_profile")
+    .select("*", { count: "exact", head: true })
+    .eq("loja_ativa", lojaId);
+
+  document.getElementById("kpiClientes").innerText = qtdClientes || 0;
+
+  /* ================== CONTINUA ================== */
   await carregarFiltroProfissionais(lojaId);
   await carregarAgendaDia(lojaId);
 }
+
 
 /* ================== INICIALIZA ================== */
 carregarHome();
