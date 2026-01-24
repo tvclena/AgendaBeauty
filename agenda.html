@@ -337,12 +337,12 @@ async function carregarColaboradores(){
     "esteticista"
   ];
 
-  const { data, error } = await sb
-    .from("colaboradores")
-    .select("id, nome, is_master, categorias")
-    .eq("loja_id", lojaId)
-    .eq("ativo", true)
-    .order("nome");
+const { data, error } = await sb
+  .from("colaboradores")
+  .select("id, nome")
+  .eq("loja_id", lojaId)
+  .eq("ativo", true)
+  .order("nome");
 
   if (error || !data) {
     console.error("Erro ao carregar colaboradores", error);
