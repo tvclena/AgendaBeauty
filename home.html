@@ -680,6 +680,17 @@ async function carregarHome(){
       currency: "BRL"
     });
 
+  /* ================== KPI SERVIÇOS ATIVOS ================== */
+  const { count: qtdServicos } = await sbHome
+    .from("produtos_servicos")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", lojaId)
+    .eq("tipo", "SERVICO")
+    .eq("ativo", true)
+    .eq("pode_agendar", true);
+
+  document.getElementById("kpiServicos").innerText = qtdServicos || 0;
+
   /* ================== CONTINUA ================== */
   await carregarFiltroProfissionais(lojaId);
   await carregarAgendaDia(lojaId);
