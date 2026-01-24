@@ -446,7 +446,42 @@ body::-webkit-scrollbar{
 .btn-dia:active{
   transform:scale(.92);
 }
+.header-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
 
+.filtro-profissional{
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  font-size:13px;
+  font-weight:700;
+  background:#fff;
+  cursor:pointer;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 </style>
 </head>
 
@@ -454,9 +489,15 @@ body::-webkit-scrollbar{
 
 <div class="app">
 
-  <div class="header">
-    <h1>Bem-vindo à <span>Clena Store</span></h1>
-  </div>
+<div class="header header-row">
+  <h1>Bem-vindo à <span>Clena Store</span></h1>
+
+  <!-- FILTRO DE PROFISSIONAL -->
+  <select id="filtroProfissional" class="filtro-profissional" style="display:none">
+    <!-- preenchido via JS -->
+  </select>
+</div>
+
 
 <!-- KPIs -->
 <div class="grid">
@@ -586,14 +627,20 @@ async function carregarHome(){
   inicioMes.setDate(1);
   const inicio = inicioMes.toLocaleDateString("en-CA");
 
-  const { count: qtdHoje } = await sbHome
-    .from("agendamentos")
-    .select("*", { count:"exact", head:true })
-    .eq("user_id", lojaId)
-    .eq("data", hoje)
-    .neq("status","CANCELADO");
+ let kpiQuery = sbHome
+  .from("agendamentos")
+  .select("*", { count:"exact", head:true })
+  .eq("user_id", lojaId)
+  .eq("data", hoje)
+  .neq("status","CANCELADO");
 
-  document.getElementById("kpiHoje").innerText = qtdHoje || 0;
+if (profissionalSelecionado !== "LOJA") {
+  kpiQuery = kpiQuery.eq("colaborador_id", profissionalSelecionado);
+}
+
+const { count: qtdHoje } = await kpiQuery;
+document.getElementById("kpiHoje").innerText = qtdHoje || 0;
+
 
   const { count: qtdClientes } = await sbHome
     .from("clientes_loja")
@@ -626,7 +673,8 @@ const total = faturamento?.reduce(
   document.getElementById("kpiFaturamento").innerText =
     total.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 
-  await carregarAgendaDia(lojaId);
+await carregarFiltroProfissionais(lojaId);
+await carregarAgendaDia(lojaId);
 }
 
 carregarHome();
@@ -644,6 +692,47 @@ document.addEventListener("touchend",e=>{
     if(session) carregarAgendaDia(session.user.id);
   });
 });
+let profissionalSelecionado = "LOJA"; // default
+
+async function carregarFiltroProfissionais(lojaId){
+
+  const { data: colaboradores } = await sbHome
+    .from("colaboradores")
+    .select("id, nome")
+    .eq("loja_id", lojaId)
+    .eq("ativo", true)
+    .order("nome");
+
+  const filtro = document.getElementById("filtroProfissional");
+
+  // se não tiver colaboradores ativos → não mostra filtro
+  if (!colaboradores || colaboradores.length === 0) {
+    filtro.style.display = "none";
+    profissionalSelecionado = "LOJA";
+    return;
+  }
+
+  filtro.style.display = "block";
+  filtro.innerHTML = "";
+
+  // opção loja (master)
+  filtro.innerHTML += `
+    <option value="LOJA">Todos (Loja)</option>
+  `;
+
+  colaboradores.forEach(c=>{
+    filtro.innerHTML += `
+      <option value="${c.id}">${c.nome}</option>
+    `;
+  });
+
+  filtro.onchange = () => {
+    profissionalSelecionado = filtro.value;
+    sbHome.auth.getSession().then(({data:{session}})=>{
+      if(session) carregarAgendaDia(session.user.id);
+    });
+  };
+}
 
 async function carregarAgendaDia(lojaId){
 
@@ -654,27 +743,32 @@ async function carregarAgendaDia(lojaId){
     "Agenda • " + dataAtual.toLocaleDateString("pt-BR");
 
   // 1️⃣ BUSCA AGENDAMENTOS
-  const { data: agenda, error } = await sbHome
-    .from("agendamentos")
-.select(`
-  id,
-  data,
-  hora_inicio,
-  cliente_nome,
-  cliente_whatsapp,
-  status,
-  servico_nome,
-  servicos,
-  valor_total,
-  created_at,
-  updated_at
-`)
+ let query = sbHome
+  .from("agendamentos")
+  .select(`
+    id,
+    data,
+    hora_inicio,
+    cliente_nome,
+    cliente_whatsapp,
+    status,
+    servico_nome,
+    servicos,
+    valor_total,
+    created_at,
+    updated_at,
+    colaborador_id
+  `)
+  .eq("user_id", lojaId)
+  .eq("data", data)
+  .neq("status", "CANCELADO");
 
+if (profissionalSelecionado !== "LOJA") {
+  query = query.eq("colaborador_id", profissionalSelecionado);
+}
 
-    .eq("user_id", lojaId)
-    .eq("data", data)
-    .neq("status", "CANCELADO")
-    .order("hora_inicio");
+const { data: agenda, error } = await query.order("hora_inicio");
+
 
   const box = document.getElementById("agendaHoje");
   box.innerHTML = "";
