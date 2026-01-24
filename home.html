@@ -734,6 +734,8 @@ let startX = 0;
 /* ================== FILTRO ================== */
 async function carregarFiltroProfissionais(lojaId){
 
+  if (filtroInicializado) return;
+
   const { data: colaboradores } = await sbHome
     .from("colaboradores")
     .select("id, nome")
@@ -754,11 +756,16 @@ async function carregarFiltroProfissionais(lojaId){
     filtro.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
   });
 
+  filtro.value = profissionalSelecionado;
+
   filtro.onchange = () => {
     profissionalSelecionado = filtro.value;
-    carregarHome();
+    carregarHome(); // 🔥 agora funciona corretamente
   };
+
+  filtroInicializado = true;
 }
+
   
 
 
