@@ -446,42 +446,7 @@ body::-webkit-scrollbar{
 .btn-dia:active{
   transform:scale(.92);
 }
-.header-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
 
-.filtro-profissional{
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  font-size:13px;
-  font-weight:700;
-  background:#fff;
-  cursor:pointer;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
 </style>
 </head>
 
@@ -489,15 +454,9 @@ body::-webkit-scrollbar{
 
 <div class="app">
 
-<div class="header header-row">
-  <h1>Bem-vindo à <span>Clena Store</span></h1>
-
-  <!-- FILTRO DE PROFISSIONAL -->
-  <select id="filtroProfissional" class="filtro-profissional" style="display:none">
-    <!-- preenchido via JS -->
-  </select>
-</div>
-
+  <div class="header">
+    <h1>Bem-vindo à <span>Clena Store</span></h1>
+  </div>
 
 <!-- KPIs -->
 <div class="grid">
@@ -595,17 +554,11 @@ body::-webkit-scrollbar{
 
 
 <script>
-/* ================== VARIÁVEIS GLOBAIS (TOPO) ================== */
-let profissionalSelecionado = "LOJA";
 let dataAtual = new Date();
-let filtroInicializado = false;
 
-
-/* ================== FUNÇÕES AUXILIARES ================== */
 function dataISO(d){
   return d.toLocaleDateString("en-CA");
 }
-
 function mudarDia(direcao){
   dataAtual.setDate(dataAtual.getDate() + direcao);
 
@@ -616,168 +569,81 @@ function mudarDia(direcao){
   });
 }
 
-
-
-/* ================== SUPABASE ================== */
 const sbHome = supabase.createClient(
   "https://egxjgmzukjyyxmkukwub.supabase.co",
   "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
 );
 
-/* ================== HOME ================== */
 async function carregarHome(){
 
-  /* ================== SESSÃO ================== */
   const { data:{ session } } = await sbHome.auth.getSession();
   if(!session) return;
 
   const lojaId = session.user.id;
-  const hojeISO = new Date().toLocaleDateString("en-CA");
 
-  /* ======================================================
-     KPI 1 — AGENDAMENTOS DO DIA
-     ====================================================== */
-  let kpiAgendamentos = sbHome
+  const hoje = new Date().toLocaleDateString("en-CA");
+  const inicioMes = new Date();
+  inicioMes.setDate(1);
+  const inicio = inicioMes.toLocaleDateString("en-CA");
+
+  const { count: qtdHoje } = await sbHome
     .from("agendamentos")
     .select("*", { count:"exact", head:true })
     .eq("user_id", lojaId)
-    .eq("data", hojeISO)
-    .neq("status", "CANCELADO");
+    .eq("data", hoje)
+    .neq("status","CANCELADO");
 
-  if (isUUID(profissionalSelecionado)) {
-    kpiAgendamentos = kpiAgendamentos.eq(
-      "colaborador_id",
-      profissionalSelecionado
-    );
-  }
+  document.getElementById("kpiHoje").innerText = qtdHoje || 0;
 
-const { count } = await kpiAgendamentos;
-document.getElementById("kpiHoje").innerText = count ?? 0;
-
-
-  /* ======================================================
-     KPI 2 — CLIENTES (clientes_profile)
-     ====================================================== */
-  let kpiClientes = sbHome
-    .from("clientes_profile")
+  const { count: qtdClientes } = await sbHome
+    .from("clientes_loja")
     .select("*", { count:"exact", head:true })
-    .eq("loja_ativa", lojaId);
+    .eq("loja_id", lojaId);
 
-  // 🔥 cliente NÃO depende de colaborador
-  const { count: qtdClientes } = await kpiClientes;
   document.getElementById("kpiClientes").innerText = qtdClientes || 0;
 
-  /* ======================================================
-     KPI 3 — FATURAMENTO DO MÊS
-     Apenas CONFIRMADO ou CONCLUIDO
-     ====================================================== */
-  const hoje = new Date();
-  const ano = hoje.getFullYear();
-  const mes = hoje.getMonth();
-
-  const inicioMes = new Date(ano, mes, 1).toLocaleDateString("en-CA");
-  const fimMes = new Date(ano, mes + 1, 0).toLocaleDateString("en-CA");
-
-  let queryFaturamento = sbHome
-    .from("agendamentos")
-    .select("valor_total")
-    .eq("user_id", lojaId)
-    .gte("data", inicioMes)
-    .lte("data", fimMes)
-    .in("status", ["CONFIRMADO", "CONCLUIDO"]);
-
-  if (isUUID(profissionalSelecionado)) {
-    queryFaturamento = queryFaturamento.eq(
-      "colaborador_id",
-      profissionalSelecionado
-    );
-  }
-
-  const { data: faturamentoMes } = await queryFaturamento;
-
-  const totalMes = faturamentoMes?.reduce(
-    (soma, a) => soma + Number(a.valor_total || 0),
-    0
-  ) || 0;
-
-  document.getElementById("kpiFaturamento").innerText =
-    totalMes.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL"
-    });
-
-  /* ======================================================
-     KPI 4 — SERVIÇOS ATIVOS
-     ====================================================== */
-  let kpiServicos = sbHome
+  const { count: qtdServicos } = await sbHome
     .from("produtos_servicos")
     .select("*", { count:"exact", head:true })
     .eq("user_id", lojaId)
-    .eq("tipo", "SERVICO")
     .eq("ativo", true)
-    .eq("pode_agendar", true);
+    .eq("tipo", "SERVICO");
 
-  // 🔥 serviço NÃO depende de colaborador
-  const { count: qtdServicos } = await kpiServicos;
   document.getElementById("kpiServicos").innerText = qtdServicos || 0;
 
-  /* ======================================================
-     CONTINUA A HOME
-     ====================================================== */
-await carregarAgendaDia(lojaId);
+const { data: faturamento } = await sbHome
+  .from("agendamentos")
+  .select("valor_total")
+  .eq("user_id", lojaId)
+  .gte("data", inicio)
+  .in("status", ["CONFIRMADO","CONCLUIDO"]);
 
+const total = faturamento?.reduce(
+  (s,v)=>s+Number(v.valor_total||0),0
+) || 0;
+
+
+  document.getElementById("kpiFaturamento").innerText =
+    total.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+
+  await carregarAgendaDia(lojaId);
 }
 
+carregarHome();
 
-
-/* ================== INICIALIZA ================== */
-sbHome.auth.getSession().then(({ data:{ session } })=>{
-  if(session){
-    carregarFiltroProfissionais(session.user.id);
-    carregarHome();
-  }
-});
-
-/* ================== SWIPE ================== */
+/* swipe dias */
 let startX = 0;
-
-/* ================== FILTRO ================== */
-async function carregarFiltroProfissionais(lojaId){
-
-  if (filtroInicializado) return;
-
-  const { data: colaboradores } = await sbHome
-    .from("colaboradores")
-    .select("id, nome")
-    .eq("loja_id", lojaId)
-    .eq("ativo", true);
-
-  const filtro = document.getElementById("filtroProfissional");
-
-  if (!colaboradores || colaboradores.length === 0) {
-    filtro.style.display = "none";
-    return;
-  }
-
-  filtro.style.display = "block";
-  filtro.innerHTML = `<option value="LOJA">Todos (Loja)</option>`;
-
-  colaboradores.forEach(c=>{
-    filtro.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
+document.addEventListener("touchstart",e=>{
+  startX = e.touches[0].clientX;
+});
+document.addEventListener("touchend",e=>{
+  const diff = e.changedTouches[0].clientX - startX;
+  if(Math.abs(diff)<60) return;
+  dataAtual.setDate(dataAtual.getDate() + (diff<0?1:-1));
+  sbHome.auth.getSession().then(({data:{session}})=>{
+    if(session) carregarAgendaDia(session.user.id);
   });
-
-  filtro.value = profissionalSelecionado;
-
-  filtro.onchange = () => {
-    profissionalSelecionado = filtro.value;
-    carregarHome(); // 🔥 agora funciona corretamente
-  };
-
-  filtroInicializado = true;
-}
-
-  
-
+});
 
 async function carregarAgendaDia(lojaId){
 
@@ -788,42 +654,36 @@ async function carregarAgendaDia(lojaId){
     "Agenda • " + dataAtual.toLocaleDateString("pt-BR");
 
   // 1️⃣ BUSCA AGENDAMENTOS
-let query = sbHome
-  .from("agendamentos")
-  .select(`
-    id,
-    data,
-    hora_inicio,
-    cliente_nome,
-    cliente_whatsapp,
-    status,
-    servicos,
-    valor_total,
-    colaborador_id,
-    created_at,
-    updated_at
-  `)
-  .eq("user_id", lojaId)
-  .eq("data", dataISO(dataAtual))
-  .neq("status", "CANCELADO");
+  const { data: agenda, error } = await sbHome
+    .from("agendamentos")
+.select(`
+  id,
+  data,
+  hora_inicio,
+  cliente_nome,
+  cliente_whatsapp,
+  status,
+  servico_nome,
+  servicos,
+  valor_total,
+  created_at,
+  updated_at
+`)
 
 
-if (isUUID(profissionalSelecionado)) {
-  query = query.eq("colaborador_id", profissionalSelecionado);
-}
-
-
-
-const { data: agenda, error } = await query.order("hora_inicio");
-
+    .eq("user_id", lojaId)
+    .eq("data", data)
+    .neq("status", "CANCELADO")
+    .order("hora_inicio");
 
   const box = document.getElementById("agendaHoje");
   box.innerHTML = "";
 
-if(error || !agenda || agenda.length === 0){
-  box.innerHTML = `<div class="empty">Nenhum horário</div>`;
-  return;
-}
+  if(error || !agenda || agenda.length === 0){
+    box.innerHTML = `<div class="empty">Nenhum horário</div>`;
+    document.getElementById("kpiHoje").innerText = 0;
+    return;
+  }
 
  
 
@@ -879,6 +739,10 @@ agenda.forEach(a => {
 `;
 
 });
+
+
+  // KPI acompanha o dia
+  document.getElementById("kpiHoje").innerText = agenda.length;
 }
 
 async function alterarStatus(id, status) {
@@ -1088,14 +952,9 @@ function fecharNovoAgendamento(){
 
   // 🔄 atualiza agenda do dia automaticamente
   sbHome.auth.getSession().then(({data:{session}})=>{
-    if(session){
-      carregarAgendaDia(session.user.id);
-      carregarHome();
-    }
+    if(session) carregarAgendaDia(session.user.id);
   });
 }
-
-
 function abrirResumoDia(data){
   sbHome.auth.getSession().then(({data:{session}})=>{
     if(!session) return;
@@ -1172,21 +1031,7 @@ function formatarDataBR(dataISO){
   const [y,m,d] = dataISO.split("-");
   return `${d}/${m}/${y}`;
 }
-function isUUID(v){
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
-}
 
-
-
-
-
-
-
-
-
-
-
-  
 
 
 
