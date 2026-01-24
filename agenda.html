@@ -382,25 +382,23 @@ async function carregar(){
   let query = sb
     .from("agenda_loja")
     .select("data, fechado, horarios")
-    .eq("user_id", userId);
-if (isUUID(colaboradorSelecionado)) {
-  query = query.eq("colaborador_id", colaboradorSelecionado);
-}
+    .eq("user_id", lojaId); // ✅ SEMPRE loja
 
+  if (isUUID(colaboradorSelecionado)) {
+    query = query.eq("colaborador_id", colaboradorSelecionado);
+  } else {
+    query = query.is("colaborador_id", null); // agenda da loja
+  }
 
   const { data, error } = await query;
 
   agenda = {};
 
-  data?.forEach(r => {
+  data?.forEach(r=>{
     let horarios = [];
 
     if (typeof r.horarios === "string") {
-      try {
-        horarios = JSON.parse(r.horarios);
-      } catch {
-        horarios = [];
-      }
+      try { horarios = JSON.parse(r.horarios); } catch {}
     } else if (Array.isArray(r.horarios)) {
       horarios = r.horarios;
     }
@@ -494,47 +492,42 @@ async function salvar(){
   const horariosVal = [];
 
   document.querySelectorAll(".horario").forEach(h=>{
-    const i=h.children[0].value;
-    const f=h.children[1].value;
-    if(i && f) horariosVal.push({inicio:i,fim:f});
+    const i = h.children[0].value;
+    const f = h.children[1].value;
+    if(i && f) horariosVal.push({ inicio:i, fim:f });
   });
 
-  const base = { fechado: fechadoVal, horarios: horariosVal };
+  const base = {
+    fechado: fechadoVal,
+    horarios: horariosVal
+  };
 
   const updates = new Set();
-  
   updates.add(selected);
 
- if(replicaSemana.checked){
-  const baseDate = dateFromISO(selected);
-  const wd = baseDate.getDay();
-  const y = baseDate.getFullYear();
-  const m = baseDate.getMonth();
-
-  const lastDay = new Date(y, m + 1, 0).getDate();
-
-  for(let d=1; d<=lastDay; d++){
-    const date = new Date(y, m, d, 12, 0, 0);
-    if(date.getDay() === wd){
-      const key = `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-      updates.add(key);
-    }
-  }
-}
-
-
   for(const d of updates){
-    await sb.from("agenda_loja").upsert({
-      user_id: userId,
+
+    const payload = {
+      user_id: lojaId, // ✅ SEMPRE a loja
+      colaborador_id: isUUID(colaboradorSelecionado)
+        ? colaboradorSelecionado
+        : null,        // ✅ vínculo correto
       data: d,
       ...base
-    }, { onConflict: "user_id,data" });
+    };
+
+    await sb
+      .from("agenda_loja")
+      .upsert(payload, {
+        onConflict: "user_id,colaborador_id,data" // ✅ correto
+      });
   }
 
   replicaSemana.checked = false;
   modal.style.display = "none";
   carregar();
 }
+
 function dateFromISO(iso) {
   const [y, m, d] = iso.split("-").map(Number);
   return new Date(y, m - 1, d, 12, 0, 0); // meio-dia local
