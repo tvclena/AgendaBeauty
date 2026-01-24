@@ -393,6 +393,13 @@ body{
 .btn-ia .sparkle{
   margin-right:6px;
 }
+#preview{
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
 
 
 
@@ -688,10 +695,15 @@ async function gerarImagemIA(){
       throw new Error("Falha ao gerar imagem");
     }
 
+previewUrl = data.imagem_url;
+
 preview.innerHTML = `
-  <img src="${data.imagem_url}" style="width:100%;border-radius:12px">
+  <img src="${previewUrl}" style="width:100%;border-radius:12px">
 `;
-preview.style.display = "block";
+
+preview.style.display = "flex";
+preview.style.width = "100%";
+preview.style.height = "100%";
 
     atualizarBotaoIA();
 
@@ -743,10 +755,10 @@ async function salvar(){
     observacoes_internas: obs.value
   };
 
-  // ✅ imagem gerada por IA (sem upload)
-  if (preview.src && !blob) {
-    payload.imagem_url = preview.src;
-  }
+if (previewUrl && blobs.length === 0) {
+  payload.imagem_url = previewUrl;
+}
+
 
   let data = null;
 
