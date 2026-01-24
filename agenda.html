@@ -373,9 +373,10 @@ async function carregar(){
     .from("agenda_loja")
     .select("data, fechado, horarios")
     .eq("user_id", userId);
-  if (isUUID(profissionalSelecionado)) {
-    query = query.eq("colaborador_id", profissionalSelecionado);
-  }
+if (isUUID(colaboradorSelecionado)) {
+  query = query.eq("colaborador_id", colaboradorSelecionado);
+}
+
 
   const { data, error } = await query;
 
