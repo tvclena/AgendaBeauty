@@ -507,19 +507,15 @@ async function salvar(){
 
   for(const d of updates){
 
-    const payload = {
-      user_id: lojaId, // ✅ SEMPRE a loja
-      colaborador_id: isUUID(colaboradorSelecionado)
-        ? colaboradorSelecionado
-        : null,        // ✅ vínculo correto
-      data: d,
-      ...base
-    };
-
     await sb
       .from("agenda_loja")
-      .upsert(payload, {
-        onConflict: "user_id,colaborador_id,data" // ✅ correto
+      .insert({
+        user_id: lojaId, // ✅ sempre loja
+        colaborador_id: isUUID(colaboradorSelecionado)
+          ? colaboradorSelecionado
+          : null,
+        data: d,
+        ...base
       });
   }
 
@@ -527,6 +523,7 @@ async function salvar(){
   modal.style.display = "none";
   carregar();
 }
+
 
 function dateFromISO(iso) {
   const [y, m, d] = iso.split("-").map(Number);
