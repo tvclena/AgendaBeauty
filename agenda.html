@@ -372,9 +372,7 @@ async function carregar(){
   let query = sb
     .from("agenda_loja")
     .select("data, fechado, horarios")
-    .eq("user_id", lojaId);
-
-  // 🔥 MESMA REGRA DA HOME
+    .eq("user_id", userId);
   if (isUUID(profissionalSelecionado)) {
     query = query.eq("colaborador_id", profissionalSelecionado);
   }
