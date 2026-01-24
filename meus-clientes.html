@@ -2,24 +2,14 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-T97MS35TJ6"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-T97MS35TJ6');
-</script>
+<title>Meus Clientes</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
-<title>Meus Clientes</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-  
+
 <style>
 :root{
   --primary:#ff6a00;
@@ -187,79 +177,47 @@ if (!erroPerfil && perfil?.negocio) {
   NOME_LOJA = perfil.negocio;
 }
 
-// 1️⃣ BUSCA CLIENTES DA LOJA
-const { data: clientesBase } = await sb
-  .from("clientes_profile")
-  .select("id, nome, whatsapp")
-  .eq("loja_ativa", lojaId);
 
-// 🔴🔴🔴 PASSO OBRIGATÓRIO — CRIA O MAPA 🔴🔴🔴
-const mapa = {};
 
-(clientesBase || []).forEach(c => {
-  mapa[c.id] = {
-    id: c.id,
-    nome: c.nome,
-    whatsapp: c.whatsapp,
-    total: 0,
-    valor: 0,
-    ultima: null
-  };
+  const { data: ags } = await sb
+    .from("agendamentos")
+    .select("cliente_id, cliente_nome, cliente_whatsapp, data, hora_inicio, servicos, valor_total")
+    .eq("loja_id", lojaId)
+    .neq("status","CANCELADO");
 
-  historico[c.id] = [];
-});
+  const mapa={};
 
-// 2️⃣ BUSCA AGENDAMENTOS DA LOJA
-let queryAgs = sb
-  .from("agendamentos")
-  .select(`
-    cliente_id,
-    data,
-    hora_inicio,
-    servicos,
-    valor_total,
-    colaborador_id
-  `)
-  .eq("user_id", lojaId)
-  .neq("status", "CANCELADO");
+  ags.forEach(a=>{
+    if(!mapa[a.cliente_id]){
+      mapa[a.cliente_id]={
+        id:a.cliente_id,
+        nome:a.cliente_nome,
+        whatsapp:a.cliente_whatsapp,
+        total:0,
+        valor:0,
+        ultima:null
+      };
+      historico[a.cliente_id]=[];
+    }
 
-// 🔥 herda filtro da Home
-if (
-  window.parent &&
-  window.parent.profissionalSelecionado &&
-  /^[0-9a-f-]{36}$/i.test(window.parent.profissionalSelecionado)
-) {
-  queryAgs = queryAgs.eq(
-    "colaborador_id",
-    window.parent.profissionalSelecionado
-  );
-}
+    const qtd = Array.isArray(a.servicos) ? a.servicos.length : 1;
+    mapa[a.cliente_id].total += qtd;
+    mapa[a.cliente_id].valor += Number(a.valor_total||0);
 
-const { data: ags } = await queryAgs;
+    if(!mapa[a.cliente_id].ultima || a.data > mapa[a.cliente_id].ultima){
+      mapa[a.cliente_id].ultima = a.data;
+    }
 
-// 3️⃣ AGREGA NOS CLIENTES
-ags.forEach(a => {
-  if (!mapa[a.cliente_id]) return;
-
-  const qtd = Array.isArray(a.servicos) ? a.servicos.length : 1;
-  mapa[a.cliente_id].total += qtd;
-  mapa[a.cliente_id].valor += Number(a.valor_total || 0);
-
-  if (!mapa[a.cliente_id].ultima || a.data > mapa[a.cliente_id].ultima) {
-    mapa[a.cliente_id].ultima = a.data;
-  }
-
-  (a.servicos || []).forEach(s => {
-    historico[a.cliente_id].push({
-      nome: s.nome,
-      preco: s.preco,
-      foto: s.foto || s.imagem || s.imagem_url || null,
-      data: a.data,
-      hora: a.hora_inicio
+    (a.servicos||[]).forEach(s=>{
+      historico[a.cliente_id].push({
+        nome:s.nome,
+        preco:s.preco,
+        foto: s.foto || s.imagem || s.imagem_url || null,
+        data:a.data,
+        hora:a.hora_inicio
+      });
     });
   });
-});
-
 
   clientes = Object.values(mapa);
   clientesFiltrados = clientes;
@@ -294,9 +252,7 @@ function render(){
 
         <div class="meta">
           ${c.total} serviços
-<span>
-  Ticket: R$ ${(c.total ? (c.valor / c.total) : 0).toFixed(2)}
-</span>
+          <span>Ticket: R$ ${(c.valor/c.total).toFixed(2)}</span>
         </div>
 
         ${c.whatsapp ? `
