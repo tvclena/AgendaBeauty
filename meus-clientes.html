@@ -214,7 +214,9 @@ const { data: ags } = await query;
   const mapa={};
 
   ags.forEach(a=>{
-    if(!mapa[a.cliente_id]){
+if(!a.cliente_id) return;
+
+if(!mapa[a.cliente_id]){
       mapa[a.cliente_id]={
         id:a.cliente_id,
         nome:a.cliente_nome,
@@ -278,7 +280,9 @@ function render(){
 
         <div class="meta">
           ${c.total} serviços
-          <span>Ticket: R$ ${(c.valor/c.total).toFixed(2)}</span>
+<span>
+  Ticket: R$ ${(c.total ? (c.valor / c.total) : 0).toFixed(2)}
+</span>
         </div>
 
         ${c.whatsapp ? `
