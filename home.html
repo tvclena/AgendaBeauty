@@ -631,7 +631,9 @@ let kpiQuery = sbHome
   .from("agendamentos")
   .select("*", { count:"exact", head:true })
   .eq("user_id", lojaId)
-  .eq("data", hoje);
+  .eq("data", hoje)
+  .neq("status", "CANCELADO");
+
 
 if (isUUID(profissionalSelecionado)) {
   kpiQuery = kpiQuery
@@ -699,6 +701,8 @@ let profissionalSelecionado = "LOJA"; // default
 
 async function carregarFiltroProfissionais(lojaId){
 
+  profissionalSelecionado = "LOJA"; // 🔥 garante estado inicial
+
   const { data: colaboradores } = await sbHome
     .from("colaboradores")
     .select("id, nome")
@@ -708,19 +712,16 @@ async function carregarFiltroProfissionais(lojaId){
 
   const filtro = document.getElementById("filtroProfissional");
 
-  // se não tiver colaboradores ativos → não mostra filtro
   if (!colaboradores || colaboradores.length === 0) {
     filtro.style.display = "none";
-    profissionalSelecionado = "LOJA";
     return;
   }
 
   filtro.style.display = "block";
   filtro.innerHTML = "";
 
-  // opção loja (master)
   filtro.innerHTML += `
-    <option value="LOJA">Todos (Loja)</option>
+    <option value="LOJA" selected>Todos (Loja)</option>
   `;
 
   colaboradores.forEach(c=>{
@@ -729,13 +730,16 @@ async function carregarFiltroProfissionais(lojaId){
     `;
   });
 
-  filtro.onchange = () => {
-    profissionalSelecionado = filtro.value;
-    sbHome.auth.getSession().then(({data:{session}})=>{
-      if(session) carregarAgendaDia(session.user.id);
-    });
-  };
-}
+ filtro.onchange = () => {
+  profissionalSelecionado = filtro.value;
+  sbHome.auth.getSession().then(({data:{session}})=>{
+    if(session){
+      carregarHome(); // 🔥 recalcula KPIs + agenda
+    }
+  });
+};
+
+
 
 async function carregarAgendaDia(lojaId){
 
