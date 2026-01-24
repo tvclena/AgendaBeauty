@@ -366,6 +366,18 @@ iframe{
 }
 
 
+.actions-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:12px;
+}
+
+.actions-row .btn-primary,
+.actions-row .btn-logout{
+  width:100%;
+  margin-top:0; /* remove o margin antigo */
+}
 
 
 
@@ -613,12 +625,16 @@ iframe{
       <input id="pUf" placeholder="BA" maxlength="2" style="text-transform:uppercase">
     </div>
 
-<button class="btn-primary" id="btnSalvar" onclick="salvarPerfil()">
-  Salvar alterações
-</button>
+<div class="actions-row">
+  <button class="btn-primary" id="btnSalvar" onclick="salvarPerfil()">
+    Salvar alterações
+  </button>
 
+  <button class="btn-logout" onclick="sair()">
+    Sair da conta
+  </button>
+</div>
 
-    <button class="btn-logout" onclick="sair()">Sair da conta</button>
 
     <div class="tip">Nada é obrigatório — mas preencher ajuda na organização ✅</div>
   </div>
