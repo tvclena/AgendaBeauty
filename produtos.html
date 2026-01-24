@@ -719,10 +719,11 @@ preview.style.height = "100%";
 
 function atualizarBotaoIA(){
   btnIA.style.display =
-    preview.style.display === "block"
+    preview.style.display !== "none"
       ? "none"
       : "block";
 }
+
 
 async function salvar(){
   loading.style.display = "flex";
