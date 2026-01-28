@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-T97MS35TJ6"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -9,48 +10,28 @@
   gtag('js', new Date());
   gtag('config', 'G-T97MS35TJ6');
 </script>
+
 <title>Clena Store</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<!-- PWA -->
 <meta name="theme-color" content="#ff6a00">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="manifest.json">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 :root{
   --primary:#ff6a00;
-  --primary-dark:#e85c00;
   --accent:#b8ff65;
   --text:#1f2937;
   --muted:#6b7280;
-  --bg:#f6f7fb;
-  --card:#ffffff;
   --border:#e5e7eb;
-  --radius:28px;
-  --shadow:0 18px 40px rgba(0,0,0,.12);
 }
 
 /* RESET */
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Inter,sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
+html,body{width:100%;overflow-x:hidden;background:#fff;color:var(--text)}
 
-html,body{
-  width:100%;
-  overflow-x:hidden;
-  background:#fff;
-  color:var(--text);
-  -webkit-font-smoothing:antialiased;
-}
-
-/* ================= HEADER ================= */
+/* HEADER */
 header{
   position:sticky;
   top:0;
@@ -58,185 +39,105 @@ header{
   background:#fff;
   border-bottom:1px solid var(--border);
 }
-
 .header{
   max-width:1200px;
   margin:auto;
   padding:18px 22px;
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  gap:18px;
+  align-items:center;
 }
+.logo{font-size:22px;font-weight:800;color:var(--primary)}
+nav{display:flex;gap:28px}
+nav a{text-decoration:none;color:#111;font-size:14px;font-weight:500}
+.actions{display:flex;gap:12px}
+.menu-btn{display:none;font-size:28px}
 
-.logo{
-  font-size:22px;
-  font-weight:800;
-  letter-spacing:-.5px;
-  color:var(--primary);
-}
-
-nav{
-  display:flex;
-  gap:28px;
-}
-
-nav a{
-  text-decoration:none;
-  color:#111;
-  font-weight:500;
-  font-size:14px;
-  position:relative;
-}
-
-nav a::after{
-  content:"";
-  position:absolute;
-  left:0;
-  bottom:-7px;
-  width:0;
-  height:2px;
-  background:var(--primary);
-  transition:.25s;
-}
-
-nav a:hover::after{
-  width:100%;
-}
-
-.actions{
-  display:flex;
-  gap:12px;
-}
-
-.menu-btn{
-  display:none;
-  font-size:28px;
-  cursor:pointer;
-}
-
-/* ================= BUTTONS ================= */
+/* BUTTONS */
 .btn{
-  padding:13px 24px;
+  padding:13px 26px;
   border-radius:999px;
   font-weight:700;
   border:none;
   cursor:pointer;
-  font-size:14px;
-  white-space:nowrap;
-  transition:.25s ease;
 }
+.btn-primary{background:var(--accent)}
+.btn-outline{background:#fff;border:1px solid var(--border)}
 
-.btn-primary{
-  background:var(--accent);
-}
-
-.btn-primary:hover{
-  transform:translateY(-2px);
-  box-shadow:0 14px 28px rgba(0,0,0,.2);
-}
-
-.btn-outline{
-  background:#fff;
-  border:1px solid var(--border);
-}
-
-.btn-outline:hover{
-  border-color:var(--primary);
-  color:var(--primary);
-}
-
-/* ================= MOBILE MENU ================= */
+/* MOBILE MENU */
 .mobile-menu{
   position:fixed;
   inset:0;
   background:#fff;
-  z-index:200;
   display:none;
   flex-direction:column;
-  padding:34px;
+  padding:30px;
+  z-index:300;
 }
-
-.mobile-menu.active{
-  display:flex;
-}
-
+.mobile-menu.active{display:flex}
 .mobile-menu a{
-  text-decoration:none;
+  padding:18px 0;
   font-size:18px;
-  padding:16px 0;
   border-bottom:1px solid var(--border);
+  text-decoration:none;
   color:#111;
-  font-weight:500;
 }
+.close-menu{font-size:28px;align-self:flex-end}
 
-.close-menu{
-  font-size:30px;
-  align-self:flex-end;
-  cursor:pointer;
-  margin-bottom:20px;
-}
-
-/* ================= HERO ================= */
+/* HERO FULL BLEED */
 .hero{
-  max-width:1200px;
-  margin:auto;
-  padding:100px 22px 70px;
+  position:relative;
+  min-height:90vh;
   display:grid;
-  grid-template-columns:1.2fr .8fr;
-  gap:64px;
+  grid-template-columns:1.1fr .9fr;
+  align-items:center;
+  padding:120px 0 80px;
+  overflow:hidden;
+}
+
+.hero-content{
+  max-width:600px;
+  padding-left:calc((100vw - 1200px)/2 + 22px);
+  z-index:2;
 }
 
 .hero h1{
   font-size:54px;
   line-height:1.08;
-  letter-spacing:-1px;
-  margin-bottom:24px;
+  margin-bottom:22px;
 }
-
-.hero h1 span{
-  color:var(--primary);
-}
+.hero h1 span{color:var(--primary)}
 
 .hero p{
-  font-size:19px;
+  font-size:18px;
   color:var(--muted);
-  max-width:560px;
-  line-height:1.6;
   margin-bottom:36px;
+  line-height:1.6;
 }
 
-.hero-actions{
-  display:flex;
-  gap:16px;
-  flex-wrap:wrap;
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap}
+
+/* MOCKUP INTEGRADO AO FUNDO */
+.hero-visual{
+  position:absolute;
+  right:-6%;
+  top:50%;
+  transform:translateY(-50%);
+  width:68%;
+  max-width:1100px;
+  z-index:1;
 }
-
-.hero-box{
-  background:linear-gradient(135deg,#f3f4f6,#e5e7eb);
-  border-radius:44px;
-  padding:40px;
-  box-shadow:var(--shadow);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-
-.hero-image{
+.hero-visual img{
   width:100%;
-  max-width:760px;   /* MAIS LARGO = visual SaaS */
   height:auto;
-  object-fit:contain;
+  display:block;
 }
 
-
-/* ================= NUMBERS ================= */
+/* NUMBERS */
 .numbers{
-  background:var(--bg);
+  background:#f6f7fb;
   padding:60px 22px;
 }
-
 .numbers-grid{
   max-width:1200px;
   margin:auto;
@@ -245,230 +146,62 @@ nav a:hover::after{
   gap:36px;
   text-align:center;
 }
+.number strong{font-size:38px;color:var(--primary)}
+.number span{display:block;margin-top:8px;color:var(--muted)}
 
-.number strong{
-  font-size:38px;
-  font-weight:800;
-  color:var(--primary);
-}
-
-.number span{
-  display:block;
-  margin-top:8px;
-  color:var(--muted);
-  font-size:14px;
-}
-
-/* ================= SECTIONS ================= */
-.section{
-  padding:100px 22px;
-}
-
-.section.bg{
-  background:var(--bg);
-}
-
-.container{
-  max-width:1200px;
-  margin:auto;
-}
-
-.section h2{
-  font-size:40px;
-  letter-spacing:-.7px;
-  margin-bottom:16px;
-}
-
-.section p.lead{
-  font-size:16px;
-  color:var(--muted);
-  max-width:700px;
-  margin-bottom:44px;
-}
-
-/* ================= CTA ================= */
+/* CTA */
 .cta{
   max-width:1200px;
-  margin:110px auto;
+  margin:100px auto;
   background:linear-gradient(135deg,#ff6a00,#ff8c42);
   color:#fff;
-  border-radius:44px;
+  border-radius:40px;
   padding:80px;
-  display:grid;
-  grid-template-columns:1.3fr .7fr;
-  box-shadow:0 40px 80px rgba(255,106,0,.45);
 }
+.cta h2{font-size:40px;margin-bottom:14px}
 
-.cta h2{
-  font-size:42px;
-  letter-spacing:-.8px;
-  margin-bottom:16px;
-}
-
-.cta p{
-  font-size:17px;
-  opacity:.95;
-}
-
-.cta .btn{
-  background:#fff;
-  color:#111;
-  margin-top:28px;
-}
-
-/* ================= FOOTER ================= */
+/* FOOTER */
 footer{
   background:#0f172a;
-  color:#e5e7eb;
-  padding:90px 22px 30px;
+  color:#9ca3af;
+  padding:80px 22px 30px;
 }
-
 .footer{
   max-width:1200px;
   margin:auto;
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:56px;
+  gap:50px;
 }
+.footer h4{color:#fff;margin-bottom:16px}
+.footer a{color:#9ca3af;text-decoration:none;display:block;margin-bottom:10px}
 
-.footer h4{
-  font-size:16px;
-  font-weight:700;
-  margin-bottom:20px;
-  color:#fff;
-}
-
-.footer a{
-  display:block;
-  text-decoration:none;
-  color:#9ca3af;
-  font-size:14px;
-  margin-bottom:12px;
-  transition:.25s;
-}
-
-.footer a:hover{
-  color:var(--accent);
-  transform:translateX(4px);
-}
-
-.footer-brand{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-
-.footer-brand strong{
-  font-size:20px;
-  font-weight:800;
-  color:#fff;
-}
-
-.footer-brand p{
-  font-size:14px;
-  line-height:1.6;
-  color:#9ca3af;
-  max-width:300px;
-}
-
-.footer-divider{
-  margin:56px auto 22px;
-  max-width:1200px;
-  height:1px;
-  background:rgba(255,255,255,.08);
-}
-
-.footer-bottom{
-  text-align:center;
-  font-size:13px;
-  color:#9ca3af;
-}
-
-/* ================= RESPONSIVE ================= */
+/* RESPONSIVE */
 @media(max-width:900px){
-  nav,.actions{
-    display:none;
-  }
-
-  .menu-btn{
-    display:block;
-  }
+  nav,.actions{display:none}
+  .menu-btn{display:block}
 
   .hero{
     grid-template-columns:1fr;
-    padding:70px 22px 60px;
+    padding:80px 22px 60px;
   }
 
-  .hero h1{
-    font-size:40px;
-  }
-
-  .hero-box{
-    border-radius:32px;
-  }
-
-.mockup{
-  position:absolute;
-  border-radius:18px;
-  box-shadow:0 28px 60px rgba(0,0,0,.22);
-  background:#fff;
-}
-
-/* NOTEBOOK */
-.mockup.notebook{
-  width:100%;
-  max-width:520px;
-  z-index:1;
-}
-
-/* CELULAR */
-.mockup.celular{
-  width:160px;
-  right:-18px;
-  bottom:-18px;
-  z-index:2;
-  border-radius:28px;
-}
-
-/* MOBILE AJUSTE */
-@media(max-width:900px){
-  .mockup-stack{
-    height:320px;
-  }
-
-  .mockup.celular{
-    width:140px;
-    right:-10px;
-    bottom:-10px;
-  }
-}
-
-  .cta{
-    grid-template-columns:1fr;
-    padding:56px;
-  }
-
-  .cta h2{
-    font-size:34px;
-  }
-}
-
-@media(max-width:600px){
-  footer{
-    padding:70px 22px 26px;
-  }
-}
-@media(max-width:900px){
-  .hero-image{
+  .hero-content{
+    padding-left:0;
     max-width:100%;
   }
 
-  .hero-box{
-    padding:28px;
-    border-radius:32px;
+  .hero h1{font-size:40px}
+
+  .hero-visual{
+    position:relative;
+    width:100%;
+    right:auto;
+    top:auto;
+    transform:none;
+    margin-top:50px;
   }
 }
-
 </style>
 </head>
 
@@ -491,105 +224,63 @@ footer{
   </div>
 </header>
 
-<!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
   <div class="close-menu" onclick="closeMenu()">✕</div>
   <a href="#">Início</a>
   <a href="saloes.html">Para Empresas</a>
   <a href="lojasat.html">Para Clientes</a>
   <a href="planos.html">Planos</a>
-  <a href="login.html">Entrar</a>
-  <a href="cadastro.html"><strong>Teste grátis por 10 dias</strong></a>
 </div>
 
 <section class="hero">
-  <div>
+  <div class="hero-content">
     <h1>Gestão de loja e agenda para seu <span>NEGÓCIO</span></h1>
     <p>
       Sistema profissional com <strong>10 dias grátis</strong>, assinatura mensal
-      e valor promocional vitalício para os 200 novos assinantes.
+      e valor promocional vitalício para novos assinantes.
     </p>
     <div class="hero-actions">
       <a href="cadastro.html"><button class="btn btn-primary">Teste grátis 10 dias</button></a>
       <a href="planos.html"><button class="btn btn-outline">Ver planos</button></a>
     </div>
   </div>
-<div class="hero-box">
-  <img 
-    src="mockup-heroo.png"
-    alt="Sistema Clena Store no computador e celular"
-    class="hero-image"
-  >
-</div>
 
+  <div class="hero-visual">
+    <img src="mockup-heroo.png" alt="Mockup Clena Store">
+  </div>
 </section>
 
 <section class="numbers">
   <div class="numbers-grid">
     <div class="number"><strong>10 dias</strong><span>gratuitos</span></div>
-    <div class="number"><strong>R$ 129,90</strong><span>acesso à todas funcionalidades</span></div>
+    <div class="number"><strong>R$ 129,90</strong><span>todas funcionalidades</span></div>
     <div class="number"><strong>+1M</strong><span>agendamentos</span></div>
     <div class="number"><strong>24h</strong><span>online</span></div>
   </div>
 </section>
 
 <section class="cta">
-  <div>
-    <h2>Teste grátis por 10 dias</h2>
-    <p>Depois continue por apenas <strong>R$ 129,90/mês.</strong></p>
-    <a href="cadastro.html"><button class="btn">Começar agora</button></a>
-  </div>
+  <h2>Teste grátis por 10 dias</h2>
+  <p>Depois continue por apenas <strong>R$ 129,90/mês</strong></p>
 </section>
 
 <footer>
   <div class="footer">
-
-    <div class="footer-brand">
-      <strong>AGENDA CLENA</strong>
-      <p>
-        Sistema profissional de agendamentos e loja online para salões,
-        barbearias, estúdios e profissionais autônomos.
-      </p>
-    </div>
-
     <div>
-      <h4>Institucional</h4>
-      <a href="#">Quem somos</a>
-      <a href="#">Contato</a>
-      <a href="#">Termos de uso</a>
-      <a href="#">Privacidade</a>
+      <h4>Clena</h4>
+      <p>Sistema profissional de agenda e loja online.</p>
     </div>
-
-    <div>
-      <h4>Sistema</h4>
-      <a href="Index.html">Para salões</a>
-      <a href="cliente.html">Para clientes</a>
-      <a href="planos.html">Planos</a>
-    </div>
-
     <div>
       <h4>Acesso</h4>
       <a href="login.html">Entrar</a>
       <a href="cadastro.html">Criar conta</a>
     </div>
-
-  </div>
-
-  <div class="footer-divider"></div>
-
-  <div class="footer-bottom">
-    © 2026 Agenda Clena — Todos os direitos reservados
   </div>
 </footer>
 
-
 <script>
-function openMenu(){
-  document.getElementById('mobileMenu').classList.add('active')
-}
-function closeMenu(){
-  document.getElementById('mobileMenu').classList.remove('active')
-}
+function openMenu(){document.getElementById('mobileMenu').classList.add('active')}
+function closeMenu(){document.getElementById('mobileMenu').classList.remove('active')}
 </script>
 
 </body>
