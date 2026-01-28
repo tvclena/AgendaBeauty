@@ -51,7 +51,7 @@ header{
 nav{display:flex;gap:28px}
 nav a{text-decoration:none;color:#111;font-size:14px;font-weight:500}
 .actions{display:flex;gap:12px}
-.menu-btn{display:none;font-size:28px}
+.menu-btn{display:none;font-size:28px;cursor:pointer}
 
 /* BUTTONS */
 .btn{
@@ -84,7 +84,7 @@ nav a{text-decoration:none;color:#111;font-size:14px;font-weight:500}
 }
 .close-menu{font-size:28px;align-self:flex-end}
 
-/* HERO FULL BLEED */
+/* HERO */
 .hero{
   position:relative;
   min-height:90vh;
@@ -98,7 +98,7 @@ nav a{text-decoration:none;color:#111;font-size:14px;font-weight:500}
 .hero-content{
   max-width:600px;
   padding-left:calc((100vw - 1200px)/2 + 22px);
-  z-index:2;
+  z-index:3;
 }
 
 .hero h1{
@@ -117,20 +117,34 @@ nav a{text-decoration:none;color:#111;font-size:14px;font-weight:500}
 
 .hero-actions{display:flex;gap:16px;flex-wrap:wrap}
 
-/* MOCKUP INTEGRADO AO FUNDO */
+/* FOTO FULL + DEGRADÊ */
 .hero-visual{
   position:absolute;
   right:-6%;
-  top:50%;
-  transform:translateY(-50%);
-  width:68%;
-  max-width:1100px;
+  top:0;
+  width:70%;
+  height:100%;
   z-index:1;
 }
+
 .hero-visual img{
   width:100%;
-  height:auto;
-  display:block;
+  height:100%;
+  object-fit:cover;
+}
+
+/* DEGRADÊ REAL */
+.hero-visual::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(
+      to left,
+      rgba(255,255,255,0) 30%,
+      rgba(255,255,255,.6) 55%,
+      rgba(255,255,255,1) 72%
+    );
 }
 
 /* NUMBERS */
@@ -176,7 +190,7 @@ footer{
 .footer h4{color:#fff;margin-bottom:16px}
 .footer a{color:#9ca3af;text-decoration:none;display:block;margin-bottom:10px}
 
-/* RESPONSIVE */
+/* RESPONSIVO */
 @media(max-width:900px){
   nav,.actions{display:none}
   .menu-btn{display:block}
@@ -196,10 +210,16 @@ footer{
   .hero-visual{
     position:relative;
     width:100%;
-    right:auto;
-    top:auto;
-    transform:none;
-    margin-top:50px;
+    height:320px;
+  }
+
+  .hero-visual::after{
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,1) 85%
+      );
   }
 }
 </style>
@@ -246,7 +266,7 @@ footer{
   </div>
 
   <div class="hero-visual">
-    <img src="mockup-heroo.png" alt="Mockup Clena Store">
+    <img src="mockup-heroo.png" alt="Clena Store mockup">
   </div>
 </section>
 
